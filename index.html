@@ -1,172 +1,228 @@
 <!DOCTYPE html>
 <html lang="si">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Perrongton Wellness – Lesson 1 AP Quiz</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lesson 1: සංඛ්‍යා රටා - Quiz</title>
 <style>
-:root{
-  --bg-gradient:linear-gradient(135deg,#dbe9f4,#fef3c7);
-  --card:#fff; --primary:#3b82f6; --text:#1f2937;
-  --muted:#6b7280; --correct:#16a34a; --wrong:#dc2626;
-  --shadow:0 10px 25px rgba(2,6,23,.08); --radius:20px;
-  --progress-bg:#e0f2fe;
+body {
+  font-family: 'Arial', sans-serif;
+  background: linear-gradient(135deg, #d1c4e9, #b2dfdb);
+  margin: 0;
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
 }
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:Arial,sans-serif;background:var(--bg-gradient);color:var(--text);}
-.container{max-width:900px;margin:30px auto;padding:15px;}
-h1{text-align:center;margin-bottom:10px;font-size:2rem;color:#1e40af;}
-.scorebar{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-weight:600;font-size:1.1rem;}
-.card{background:var(--card);padding:25px;border-radius:var(--radius);box-shadow:var(--shadow);transition:transform 0.3s;}
-.card:hover{transform:translateY(-5px);}
-.choices{display:grid;gap:12px;margin-top:20px;}
-.choice{position:relative;overflow:hidden;padding:14px 18px;border-radius:15px;border:2px solid #e5e7eb;background:#f9fafb;cursor:pointer;font-weight:500;transition:all 0.3s;font-size:1rem;}
-.choice::after{
-  content:""; position:absolute; top:50%; left:50%; width:0; height:0;
-  background:rgba(59,130,246,0.2); border-radius:50%; transform:translate(-50%,-50%);
-  transition:width 0.4s ease, height 0.4s ease;
+
+.quiz-container {
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  padding: 30px;
+  max-width: 700px;
+  width: 100%;
+  perspective: 1000px;
 }
-.choice:hover::after{width:300%; height:300%;}
-.choice:hover{transform:translateY(-2px) scale(1.02);box-shadow:0 7px 20px rgba(0,0,0,0.12);}
-.correct{background:#dcfce7;border-color:var(--correct);}
-.wrong{background:#fee2e2;border-color:var(--wrong);}
-.progress-container{background:var(--progress-bg);border-radius:var(--radius);height:22px;margin-bottom:10px;overflow:hidden;}
-.progress-fill{height:100%;width:0%;background:linear-gradient(90deg,#3b82f6,#60a5fa);transition:width 0.4s;}
-.remaining{font-weight:500;color:#2563eb;}
-.result{display:none;margin-top:20px;background:#fff;padding:20px;border-radius:var(--radius);box-shadow:var(--shadow);position:relative;}
-.result h2{color:#1e40af;margin-bottom:10px;}
-.result table{width:100%;border-collapse:collapse;margin-top:15px;}
-.result td, .result th{border:1px solid #ddd;padding:10px;text-align:left;font-size:0.95rem;}
-.result th{background:#f3f4f6;color:#1e40af;}
-/* confetti styles */
-.confetti{position:fixed;width:10px;height:10px;background:red;top:0;left:0;pointer-events:none;opacity:0.8;}
+
+h1 {
+  text-align: center;
+  color: #4a148c;
+}
+
+.progress-container {
+  background: #b2dfdb;
+  height: 25px;
+  border-radius: 20px;
+  overflow: hidden;
+  margin-bottom: 20px;
+  box-shadow: inset 0 4px 6px rgba(0,0,0,0.2), 0 4px 6px rgba(0,0,0,0.1);
+  perspective: 500px;
+}
+
+.progress-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(270deg, #00796b, #26a69a, #004d40, #26a69a);
+  background-size: 800% 100%;
+  border-radius: 20px;
+  transition: width 0.5s ease;
+  transform-style: preserve-3d;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  animation: flow 4s linear infinite;
+}
+
+.progress-container:hover .progress-bar {
+  transform: rotateX(5deg) rotateY(5deg) scaleY(1.1);
+}
+
+@keyframes flow {
+  0% { background-position: 0% 0; }
+  50% { background-position: 100% 0; }
+  100% { background-position: 0% 0; }
+}
+
+.question {
+  margin-bottom: 20px;
+  font-size: 1.2em;
+  color: #311b92;
+}
+
+.answers {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.answer-btn {
+  padding: 12px;
+  font-size: 1em;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  background: linear-gradient(145deg, #ff8a65, #ff7043);
+  color: #fff;
+  font-weight: bold;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+.answer-btn:hover {
+  transform: translateY(-3px) rotateX(5deg) rotateY(5deg);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+}
+
+.answer-btn.correct {
+  background: #4caf50 !important;
+}
+
+.answer-btn.wrong {
+  background: #f44336 !important;
+}
+
+#nextBtn {
+  margin-top: 20px;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 12px;
+  background: #1976d2;
+  color: white;
+  font-size: 1em;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+#nextBtn:hover {
+  transform: translateY(-3px) rotateX(5deg) rotateY(5deg);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+}
+
+#result {
+  font-size: 1.3em;
+  font-weight: bold;
+  margin-top: 20px;
+  text-align: center;
+  color: #311b92;
+}
+
+#questionRemaining {
+  margin-bottom: 10px;
+  font-weight: bold;
+  color: #004d40;
+}
 </style>
 </head>
 <body>
-<div class="container">
-  <h1>Perrongton Wellness – Lesson 1: සංඛ්‍යා රටා</h1>
-  <div class="scorebar">
-    <div>Score: <span id="score">40</span></div>
-    <div class="remaining">Questions Remaining: <span id="remaining">20</span></div>
-  </div>
+<div class="quiz-container">
+  <h1>Lesson 1: සංඛ්‍යා රටා - Quiz</h1>
+  <div id="questionRemaining">Question 1 of 20</div>
   <div class="progress-container">
-    <div class="progress-fill" id="progress"></div>
+    <div class="progress-bar" id="progressBar"></div>
   </div>
-  <div class="card">
-    <div id="qtext">Loading...</div>
-    <div class="choices" id="choices"></div>
+  <div id="quiz">
+    <div class="question" id="questionText"></div>
+    <div class="answers" id="answerButtons"></div>
+    <button id="nextBtn">Next</button>
   </div>
-  <div class="result" id="result">
-    <h2>Quiz අවසානය!</h2>
-    <p>අවසන් ලකුණු: <span id="finalScore"></span></p>
-    <table>
-      <thead>
-        <tr><th>Question</th><th>Your Answer</th><th>Correct Answer</th></tr>
-      </thead>
-      <tbody id="review"></tbody>
-    </table>
-  </div>
+  <div id="result"></div>
 </div>
 
 <script>
-const quiz=[
-{q:"8, 12, 16, 20, ... ඊලග පදය කුමක්ද?", choices:["22, 26","24, 28","25, 30","23, 27"], answer:1},
-{q:"21, 28, 35, 42, ... පොදු අන්තරය කීයද?", choices:["5","6","7","8"], answer:2},
-{q:"100, 88, 76, 64, ... පොදු අන්තරය:", choices:["-10","-12","-14","-8"], answer:1},
-{q:"පොදු අන්තරය 5 සහ මුල් පදය 2 නම්, 6 වන පදය කීයද?", choices:["27","25","22","30"], answer:0},
-{q:"11 වන පදය 63 නම්, පොදු අන්තරය කීයද? (මුල් පදය 3)", choices:["5","6","7","8"], answer:1},
-{q:"7, 11, 17, 25, 30, ... යන්න arithmetic progression නොවන්නේ ඇයි?", choices:["පොදු අන්තරය එකක් නොවීම","පද ගණන අඩු වීම","මුල් පදය 0 වීම","කුමක්ම නොවෙයි"], answer:0},
-{q:"පොදු අන්තරය 4, මුල් පදය 5 නම්, 15 වන පදය කීයද?", choices:["60","61","62","63"], answer:1},
-{q:"15, 15, 15, 15,... පොදු අන්තරය කීයද?", choices:["15","0","1","-15"], answer:1},
-{q:"89, 70, 53, 38, ... පොදු අන්තරය කීයද?", choices:["-15","-17","-18","-19"], answer:2},
-{q:"Arithmetic progression එකක පොදු අන්තරය negative නම්, පද මාලාව:", choices:["වැඩිවෙයි","අඩුවෙයි","එකේම පදය නැවත නැවත ලැබේ","අනියම්ව වෙනස් වේ"], answer:1},
-{q:"61, 54, 47, 40,... පොදු අන්තරය කීයද?", choices:["5","-6","-7","-8"], answer:2},
-{q:"මුල් පදය 7 සහ පොදු අන්තරය 5 නම්, 10 වන පදය කීයද?", choices:["52","54","55","56"], answer:2},
-{q:"මුල් පදය 3 සහ පොදු අන්තරය 7 නම්, 8 වන පදය කීයද?", choices:["49","52","53","54"], answer:1},
-{q:"32, 28, 24, 20, ... පොදු අන්තරය කීයද?", choices:["-2","-3","-4","-5"], answer:2},
-{q:"5, 12, 19, 26, ... පොදු අන්තරය කීයද?", choices:["6","7","8","9"], answer:1},
-{q:"මුල් පදය 4 සහ පොදු අන්තරය 9 නම්, 12 වන පදය කීයද?", choices:["101","102","103","104"], answer:2},
-{q:"මුල් පදය 10 සහ පොදු අන්තරය 2 නම්, 25 වන පදය කීයද?", choices:["58","59","60","61"], answer:1},
-{q:"99, 93, 87, 81, ... පොදු අන්තරය කීයද?", choices:["-4","-5","-6","-7"], answer:2},
-{q:"මුල් පදය 1 සහ පොදු අන්තරය 4 නම්, 20 වන පදය කීයද?", choices:["77","78","79","80"], answer:2},
-{q:"මුල් පදය 6 සහ පොදු අන්තරය -3 නම්, 15 වන පදය කීයද?", choices:["-37","-38","-39","-40"], answer:1}
+const quizData = [
+  {q:"8, 12, 16, 20, ... ඊලග පදය කුමක්ද?", a:["22, 26","24, 28","25, 30","23, 27"], correct:1},
+  {q:"21, 28, 35, 42, ... පොදු අන්තරය කීයද?", a:["5","6","7","8"], correct:2},
+  {q:"100, 88, 76, 64, ... පොදු අන්තරය:", a:["-10","-12","-14","-8"], correct:1},
+  {q:"පොදු අන්තරය 5 සහ මුල් පදය 2 නම්, 6 වන පදය කීයද?", a:["27","25","22","30"], correct:1},
+  {q:"11 වන පදය 63 නම්, පොදු අන්තරය කීයද? (මුල් පදය 3)", a:["5","6","7","8"], correct:2},
+  {q:"7, 11, 17, 25, 30, ... යන්න arithmetic progression නොවන්නේ ඇයි?", a:["පොදු අන්තරය එකක් නොවීම","පද ගණන අඩු වීම","මුල් පදය 0 වීම","කුමක්ම නොවෙයි"], correct:0},
+  {q:"පොදු අන්තරය 4, මුල් පදය 5 නම්, 15 වන පදය කීයද?", a:["60","61","62","63"], correct:0},
+  {q:"15, 15, 15, 15,... පොදු අන්තරය කීයද?", a:["15","0","1","-15"], correct:1},
+  {q:"89, 70, 53, 38, ... පොදු අන්තරය කීයද?", a:["-15","-17","-18","-19"], correct:2},
+  {q:"Arithmetic progression එකක පොදු අන්තරය negative නම්, පද මාලාව:", a:["වැඩිවෙයි","අඩුවෙයි","එකේම පදය නැවත නැවත ලැබේ","අනියම්ව වෙනස් වේ"], correct:1},
+  {q:"61, 54, 47, 40,... පොදු අන්තරය කීයද?", a:["5","-6","-7","-8"], correct:2},
+  {q:"මුල් පදය 7 සහ පොදු අන්තරය 5 නම්, 10 වන පදය කීයද?", a:["52","54","55","56"], correct:2},
+  {q:"මුල් පදය 3 සහ පොදු අන්තරය 7 නම්, 8 වන පදය කීයද?", a:["49","52","53","54"], correct:2},
+  {q:"32, 28, 24, 20, ... පොදු අන්තරය කීයද?", a:["-2","-3","-4","-5"], correct:2},
+  {q:"5, 12, 19, 26, ... පොදු අන්තරය කීයද?", a:["6","7","8","9"], correct:1},
+  {q:"මුල් පදය 4 සහ පොදු අන්තරය 9 නම්, 12 වන පදය කීයද?", a:["101","102","103","104"], correct:1},
+  {q:"මුල් පදය 10 සහ පොදු අන්තරය 2 නම්, 25 වන පදය කීයද?", a:["58","59","60","61"], correct:2},
+  {q:"99, 93, 87, 81, ... පොදු අන්තරය කීයද?", a:["-4","-5","-6","-7"], correct:2},
+  {q:"මුල් පදය 1 සහ පොදු අන්තරය 4 නම්, 20 වන පදය කීයද?", a:["77","78","79","80"], correct:2},
+  {q:"මුල් පදය 6 සහ පොදු අන්තරය -3 නම්, 15 වන පදය කීයද?", a:["-37","-38","-39","-40"], correct:2}
 ];
 
-let index=0, scoreVal=40;
-let userAnswers=[];
-const qtext=document.getElementById("qtext");
-const choicesDiv=document.getElementById("choices");
-const scoreEl=document.getElementById("score");
-const remainingEl=document.getElementById("remaining");
-const progressFill=document.getElementById("progress");
-const resultDiv=document.getElementById("result");
-const finalScore=document.getElementById("finalScore");
-const reviewTbody=document.getElementById("review");
+let current = 0;
+let score = 0;
 
-function renderQuestion(){
-  const q=quiz[index];
-  qtext.textContent=q.q;
-  choicesDiv.innerHTML="";
-  q.choices.forEach((c,i)=>{
-    const div=document.createElement("div");
-    div.className="choice";
-    div.innerHTML=`${String.fromCharCode(65+i)}) ${c}`;
-    div.onclick=()=>selectAnswer(i,div);
-    choicesDiv.appendChild(div);
+const questionText = document.getElementById("questionText");
+const answerButtons = document.getElementById("answerButtons");
+const nextBtn = document.getElementById("nextBtn");
+const resultDiv = document.getElementById("result");
+const progressBar = document.getElementById("progressBar");
+const questionRemaining = document.getElementById("questionRemaining");
+
+function showQuestion(index) {
+  questionText.textContent = quizData[index].q;
+  answerButtons.innerHTML = "";
+  quizData[index].a.forEach((answer, i) => {
+    const btn = document.createElement("button");
+    btn.textContent = answer;
+    btn.classList.add("answer-btn");
+    btn.addEventListener("click", () => selectAnswer(i, btn));
+    answerButtons.appendChild(btn);
   });
-  progressFill.style.width=`${(index/quiz.length)*100}%`;
-  remainingEl.textContent=quiz.length-index;
+  questionRemaining.textContent = `Question ${current + 1} of ${quizData.length}`;
+  progressBar.style.width = `${(current/quizData.length)*100}%`;
 }
 
-function selectAnswer(i,el){
-  const correct=quiz[index].answer;
-  userAnswers.push({q:quiz[index].q, your:i, correct});
-  if(i===correct){el.classList.add("correct"); scoreVal+=5;}
-  else{el.classList.add("wrong"); scoreVal-=2;}
-  scoreEl.textContent=scoreVal;
-  setTimeout(()=>{
-    index++;
-    if(index<quiz.length){ renderQuestion(); }
-    else{ progressFill.style.width='100%'; showResult(); }
-  },500);
+function selectAnswer(i, btn) {
+  const correctIndex = quizData[current].correct;
+  Array.from(answerButtons.children).forEach(b=>{
+    b.disabled = true;
+    if(quizData[current].a.indexOf(b.textContent) === correctIndex){
+      b.classList.add("correct");
+    }
+  });
+  if(i === correctIndex) score++;
+  else btn.classList.add("wrong");
 }
+
+nextBtn.addEventListener("click", () => {
+  current++;
+  if(current < quizData.length){
+    showQuestion(current);
+  } else {
+    showResult();
+  }
+});
 
 function showResult(){
-  document.querySelector(".card").style.display="none";
-  resultDiv.style.display="block";
-  finalScore.textContent=scoreVal;
-  userAnswers.forEach(item=>{
-    const tr=document.createElement("tr");
-    const qIndex=quiz.findIndex(q=>q.q===item.q);
-    tr.innerHTML=`<td>${item.q}</td>
-                   <td style="color:${item.your===item.correct?'green':'red'}">${quiz[qIndex].choices[item.your]}</td>
-                   <td>${quiz[qIndex].choices[item.correct]}</td>`;
-    reviewTbody.appendChild(tr);
-  });
-  launchConfetti();
+  quiz.style.display = "none";
+  resultDiv.innerHTML = `ඔබේ ලකුණු: ${score} / ${quizData.length}`;
+  progressBar.style.width = "100%";
 }
 
-/* simple confetti */
-function launchConfetti(){
-  const count=150;
-  for(let i=0;i<count;i++){
-    const div=document.createElement("div");
-    div.className="confetti";
-    div.style.left=Math.random()*window.innerWidth+"px";
-    div.style.backgroundColor=`hsl(${Math.random()*360},80%,60%)`;
-    div.style.animation=`fall ${2+Math.random()*3}s linear forwards`;
-    document.body.appendChild(div);
-    setTimeout(()=>div.remove(),4000);
-  }
-}
-const style=document.createElement("style");
-style.innerHTML=`@keyframes fall{
-  0%{transform:translateY(0) rotate(0deg);}
-  100%{transform:translateY(100vh) rotate(720deg);}
-}`;
-document.head.appendChild(style);
-
-renderQuestion();
+showQuestion(current);
 </script>
 </body>
 </html>
