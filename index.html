@@ -3,61 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>School Website</title>
+    <title>පාසල් වෙබ් අඩවිය</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <header>
+    <header class="header">
         <div class="container">
-            <nav>
+            <nav class="navbar">
                 <div class="logo">
-                    <h1>School Name</h1>
+                    <img src="school_logo.png" alt="School Logo">
+                    <h1>ප්‍රමුඛ විද්‍යාලය</h1>
                 </div>
                 <ul class="nav-links">
-                    <li><a href="#home">Home</a></li>
-                    <li><a href="#student-data">Student Data</a></li>
-                    <li><a href="#news">News</a></li>
-                    <li><a href="#about-us">About Us</a></li>
+                    <li><a href="#home" class="nav-link" data-lang-si="මුල් පිටුව" data-lang-ta="முகப்பு" data-lang-en="Home">මුල් පිටුව</a></li>
+                    <li><a href="#student-data" class="nav-link" data-lang-si="ශිෂ්‍ය දත්ත" data-lang-ta="மாணவர் தரவு" data-lang-en="Student Data">ශිෂ්‍ය දත්ත</a></li>
+                    <li><a href="#news" class="nav-link" data-lang-si="පුවත්" data-lang-ta="செய்திகள்" data-lang-en="News">පුවත්</a></li>
+                    <li><a href="#about-us" class="nav-link" data-lang-si="අප ගැන" data-lang-ta="எங்களைப் பற்றி" data-lang-en="About Us">අප ගැන</a></li>
                 </ul>
-                <div class="controls">
-                    <button id="dark-mode-toggle">Dark Mode</button>
+                <div class="navbar-controls">
+                    <button id="theme-toggle" class="control-btn"><i class="fas fa-moon"></i></button>
                     <div class="lang-switcher">
-                        <button onclick="changeLanguage('si')">සිංහල</button>
-                        <button onclick="changeLanguage('ta')">தமிழ்</button>
-                        <button onclick="changeLanguage('en')">English</button>
+                        <button class="lang-btn active" data-lang="si">සිං</button>
+                        <button class="lang-btn" data-lang="ta">த</button>
+                        <button class="lang-btn" data-lang="en">En</button>
                     </div>
                 </div>
             </nav>
         </div>
     </header>
 
-    <main>
-        <section id="home" class="active">
+    <main class="main-content">
+        <section id="home" class="page-section active" style="background-image: url('school_building.jpg');">
+            <div class="overlay"></div>
             <div class="container">
-                <h2>Home</h2>
-                <p class="content" data-lang-si="අපගේ විද්‍යාලයට සාදරයෙන් පිළිගනිමු." data-lang-ta="எமது பாடசாலைக்கு வரவேற்கிறோம்." data-lang-en="Welcome to our school."></p>
+                <div class="content-box">
+                    <h2 class="section-title" data-lang-si="අපගේ විද්‍යාලයට සාදරයෙන් පිළිගනිමු" data-lang-ta="எமது பாடசாலைக்கு வரவேற்கிறோம்" data-lang-en="Welcome to Our School">අපගේ විද්‍යාලයට සාදරයෙන් පිළිගනිමු</h2>
+                    <p class="section-text" data-lang-si="අධ්‍යාපනය, විනය සහ අනාගතය වෙනුවෙන් කැප වූ පාසලක්." data-lang-ta="கல்வி, ஒழுக்கம் மற்றும் எதிர்காலத்திற்காக அர்ப்பணிக்கப்பட்ட ஒரு பாடசாலை." data-lang-en="A school dedicated to education, discipline, and the future.">අධ්‍යාපනය, විනය සහ අනාගතය වෙනුවෙන් කැප වූ පාසලක්.</p>
+                </div>
             </div>
         </section>
 
-        <section id="student-data">
+        <section id="student-data" class="page-section">
             <div class="container">
-                <h2>Student Data</h2>
-                <p class="content" data-lang-si="ශිෂ්‍ය දත්ත අංශය." data-lang-ta="மாணவர் தரவுப் பகுதி." data-lang-en="Student data section."></p>
+                <div class="content-box">
+                    <h2 class="section-title" data-lang-si="ශිෂ්‍ය දත්ත" data-lang-ta="மாணவர் தரவு" data-lang-en="Student Data">ශිෂ්‍ය දත්ත</h2>
+                    <p class="section-text" data-lang-si="මෙම කොටසින් ශිෂ්‍යයන්ගේ සියලු තොරතුරු ලබා ගත හැක." data-lang-ta="இந்த பிரிவில், மாணவர்களின் அனைத்து தகவல்களையும் பெறலாம்." data-lang-en="In this section, all student information can be obtained.">මෙම කොටසින් ශිෂ්‍යයන්ගේ සියලු තොරතුරු ලබා ගත හැක.</p>
+                </div>
             </div>
         </section>
 
-        <section id="news">
+        <section id="news" class="page-section">
             <div class="container">
-                <h2>News</h2>
-                <p class="content" data-lang-si="නවතම පුවත් මෙතැනින් ලබා ගන්න." data-lang-ta="சமீபத்திய செய்திகளை இங்கே பெறுங்கள்." data-lang-en="Get the latest news here."></p>
+                <div class="content-box">
+                    <h2 class="section-title" data-lang-si="නවතම පුවත්" data-lang-ta="சமீபத்திய செய்திகள்" data-lang-en="Latest News">නවතම පුවත්</h2>
+                    <p class="section-text" data-lang-si="පාසලේ සිදුවන නවතම ක්‍රියාකාරකම් සහ සිදුවීම් පිළිබඳව දැනුවත් වන්න." data-lang-ta="பாடசாலையில் நடக்கும் சமீபத்திய நடவடிக்கைகள் மற்றும் நிகழ்வுகள் பற்றி அறிந்து கொள்ளுங்கள்." data-lang-en="Stay informed about the latest activities and events at the school.">පාසලේ සිදුවන නවතම ක්‍රියාකාරකම් සහ සිදුවීම් පිළිබඳව දැනුවත් වන්න.</p>
+                </div>
             </div>
         </section>
 
-        <section id="about-us">
+        <section id="about-us" class="page-section">
             <div class="container">
-                <h2>About Us</h2>
-                <p class="content" data-lang-si="අප ගැන තොරතුරු." data-lang-ta="எங்களைப் பற்றிய தகவல்கள்." data-lang-en="Information about us."></p>
+                <div class="content-box">
+                    <h2 class="section-title" data-lang-si="අප ගැන" data-lang-ta="எங்களைப் பற்றி" data-lang-en="About Us">අප ගැන</h2>
+                    <p class="section-text" data-lang-si="අපගේ පාසලේ ඉතිහාසය, දැක්ම සහ මෙහෙවර පිළිබඳ තොරතුරු." data-lang-ta="எமது பாடசாலையின் வரலாறு, நோக்கு மற்றும் இலக்கு பற்றிய தகவல்கள்." data-lang-en="Information about our school's history, vision, and mission.">අපගේ පාසලේ ඉතිහාසය, දැක්ම සහ මෙහෙවර පිළිබඳ තොරතුරු.</p>
+                </div>
             </div>
         </section>
     </main>
