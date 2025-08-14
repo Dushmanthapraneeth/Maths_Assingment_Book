@@ -100,28 +100,11 @@ h1 {
   background: #f44336 !important;
 }
 
-#nextBtn {
-  margin-top: 20px;
-  padding: 12px 20px;
-  border: none;
-  border-radius: 12px;
-  background: #1976d2;
-  color: white;
-  font-size: 1em;
-  cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-
-#nextBtn:hover {
-  transform: translateY(-3px) rotateX(5deg) rotateY(5deg);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.4);
-}
-
 #result {
-  font-size: 1.3em;
+  font-size: 1.2em;
   font-weight: bold;
   margin-top: 20px;
-  text-align: center;
+  text-align: left;
   color: #311b92;
 }
 
@@ -142,7 +125,6 @@ h1 {
   <div id="quiz">
     <div class="question" id="questionText"></div>
     <div class="answers" id="answerButtons"></div>
-    <button id="nextBtn">Next</button>
   </div>
   <div id="result"></div>
 </div>
@@ -173,15 +155,17 @@ const quizData = [
 
 let current = 0;
 let score = 0;
+const selectedAnswers = [];
 
 const questionText = document.getElementById("questionText");
 const answerButtons = document.getElementById("answerButtons");
-const nextBtn = document.getElementById("nextBtn");
 const resultDiv = document.getElementById("result");
 const progressBar = document.getElementById("progressBar");
 const questionRemaining = document.getElementById("questionRemaining");
 
 function showQuestion(index) {
+  questionText.style.display = "block";
+  answerButtons.style.display = "flex";
   questionText.textContent = quizData[index].q;
   answerButtons.innerHTML = "";
   quizData[index].a.forEach((answer, i) => {
@@ -197,29 +181,48 @@ function showQuestion(index) {
 
 function selectAnswer(i, btn) {
   const correctIndex = quizData[current].correct;
-  Array.from(answerButtons.children).forEach(b=>{
+  selectedAnswers.push(i);
+  Array.from(answerButtons.children).forEach((b, idx)=>{
     b.disabled = true;
-    if(quizData[current].a.indexOf(b.textContent) === correctIndex){
+    if(idx === correctIndex){
       b.classList.add("correct");
+    }
+    if(idx === i && i !== correctIndex){
+      b.classList.add("wrong");
     }
   });
   if(i === correctIndex) score++;
-  else btn.classList.add("wrong");
+  setTimeout(() => {
+    current++;
+    if(current < quizData.length){
+      showQuestion(current);
+    } else {
+      showResult();
+    }
+  }, 500);
 }
 
-nextBtn.addEventListener("click", () => {
-  current++;
-  if(current < quizData.length){
-    showQuestion(current);
-  } else {
-    showResult();
-  }
-});
-
 function showResult(){
-  quiz.style.display = "none";
-  resultDiv.innerHTML = `ඔබේ ලකුණු: ${score} / ${quizData.length}`;
+  questionText.style.display = "none";
+  answerButtons.style.display = "none";
+  questionRemaining.style.display = "none";
   progressBar.style.width = "100%";
+
+  let html = `<h2>ඔබේ ලකුණු: ${score} / ${quizData.length}</h2>`;
+  html += `<ul>`;
+  quizData.forEach((q, idx)=>{
+    html += `<li>${idx+1}. ${q.q} <br>`;
+    q.a.forEach((ans, i)=>{
+      let clickClass = '';
+      if(selectedAnswers[idx] === i && i !== q.correct) clickClass = ' (selected)';
+      if(i===q.correct) html += `<span style="color:green;">✔ ${ans}${clickClass}</span> `;
+      else if(selectedAnswers[idx] === i) html += `<span style="color:red;">✖ ${ans}${clickClass}</span> `;
+      else html += `${ans} `;
+    });
+    html += `</li><br>`;
+  });
+  html += `</ul>`;
+  resultDiv.innerHTML = html;
 }
 
 showQuestion(current);
