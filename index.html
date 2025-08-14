@@ -1,369 +1,129 @@
 <!DOCTYPE html>
 <html lang="si">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Perrongton Wellness – Lesson 1: සංඛ්‍යා රටා | MCQ Quiz</title>
-  <style>
-    :root{
-      --bg:#dbe9f4;           /* soft pastel blue */
-      --card:#ffffff;
-      --primary:#2b6cb0;      /* calm blue */
-      --primary-600:#2c5282;
-      --accent:#60a5fa;       /* progress */
-      --text:#1f2937;         /* slate-800 */
-      --muted:#6b7280;        /* gray-500 */
-      --correct:#16a34a;      /* green-600 */
-      --wrong:#dc2626;        /* red-600 */
-      --shadow:0 10px 25px rgba(2, 6, 23, .08);
-      --radius:18px;
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, Ubuntu, Cantarell, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
-      background:linear-gradient(180deg,var(--bg),#eaf2fb 60%);
-      color:var(--text);
-    }
-    .container{max-width:980px;margin:40px auto;padding:16px}
-    .brand{display:flex;align-items:center;gap:12px;justify-content:center;margin-bottom:18px}
-    .leaf{width:36px;height:36px;border-radius:12px;background:radial-gradient(circle at 30% 30%, #9ae6b4, #34d399 60%, #059669);box-shadow:var(--shadow)}
-    h1{margin:0;text-align:center;font-size:clamp(22px,3.4vw,34px);}
-    .subtitle{margin-top:8px;text-align:center;color:var(--muted)}
-
-    .scorebar{display:flex;align-items:center;gap:12px;background:var(--card);border-radius:var(--radius);padding:12px 14px;box-shadow:var(--shadow);margin:18px 0}
-    .score{font-weight:700}
-    .pill{padding:6px 10px;border-radius:999px;background:#eef2ff;color:#3730a3;font-weight:600}
-    .progress{flex:1;height:12px;background:#e5e7eb;border-radius:999px;overflow:hidden}
-    .progress>span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),#93c5fd);transition:width .35s ease}
-    .counter{min-width:120px;text-align:right;color:var(--muted);font-weight:600}
-
-    .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
-    .qhead{display:flex;gap:10px;align-items:flex-start}
-    .qno{flex:0 0 auto;width:36px;height:36px;border-radius:10px;background:#e0f2fe;display:grid;place-items:center;font-weight:800;color:#0c4a6e}
-    .qtext{font-size:18px;line-height:1.4}
-
-    .choices{margin-top:14px;display:grid;gap:10px}
-    .choice{display:flex;align-items:center;gap:10px;border:2px solid #e5e7eb;border-radius:14px;padding:12px 12px;cursor:pointer;transition:.25s ease;background:#fafafa}
-    .choice:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(2,6,23,.06)}
-    .badge{flex:0 0 auto;width:28px;height:28px;border-radius:8px;background:#eff6ff;display:grid;place-items:center;font-weight:700;color:#1d4ed8}
-
-    .choice.correct{border-color:var(--correct);background:#ecfdf5}
-    .choice.wrong{border-color:var(--wrong);background:#fef2f2}
-
-    .controls{display:flex;gap:10px;justify-content:space-between;margin-top:16px}
-    button{border:0;border-radius:14px;padding:12px 16px;font-weight:700;cursor:pointer;box-shadow:var(--shadow);background:var(--primary);color:white;transition:.2s}
-    button.secondary{background:#e5e7eb;color:#111827}
-    button:disabled{opacity:.5;cursor:not-allowed;box-shadow:none}
-    button:hover:not(:disabled){transform:translateY(-1px);background:var(--primary-600)}
-
-    .footer{margin-top:18px;text-align:center;color:var(--muted)}
-
-    .result{display:none;margin-top:18px;background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;text-align:center}
-    .result h2{margin:0 0 8px}
-    .confetti{font-size:26px}
-
-    .notice{margin-top:8px;font-size:14px;color:#6b7280}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Perrongton Wellness – Lesson 1 AP Quiz</title>
+<style>
+  :root {
+    --bg:#dbe9f4; --card:#fff; --primary:#2b6cb0; --primary-600:#2c5282; --text:#1f2937;
+    --muted:#6b7280; --correct:#16a34a; --wrong:#dc2626; --shadow:0 10px 25px rgba(2,6,23,.08);
+    --radius:18px;
+  }
+  body {margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--text);}
+  .container{max-width:900px;margin:20px auto;padding:16px;}
+  h1{text-align:center;}
+  .card{background:var(--card);padding:20px;border-radius:var(--radius);box-shadow:var(--shadow);margin-top:20px;}
+  .choices{display:grid;gap:10px;margin-top:15px;}
+  .choice{padding:12px 15px;border-radius:12px;border:2px solid #e5e7eb;cursor:pointer;background:#fafafa;transition:.2s;}
+  .choice:hover{transform:translateY(-1px);}
+  .correct{background:#dcfce7;border-color:#16a34a;}
+  .wrong{background:#fee2e2;border-color:#dc2626;}
+  .scorebar{margin-top:20px;font-weight:600;}
+  .result{display:none;margin-top:20px;background:#fff;padding:20px;border-radius:var(--radius);box-shadow:var(--shadow);}
+  .result table{width:100%;border-collapse:collapse;margin-top:10px;}
+  .result td, .result th{border:1px solid #ddd;padding:8px;text-align:left;}
+  .result th{background:#f3f4f6;}
+</style>
 </head>
 <body>
-  <div class="container">
-    <div class="brand">
-      <div class="leaf" aria-hidden="true"></div>
-      <h1>Perrongton Wellness – Lesson 1: සංඛ්‍යා රටා</h1>
-    </div>
-    <p class="subtitle">Arithmetic Progression (AP) MCQ Quiz – සාර්ථකත්වයට සුබ පැතුම්!</p>
-
-    <!-- Live Score + Progress -->
-    <div class="scorebar" role="region" aria-label="Quiz scoreboard and progress">
-      <div class="score">Score: <span id="score">0</span>/<span id="total">0</span></div>
-      <span class="pill" id="statusPill">Question <span id="pillIndex">1</span></span>
-      <div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
-      <div class="counter"><span id="count">0</span>% Complete</div>
-    </div>
-
-    <!-- Question Card -->
-    <div class="card" id="card" aria-live="polite">
-      <div class="qhead">
-        <div class="qno" id="qno">1</div>
-        <div class="qtext" id="qtext">Loading…</div>
-      </div>
-      <div class="choices" id="choices"></div>
-      <div class="controls">
-        <button id="prevBtn" class="secondary">⬅ Previous</button>
-        <div style="display:flex;gap:10px">
-          <button id="checkBtn">Check Answer</button>
-          <button id="nextBtn" class="secondary">Next ➡</button>
-        </div>
-      </div>
-      <div class="notice" id="notice"></div>
-    </div>
-
-    <!-- Result Block -->
-    <div class="result" id="result">
-      <div class="confetti">🎉🎉</div>
-      <h2>සුභ පැතුම්! Quiz එක අවසානයට පැමිණියේය.</h2>
-      <p>ඔබේ ලකුණු: <strong><span id="finalScore">0</span></strong> අගටින් <strong><span id="finalTotal">0</span></strong></p>
-      <p id="remark"></p>
-      <div style="margin-top:12px;display:flex;justify-content:center;gap:10px">
-        <button id="retryBtn">↻ Try Again</button>
-        <button id="reviewBtn" class="secondary">👀 Review Answers</button>
-      </div>
-    </div>
-
-    <p class="footer">Theme: soft pastel blue • Rounded corners • Perrongton Wellness</p>
+<div class="container">
+  <h1>Perrongton Wellness – Lesson 1: සංඛ්‍යා රටා</h1>
+  <div class="scorebar">Score: <span id="score">40</span></div>
+  <div class="card">
+    <div id="qtext">Loading...</div>
+    <div class="choices" id="choices"></div>
   </div>
+  <div class="result" id="result">
+    <h2>Quiz අවසානය!</h2>
+    <p>අවසන් ලකුණු: <span id="finalScore"></span></p>
+    <table>
+      <thead><tr><th>Question</th><th>Your Answer</th><th>Correct Answer</th></tr></thead>
+      <tbody id="review"></tbody>
+    </table>
+    <button onclick="location.reload()">↻ නැවත කරන්න</button>
+  </div>
+</div>
 
-  <script>
-    // --- QUIZ DATA ---
-    /**
-     * NOTE (Q9): The original sequence 89, 70, 53, 38 is not an AP (differences -19, -17, -15).
-     * To keep mathematical integrity, option (d) was changed to "AP නොවේ (No common difference)".
-     */
-    const quiz = [
-      {
-        q: "1.  8, 12, 16, 20, ...  ඊලග පදය කුමක්ද?",
-        choices: ["a) 22, 26", "b) 24, 28", "c) 25, 30", "d) 23, 27"],
-        answer: 1
-      },
-      {
-        q: "2.  21, 28, 35, 42, ...  පොදු අන්තරය කීයද?",
-        choices: ["a) 5", "b) 6", "c) 7", "d) 8"],
-        answer: 2
-      },
-      {
-        q: "3.  100, 88, 76, 64, ...  පොදු අන්තරය:",
-        choices: ["a) -10", "b) -12", "c) -14", "d) -8"],
-        answer: 1
-      },
-      {
-        q: "4.  පොදු අන්තරය 5 සහ මුල් පදය 2 නම්, 6 වන පදය කීයද?",
-        choices: ["a) 27", "b) 25", "c) 22", "d) 30"],
-        answer: 0
-      },
-      {
-        q: "5.  11 වන පදය 63 නම්, පොදු අන්තරය කීයද? (මුල් පදය 3)",
-        choices: ["a) 5", "b) 6", "c) 7", "d) 8"],
-        answer: 1
-      },
-      {
-        q: "6.  7, 11, 17, 25, 30, ...  යන්න arithmetic progression නොවන්නේ ඇයි?",
-        choices: ["a) පොදු අන්තරය එකක් නොවීම", "b) පද ගණන අඩු වීම", "c) මුල් පදය 0 වීම", "d) කුමක්ම නොවෙයි"],
-        answer: 0
-      },
-      {
-        q: "7.  පොදු අන්තරය 4, මුල් පදය 5 නම්, 15 වන පදය කීයද?",
-        choices: ["a) 60", "b) 61", "c) 62", "d) 63"],
-        answer: 1
-      },
-      {
-        q: "8.  15, 15, 15, 15,...  පොදු අන්තරය කීයද?",
-        choices: ["a) 15", "b) 0", "c) 1", "d) -15"],
-        answer: 1
-      },
-      {
-        q: "9.  89, 70, 53, 38, ...  පොදු අන්තරය කීයද?",
-        choices: ["a) -15", "b) -17", "c) -18", "d) AP නොවේ"],
-        answer: 3
-      },
-      {
-        q: "10.  Arithmetic progression එකක පොදු අන්තරය negative නම්, පද මාලාව:",
-        choices: ["a) වැඩිවෙයි", "b) අඩුවෙයි", "c) එකේම පදය නැවත නැවත ලැබේ", "d) අනියම්ව වෙනස් වේ"],
-        answer: 1
-      },
-      {
-        q: "11.  61, 54, 47, 40,...  පොදු අන්තරය කීයද?",
-        choices: ["a) 5", "b) -6", "c) -7", "d) -8"],
-        answer: 2
-      },
-      {
-        q: "12.  මුල් පදය 7 සහ පොදු අන්තරය 5 නම්, 10 වන පදය කීයද?",
-        choices: ["a) 52", "b) 54", "c) 55", "d) 56"],
-        answer: 2
-      },
-      {
-        q: "13.  මුල් පදය 3 සහ පොදු අන්තරය 7 නම්, 8 වන පදය කීයද?",
-        choices: ["a) 49", "b) 52", "c) 53", "d) 54"],
-        answer: 1
-      },
-      {
-        q: "14.  32, 28, 24, 20, ...  පොදු අන්තරය කීයද?",
-        choices: ["a) -2", "b) -3", "c) -4", "d) -5"],
-        answer: 2
-      },
-      {
-        q: "15.  5, 12, 19, 26, ...  පොදු අන්තරය කීයද?",
-        choices: ["a) 6", "b) 7", "c) 8", "d) 9"],
-        answer: 1
-      },
-      {
-        q: "16.  මුල් පදය 4 සහ පොදු අන්තරය 9 නම්, 12 වන පදය කීයද?",
-        choices: ["a) 101", "b) 102", "c) 103", "d) 104"],
-        answer: 2
-      },
-      {
-        q: "17.  මුල් පදය 10 සහ පොදු අන්තරය 2 නම්, 25 වන පදය කීයද?",
-        choices: ["a) 58", "b) 59", "c) 60", "d) 61"],
-        answer: 1
-      },
-      {
-        q: "18.  99, 93, 87, 81, ...  පොදු අන්තරය කීයද?",
-        choices: ["a) -4", "b) -5", "c) -6", "d) -7"],
-        answer: 2
-      },
-      {
-        q: "19.  මුල් පදය 1 සහ පොදු අන්තරය 4 නම්, 20 වන පදය කීයද?",
-        choices: ["a) 77", "b) 78", "c) 79", "d) 80"],
-        answer: 2
-      },
-      {
-        q: "20.  මුල් පදය 6 සහ පොදු අන්තරය -3 නම්, 15 වන පදය කීයද?",
-        choices: ["a) -37", "b) -38", "c) -39", "d) -40"],
-        answer: 1
-      },
-    ];
+<script>
+const quiz=[
+{q:"8, 12, 16, 20, ... ඊලග පදය කුමක්ද?", choices:["22, 26","24, 28","25, 30","23, 27"], answer:1},
+{q:"21, 28, 35, 42, ... පොදු අන්තරය කීයද?", choices:["5","6","7","8"], answer:2},
+{q:"100, 88, 76, 64, ... පොදු අන්තරය:", choices:["-10","-12","-14","-8"], answer:1},
+{q:"පොදු අන්තරය 5 සහ මුල් පදය 2 නම්, 6 වන පදය කීයද?", choices:["27","25","22","30"], answer:0},
+{q:"11 වන පදය 63 නම්, පොදු අන්තරය කීයද? (මුල් පදය 3)", choices:["5","6","7","8"], answer:1},
+{q:"7, 11, 17, 25, 30, ... යන්න arithmetic progression නොවන්නේ ඇයි?", choices:["පොදු අන්තරය එකක් නොවීම","පද ගණන අඩු වීම","මුල් පදය 0 වීම","කුමක්ම නොවෙයි"], answer:0},
+{q:"පොදු අන්තරය 4, මුල් පදය 5 නම්, 15 වන පදය කීයද?", choices:["60","61","62","63"], answer:1},
+{q:"15, 15, 15, 15,... පොදු අන්තරය කීයද?", choices:["15","0","1","-15"], answer:1},
+{q:"89, 70, 53, 38, ... පොදු අන්තරය කීයද?", choices:["-15","-17","-18","-19"], answer:2},
+{q:"Arithmetic progression එකක පොදු අන්තරය negative නම්, පද මාලාව:", choices:["වැඩිවෙයි","අඩුවෙයි","එකේම පදය නැවත නැවත ලැබේ","අනියම්ව වෙනස් වේ"], answer:1},
+{q:"61, 54, 47, 40,... පොදු අන්තරය කීයද?", choices:["5","-6","-7","-8"], answer:2},
+{q:"මුල් පදය 7 සහ පොදු අන්තරය 5 නම්, 10 වන පදය කීයද?", choices:["52","54","55","56"], answer:2},
+{q:"මුල් පදය 3 සහ පොදු අන්තරය 7 නම්, 8 වන පදය කීයද?", choices:["49","52","53","54"], answer:1},
+{q:"32, 28, 24, 20, ... පොදු අන්තරය කීයද?", choices:["-2","-3","-4","-5"], answer:2},
+{q:"5, 12, 19, 26, ... පොදු අන්තරය කීයද?", choices:["6","7","8","9"], answer:1},
+{q:"මුල් පදය 4 සහ පොදු අන්තරය 9 නම්, 12 වන පදය කීයද?", choices:["101","102","103","104"], answer:2},
+{q:"මුල් පදය 10 සහ පොදු අන්තරය 2 නම්, 25 වන පදය කීයද?", choices:["58","59","60","61"], answer:1},
+{q:"99, 93, 87, 81, ... පොදු අන්තරය කීයද?", choices:["-4","-5","-6","-7"], answer:2},
+{q:"මුල් පදය 1 සහ පොදු අන්තරය 4 නම්, 20 වන පදය කීයද?", choices:["77","78","79","80"], answer:2},
+{q:"මුල් පදය 6 සහ පොදු අන්තරය -3 නම්, 15 වන පදය කීයද?", choices:["-37","-38","-39","-40"], answer:1}
+];
 
-    // --- STATE ---
-    let index = 0;                 // current question index
-    let selected = new Array(quiz.length).fill(null);
-    let checked = new Array(quiz.length).fill(false);
+let index=0;
+let scoreVal=40;
+let userAnswers=[];
 
-    const els = {
-      score: document.getElementById('score'),
-      total: document.getElementById('total'),
-      qno: document.getElementById('qno'),
-      qtext: document.getElementById('qtext'),
-      choices: document.getElementById('choices'),
-      prev: document.getElementById('prevBtn'),
-      next: document.getElementById('nextBtn'),
-      check: document.getElementById('checkBtn'),
-      progress: document.getElementById('progressBar'),
-      count: document.getElementById('count'),
-      pillIndex: document.getElementById('pillIndex'),
-      notice: document.getElementById('notice'),
-      result: document.getElementById('result'),
-      finalScore: document.getElementById('finalScore'),
-      finalTotal: document.getElementById('finalTotal'),
-      remark: document.getElementById('remark'),
-      retry: document.getElementById('retryBtn'),
-      review: document.getElementById('reviewBtn'),
-      card: document.getElementById('card'),
-      totalWrap: document.getElementById('total')
-    };
+const qtext=document.getElementById("qtext");
+const choicesDiv=document.getElementById("choices");
+const scoreEl=document.getElementById("score");
+const resultDiv=document.getElementById("result");
+const finalScore=document.getElementById("finalScore");
+const reviewTbody=document.getElementById("review");
 
-    els.total.textContent = quiz.length;
+function renderQuestion(){
+  const q=quiz[index];
+  qtext.textContent=q.q;
+  choicesDiv.innerHTML="";
+  q.choices.forEach((c,i)=>{
+    const div=document.createElement("div");
+    div.className="choice";
+    div.innerHTML=`${String.fromCharCode(65+i)}) ${c}`;
+    div.onclick=()=>selectAnswer(i,div);
+    choicesDiv.appendChild(div);
+  });
+}
+function selectAnswer(i,el){
+  const correct=quiz[index].answer;
+  userAnswers.push({q:quiz[index].q, your:i, correct});
+  if(i===correct){
+    el.classList.add("correct");
+    scoreVal+=5;
+  }else{
+    el.classList.add("wrong");
+    scoreVal-=2;
+  }
+  scoreEl.textContent=scoreVal;
+  setTimeout(()=>{
+    index++;
+    if(index<quiz.length){ renderQuestion(); }
+    else{ showResult(); }
+  },500);
+}
 
-    function render(){
-      const it = quiz[index];
-      els.qno.textContent = (index+1);
-      els.qtext.textContent = it.q;
-      els.choices.innerHTML = '';
-      els.pillIndex.textContent = (index+1);
-
-      it.choices.forEach((c,i)=>{
-        const div = document.createElement('div');
-        div.className = 'choice';
-        div.setAttribute('role','button');
-        div.setAttribute('tabindex','0');
-        div.dataset.index = i;
-        div.innerHTML = `<span class="badge">${String.fromCharCode(65+i)}</span><span>${c}</span>`;
-
-        // mark selection
-        if(selected[index] === i){
-          div.style.outline = '3px solid #bfdbfe';
-        }
-
-        // if checked, colorize correct/wrong
-        if(checked[index]){
-          if(i === it.answer){ div.classList.add('correct'); }
-          if(selected[index] === i && i !== it.answer){ div.classList.add('wrong'); }
-        }
-
-        div.addEventListener('click',()=>{ select(i); });
-        div.addEventListener('keydown',(e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); select(i); }});
-        els.choices.appendChild(div);
-      });
-
-      els.prev.disabled = index===0;
-      els.next.disabled = index===quiz.length-1;
-      els.check.disabled = (selected[index]===null);
-
-      // progress
-      const answered = checked.filter(Boolean).length;
-      const pct = Math.round(answered/quiz.length*100);
-      els.progress.style.width = `${(index+1)/quiz.length*100}%`;
-      els.count.textContent = pct;
-
-      // score
-      const sc = score();
-      els.score.textContent = sc;
-      els.notice.textContent = checked[index] ? (selected[index]===quiz[index].answer? '✅ නිවැරදි!':'❌ නැවත බලන්න.') : '';
-    }
-
-    function select(i){
-      selected[index] = i;
-      checked[index] = false; // reset if changed
-      render();
-    }
-
-    function check(){
-      if(selected[index]===null) return;
-      checked[index] = true;
-      render();
-      // auto-advance slightly after check
-      setTimeout(()=>{
-        if(index < quiz.length-1){
-          index++;
-          render();
-        }else{
-          finish();
-        }
-      }, 400);
-    }
-
-    function next(){
-      if(index < quiz.length-1){ index++; render(); }
-    }
-
-    function prev(){
-      if(index>0){ index--; render(); }
-    }
-
-    function score(){
-      let s=0; for(let i=0;i<quiz.length;i++){ if(checked[i] && selected[i]===quiz[i].answer) s++; }
-      return s;
-    }
-
-    function finish(){
-      els.card.style.display='none';
-      els.result.style.display='block';
-      els.finalScore.textContent = score();
-      els.finalTotal.textContent = quiz.length;
-      const pct = Math.round(score()/quiz.length*100);
-      els.remark.textContent = pct>=80? 'Excellent 🌟 – ඔබගේ සංඛ්‍යා රටා දැනුම ඉහළයි!': pct>=50? 'Good 👍 – තව ටිකක් පුහුණුවෙන් ඉහළට!' : 'Keep Practicing 💪 – නැවත උත්සාහ කරමු!';
-      // full progress
-      els.progress.style.width = '100%';
-      els.count.textContent = '100';
-    }
-
-    els.prev.addEventListener('click', prev);
-    els.next.addEventListener('click', next);
-    els.check.addEventListener('click', check);
-    els.retry.addEventListener('click', ()=>{
-      index=0; selected.fill(null); checked.fill(false);
-      els.card.style.display='block';
-      els.result.style.display='none';
-      render();
-      window.scrollTo({top:0,behavior:'smooth'});
-    });
-    els.review.addEventListener('click', ()=>{
-      // jump to first unchecked or first question
-      const firstWrong = selected.findIndex((v,i)=> v!==null && v!==quiz[i].answer);
-      index = firstWrong>=0? firstWrong:0; render();
-      window.scrollTo({top:0,behavior:'smooth'});
-    });
-
-    // init
-    render();
-  </script>
+function showResult(){
+  document.querySelector(".card").style.display="none";
+  resultDiv.style.display="block";
+  finalScore.textContent=scoreVal;
+  userAnswers.forEach(item=>{
+    const tr=document.createElement("tr");
+    tr.innerHTML=`<td>${item.q}</td>
+                   <td style="color:${item.your===item.correct?'green':'red'}">${quiz[indexOf(item.q)].choices[item.your]}</td>
+                   <td>${quiz[indexOf(item.q)].choices[item.correct]}</td>`;
+    reviewTbody.appendChild(tr);
+  });
+}
+function indexOf(qText){return quiz.findIndex(q=>q.q===qText);}
+renderQuestion();
+</script>
 </body>
 </html>
