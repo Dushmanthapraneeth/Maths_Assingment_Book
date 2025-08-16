@@ -1,253 +1,314 @@
 <!DOCTYPE html>
 <html lang="si">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Lesson 1: සංඛ්‍යා රටා - Quiz</title>
-<style>
-body {
-  font-family: 'Arial', sans-serif;
-  margin: 0;
-  padding: 20px;
-  display: flex;
-  justify-content: center;
-  min-height: 100vh;
-  animation: bgAnim 20s ease-in-out infinite alternate;
-}
-
-@keyframes bgAnim {
-  0% { background: linear-gradient(120deg, #d1c4e9, #ffccbc); }
-  50% { background: linear-gradient(120deg, #b2dfdb, #ffe082); }
-  100% { background: linear-gradient(120deg, #c8e6c9, #f48fb1); }
-}
-
-.quiz-container {
-  background: #ffffff;
-  border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-  padding: 30px;
-  max-width: 700px;
-  width: 100%;
-  perspective: 1000px;
-}
-
-h1 {
-  text-align: center;
-  color: #4a148c;
-}
-
-.progress-wrapper {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.progress-container {
-  background: #b2dfdb;
-  height: 25px;
-  border-radius: 20px;
-  overflow: hidden;
-  flex: 1;
-  margin-right: 10px;
-  box-shadow: inset 0 4px 6px rgba(0,0,0,0.2), 0 4px 6px rgba(0,0,0,0.1);
-  perspective: 500px;
-}
-
-.progress-bar {
-  height: 100%;
-  width: 0%;
-  background: linear-gradient(270deg, #00796b, #26a69a, #004d40, #26a69a);
-  background-size: 800% 100%;
-  border-radius: 20px;
-  transition: width 0.5s ease;
-  transform-style: preserve-3d;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-  animation: flow 4s linear infinite;
-}
-
-@keyframes flow {
-  0% { background-position: 0% 0; }
-  50% { background-position: 100% 0; }
-  100% { background-position: 0% 0; }
-}
-
-#scoreDisplay {
-  font-weight: bold;
-  color: #004d40;
-  min-width: 50px;
-  text-align: right;
-}
-
-.question {
-  margin-bottom: 20px;
-  font-size: 1.2em;
-  color: #311b92;
-}
-
-.answers {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.answer-btn {
-  padding: 12px;
-  font-size: 1em;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
-  background: linear-gradient(145deg, #ff8a65, #ff7043);
-  color: #fff;
-  font-weight: bold;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-  transform-style: preserve-3d;
-}
-
-.answer-btn:hover {
-  transform: translateY(-5px) rotateX(10deg) rotateY(10deg) scale(1.05);
-  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-}
-
-.answer-btn.correct {
-  background: #4caf50 !important;
-}
-
-.answer-btn.wrong {
-  background: #f44336 !important;
-}
-
-#result {
-  font-size: 1.2em;
-  font-weight: bold;
-  margin-top: 20px;
-  text-align: left;
-  color: #311b92;
-}
-
-#questionRemaining {
-  margin-bottom: 10px;
-  font-weight: bold;
-  color: #004d40;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Game Home Page</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        body.light-mode {
+            background-color: #f0f4f8; /* Light gray background */
+            color: #1a202c; /* Dark text */
+        }
+        body.dark-mode {
+            background-color: #1a202c; /* Dark background */
+            color: #e2e8f0; /* Light text */
+        }
+        .main-card {
+            transition: background-color 0.3s, box-shadow 0.3s;
+        }
+        .light-mode .main-card {
+            background-color: #ffffff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .dark-mode .main-card {
+            background-color: #2d3748; /* Dark gray for the main card */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        .section-card {
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .light-mode .section-card {
+            background-color: #f8fafc; /* Lighter gray for sections */
+            border-color: #e2e8f0;
+        }
+        .dark-mode .section-card {
+            background-color: #1f2937; /* Even darker gray for sections */
+            border-color: #4b5563;
+        }
+        .lang-button.selected {
+            background-color: #dc2626; /* Red color for selected language button */
+        }
+        .lang-button:hover.selected {
+            background-color: #b91c1c; /* Darker red on hover */
+        }
+    </style>
 </head>
-<body>
-<div class="quiz-container">
-  <h1>Lesson 1: සංඛ්‍යා රටා - Quiz</h1>
-  <div class="progress-wrapper">
-    <div class="progress-container">
-      <div class="progress-bar" id="progressBar"></div>
+<body class="light-mode flex items-center justify-center min-h-screen p-4">
+    <div class="main-card rounded-3xl p-8 md:p-12 w-full max-w-2xl">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 id="header-title" class="text-3xl md:text-4xl font-bold mb-2">Welcome to the Quiz Game!</h1>
+            <p id="header-subtitle" class="text-gray-600 dark:text-gray-400">Refresh your knowledge</p>
+        </div>
+
+        <!-- Language and Mode Toggle Row -->
+        <div class="flex justify-between items-center mb-8">
+            <!-- Language Buttons -->
+            <div class="flex gap-2">
+                <button class="lang-button bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white font-medium py-1 px-3 rounded-md shadow-inner transition-colors selected" data-lang="si">Si</button>
+                <button class="lang-button bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white font-medium py-1 px-3 rounded-md shadow-inner transition-colors" data-lang="ta">Ta</button>
+                <button class="lang-button bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white font-medium py-1 px-3 rounded-md shadow-inner transition-colors" data-lang="en">En</button>
+            </div>
+            <!-- Mode Toggle Button -->
+            <button id="mode-toggle" class="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white font-medium py-2 px-4 rounded-full shadow-inner transition-colors">
+                <span id="mode-icon" class="mr-2">🌙</span>
+                <span id="mode-text">NIGHTMODE</span>
+            </button>
+        </div>
+
+        <!-- Main Content Sections -->
+        <div class="flex flex-col gap-8">
+            <!-- පන්තිය තෝරාගැනීම (Class Selection) -->
+            <div class="section-card p-6 rounded-2xl border border-gray-200 dark:border-gray-700">
+                <h2 id="class-title" class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Select Class</h2>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 justify-center">
+                    <button class="class-button bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-xl shadow-md transition-transform transform hover:scale-105">6 වන ශ්‍රේණිය</button>
+                    <button class="class-button bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-xl shadow-md transition-transform transform hover:scale-105">7 වන ශ්‍රේණිය</button>
+                    <button class="class-button bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-xl shadow-md transition-transform transform hover:scale-105">8 වන ශ්‍රේණිය</button>
+                    <button class="class-button bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-xl shadow-md transition-transform transform hover:scale-105">9 වන ශ්‍රේණිය</button>
+                    <button class="class-button bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-xl shadow-md transition-transform transform hover:scale-105">10 වන ශ්‍රේණිය</button>
+                    <button class="class-button bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-xl shadow-md transition-transform transform hover:scale-105">11 වන ශ්‍රේණිය</button>
+                </div>
+            </div>
+
+            <!-- පාඩම තෝරාගැනීම (Lesson Selection - Initially hidden) -->
+            <div id="lesson-selection" class="section-card p-6 rounded-2xl border border-gray-200 dark:border-gray-700 hidden">
+                <h2 id="lesson-title" class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">පාඩම තෝරන්න</h2>
+                <div id="lessons-container" class="flex flex-wrap justify-center gap-4">
+                    <!-- Lessons buttons will be dynamically added here -->
+                </div>
+            </div>
+        </div>
     </div>
-    <div id="scoreDisplay">Score: 0</div>
-  </div>
-  <div id="questionRemaining">Question 1 of 20</div>
-  <div id="quiz">
-    <div class="question" id="questionText"></div>
-    <div class="answers" id="answerButtons"></div>
-  </div>
-  <div id="result"></div>
-</div>
 
-<script>
-const quizDataOriginal = [
-  {q:"8, 12, 16, 20, ... ඊලග පදය කුමක්ද?", a:["22, 26","24, 28","25, 30","23, 27"], correct:1},
-  {q:"21, 28, 35, 42, ... පොදු අන්තරය කීයද?", a:["5","6","7","8"], correct:2},
-  {q:"100, 88, 76, 64, ... පොදු අන්තරය:", a:["-10","-12","-14","-8"], correct:1},
-  {q:"පොදු අන්තරය 5 සහ මුල් පදය 2 නම්, 6 වන පදය කීයද?", a:["27","25","22","30"], correct:1},
-  {q:"11 වන පදය 63 නම්, පොදු අන්තරය කීයද? (මුල් පදය 3)", a:["5","6","7","8"], correct:2},
-  {q:"7, 11, 17, 25, 30, ... යන්න arithmetic progression නොවන්නේ ඇයි?", a:["පොදු අන්තරය එකක් නොවීම","පද ගණන අඩු වීම","මුල් පදය 0 වීම","කුමක්ම නොවෙයි"], correct:0},
-  {q:"පොදු අන්තරය 4, මුල් පදය 5 නම්, 15 වන පදය කීයද?", a:["60","61","62","63"], correct:0},
-  {q:"15, 15, 15, 15,... පොදු අන්තරය කීයද?", a:["15","0","1","-15"], correct:1},
-  {q:"89, 70, 53, 38, ... පොදු අන්තරය කීයද?", a:["-15","-17","-18","-19"], correct:2},
-  {q:"Arithmetic progression එකක පොදු අන්තරය negative නම්, පද මාලාව:", a:["වැඩිවෙයි","අඩුවෙයි","එකේම පදය නැවත නැවත ලැබේ","අනියම්ව වෙනස් වේ"], correct:1},
-  {q:"61, 54, 47, 40,... පොදු අන්තරය කීයද?", a:["5","-6","-7","-8"], correct:2},
-  {q:"මුල් පදය 7 සහ පොදු අන්තරය 5 නම්, 10 වන පදය කීයද?", a:["52","54","55","56"], correct:2},
-  {q:"මුල් පදය 3 සහ පොදු අන්තරය 7 නම්, 8 වන පදය කීයද?", a:["49","52","53","54"], correct:2},
-  {q:"32, 28, 24, 20, ... පොදු අන්තරය කීයද?", a:["-2","-3","-4","-5"], correct:2},
-  {q:"5, 12, 19, 26, ... පොදු අන්තරය කීයද?", a:["6","7","8","9"], correct:1},
-  {q:"මුල් පදය 4 සහ පොදු අන්තරය 9 නම්, 12 වන පදය කීයද?", a:["101","102","103","104"], correct:1},
-  {q:"මුල් පදය 10 සහ පොදු අන්තරය 2 නම්, 25 වන පදය කීයද?", a:["58","59","60","61"], correct:2},
-  {q:"99, 93, 87, 81, ... පොදු අන්තරය කීයද?", a:["-4","-5","-6","-7"], correct:2},
-  {q:"මුල් පදය 1 සහ පොදු අන්තරය 4 නම්, 20 වන පදය කීයද?", a:["77","78","79","80"], correct:2},
-  {q:"මුල් පදය 6 සහ පොදු අන්තරය -3 නම්, 15 වන පදය කීයද?", a:["-37","-38","-39","-40"], correct:2}
-];
+    <script>
+        // පාඩම් සඳහා දත්ත (Data for Lessons)
+        const lessons = {
+            'si': {
+                '6 වන ශ්‍රේණිය': ['වාණිජ', 'ස්ථානීය අගය', 'පූර්ණ සංඛ්‍යා මත ගණිත කර්ම', 'කාලය', 'සංඛ්‍යා රේඛාව', 'නිමානයක සභා වටුවීම', 'කෝණ', 'දිශා'],
+                '7 වන ශ්‍රේණිය': ['ගණිතය', 'විද්‍යාව', 'සිංහල', 'භූගෝල විද්‍යාව'],
+                '8 වන ශ්‍රේණිය': ['ගණිතය', 'විද්‍යාව', 'ඉංග්‍රීසි', 'සමාජ අධ්‍යයනය'],
+                '9 වන ශ්‍රේණිය': ['ගණිතය', 'විද්‍යාව', 'ICT', 'සෞඛ්‍ය විද්‍යාව'],
+                '10 වන ශ්‍රේණිය': ['ගණිතය', 'විද්‍යාව', 'සිංහල', 'බුද්ධ ධර්මය', 'ඉතිහාසය'],
+                '11 වන ශ්‍රේණිය': ['ගණිතය', 'විද්‍යාව', 'කලා', 'වාණිජ', 'තාක්ෂණ'],
+            },
+            'en': {
+                'Grade 6': ['Commerce', 'Place Value', 'Arithmetic Operations on Integers', 'Time', 'Number Line', 'Rounding Off', 'Angles', 'Directions'],
+                'Grade 7': ['Mathematics', 'Science', 'Sinhala', 'Geography'],
+                'Grade 8': ['Mathematics', 'Science', 'English', 'Social Studies'],
+                'Grade 9': ['Mathematics', 'Science', 'ICT', 'Health Science'],
+                'Grade 10': ['Mathematics', 'Science', 'Sinhala', 'Buddhism', 'History'],
+                'Grade 11': ['Mathematics', 'Science', 'Arts', 'Commerce', 'Technology'],
+            },
+            'ta': {
+                '6 ஆம் வகுப்பு': ['வணிகம்', 'இட மதிப்பு', 'முழு எண்களில் கணித செயல்பாடுகள்', 'நேரம்', 'எண் கோடு', 'வட்டமிடல்', 'கோணங்கள்', 'திசைகள்'],
+                '7 ஆம் வகுப்பு': ['கணிதம்', 'விஞ்ஞானம்', 'சிங்களம்', 'புவியியல்'],
+                '8 ஆம் வகுப்பு': ['கணிதம்', 'விஞ்ஞானம்', 'ஆங்கிலம்', 'சமூக ஆய்வு'],
+                '9 ஆம் வகுப்பு': ['கணிதம்', 'விஞ்ஞானம்', 'ICT', 'சுகாதார விஞ்ஞானம்'],
+                '10 ஆம் வகுப்பு': ['கணிதம்', 'விஞ்ஞானம்', 'சிங்களம்', 'பௌத்தம்', 'வரலாறு'],
+                '11 ஆம் வகுப்பு': ['கணிதம்', 'விஞ்ஞானம்', 'கலை', 'வர்த்தகம்', 'தொழில்நுட்பம்'],
+            }
+        };
 
-let quizData = [...quizDataOriginal].sort(()=>Math.random()-0.5);
-let current = 0;
-let score = 0;
-const selectedAnswers = [];
+        // පරිවර්තන සඳහා දත්ත (Data for Translations)
+        const translations = {
+            'si': {
+                'headerTitle': 'Quiz Game එකට සාදරයෙන් පිළිගනිමු!',
+                'headerSubtitle': 'ඔබේ දැනුම අලුත් කරගන්න',
+                'classTitle': 'පන්තිය තෝරන්න',
+                'lessonTitle': 'පාඩම තෝරන්න',
+                'darkMode': 'Dark Mode',
+                'lightMode': 'Light Mode',
+                'langSi': 'Si',
+                'langTa': 'Ta',
+                'langEn': 'En',
+                'nightMode': 'NIGHTMODE',
+                'lightMode': 'LIGHTMODE',
+            },
+            'en': {
+                'headerTitle': 'Welcome to the Quiz Game!',
+                'headerSubtitle': 'Refresh your knowledge',
+                'classTitle': 'Select Class',
+                'lessonTitle': 'Select Lesson',
+                'darkMode': 'Dark Mode',
+                'lightMode': 'Light Mode',
+                'langSi': 'Si',
+                'langTa': 'Ta',
+                'langEn': 'En',
+                'nightMode': 'NIGHTMODE',
+                'lightMode': 'LIGHTMODE',
+            },
+            'ta': {
+                'headerTitle': 'வினாடி வினா விளையாட்டுக்கு வரவேற்கிறோம்!',
+                'headerSubtitle': 'உங்கள் அறிவை புதுப்பித்துக் கொள்ளுங்கள்',
+                'classTitle': 'வகுப்பைத் தேர்ந்தெடுக்கவும்',
+                'lessonTitle': 'பாடத்தைத் தேர்ந்தெடுக்கவும்',
+                'darkMode': 'இருண்ட பயன்முறை',
+                'lightMode': 'ஒளி பயன்முறை',
+                'langSi': 'Si',
+                'langTa': 'Ta',
+                'langEn': 'En',
+                'nightMode': 'NIGHTMODE',
+                'lightMode': 'LIGHTMODE',
+            }
+        };
 
-const questionText = document.getElementById("questionText");
-const answerButtons = document.getElementById("answerButtons");
-const resultDiv = document.getElementById("result");
-const progressBar = document.getElementById("progressBar");
-const questionRemaining = document.getElementById("questionRemaining");
-const scoreDisplay = document.getElementById("scoreDisplay");
+        let currentLang = 'si';
 
-function showQuestion(index) {
-  questionText.style.display = "block";
-  answerButtons.style.display = "flex";
-  const q = quizData[index];
-  questionText.textContent = q.q;
-  answerButtons.innerHTML = "";
-  q.a.forEach((answer, i) => {
-    const btn = document.createElement("button");
-    btn.textContent = answer;
-    btn.classList.add("answer-btn");
-    btn.addEventListener("click", () => selectAnswer(i, btn));
-    answerButtons.appendChild(btn);
-  });
-  questionRemaining.textContent = `Question ${current + 1} of ${quizData.length}`;
-  progressBar.style.width = `${(current/quizData.length)*100}%`;
-  scoreDisplay.textContent = `Score: ${score}`;
-}
+        document.addEventListener('DOMContentLoaded', () => {
+            const modeToggleBtn = document.getElementById('mode-toggle');
+            const modeTextSpan = document.getElementById('mode-text');
+            const modeIconSpan = document.getElementById('mode-icon');
+            const langButtons = document.querySelectorAll('.lang-button');
+            const classButtons = document.querySelectorAll('.class-button');
+            const lessonsContainer = document.getElementById('lessons-container');
+            const lessonSelectionDiv = document.getElementById('lesson-selection');
+            
+            // Set initial language button as selected
+            document.querySelector(`[data-lang="${currentLang}"]`).classList.add('selected');
 
-function selectAnswer(i, btn) {
-  const correctIndex = quizData[current].correct;
-  selectedAnswers.push(i);
-  Array.from(answerButtons.children).forEach((b, idx)=>{
-    b.disabled = true;
-    if(idx === correctIndex) b.classList.add("correct");
-    if(idx === i && i !== correctIndex) b.classList.add("wrong");
-  });
-  if(i === correctIndex) score++;
-  scoreDisplay.textContent = `Score: ${score}`;
-  setTimeout(() => {
-    current++;
-    if(current < quizData.length){
-      showQuestion(current);
-    } else {
-      showResult();
-    }
-  }, 500);
-}
+            // Dark/Light Mode Toggle
+            modeToggleBtn.addEventListener('click', () => {
+                document.body.classList.toggle('dark-mode');
+                document.body.classList.toggle('light-mode');
+                
+                const isDarkMode = document.body.classList.contains('dark-mode');
+                if (isDarkMode) {
+                    modeTextSpan.textContent = 'LIGHTMODE';
+                    modeIconSpan.textContent = '☀️';
+                } else {
+                    modeTextSpan.textContent = 'NIGHTMODE';
+                    modeIconSpan.textContent = '🌙';
+                }
+            });
 
-function showResult(){
-  questionText.style.display = "none";
-  answerButtons.style.display = "none";
-  questionRemaining.style.display = "none";
-  progressBar.style.width = "100%";
+            // Language Selection
+            langButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    langButtons.forEach(btn => btn.classList.remove('selected'));
+                    button.classList.add('selected');
+                    currentLang = button.dataset.lang;
+                    updateLanguage();
+                    displayLessons(classButtons.querySelector('.bg-red-600')?.textContent.trim() || null);
+                });
+            });
 
-  let html = `<h2>ඔබේ ලකුණු: ${score} / ${quizData.length}</h2>`;
-  html += `<ul>`;
-  quizData.forEach((q, idx)=>{
-    html += `<li>${idx+1}. ${q.q} <br>`;
-    q.a.forEach((ans, i)=>{
-      let clickClass = '';
-      if(selectedAnswers[idx] === i && i !== q.correct) clickClass = ' (selected)';
-      if(i===q.correct) html += `<span style="color:green;">✔ ${ans}${clickClass}</span> `;
-      else if(selectedAnswers[idx] === i) html += `<span style="color:red;">✖ ${ans}${clickClass}</span> `;
-      else html += `${ans} `;
-    });
-    html += `</li><br>`;
-  });
-  html += `</ul>`;
-  resultDiv.innerHTML = html;
-}
+            // Class Selection
+            classButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    classButtons.forEach(btn => btn.classList.remove('bg-red-600', 'hover:bg-red-700'));
+                    button.classList.add('bg-red-600', 'hover:bg-red-700');
+                    const className = button.textContent.trim();
+                    displayLessons(className);
+                });
+            });
 
-showQuestion(current);
-</script>
+            // Function to update all text based on selected language
+            function updateLanguage() {
+                const lang = currentLang;
+                const texts = translations[lang];
+
+                document.getElementById('header-title').textContent = texts.headerTitle;
+                document.getElementById('header-subtitle').textContent = texts.headerSubtitle;
+                document.getElementById('class-title').textContent = texts.classTitle;
+                document.getElementById('lesson-title').textContent = texts.lessonTitle;
+                
+                const isDarkMode = document.body.classList.contains('dark-mode');
+                if (isDarkMode) {
+                    modeTextSpan.textContent = translations[currentLang].lightMode;
+                } else {
+                    modeTextSpan.textContent = translations[currentLang].nightMode;
+                }
+
+                // Update class button texts
+                const classNames = Object.keys(lessons['si']);
+                classButtons.forEach((button, index) => {
+                    if (lang === 'en') {
+                        const enClassMap = {
+                            '6 වන ශ්‍රේණිය': 'Grade 6', '7 වන ශ්‍රේණිය': 'Grade 7', '8 වන ශ්‍රේණිය': 'Grade 8',
+                            '9 වන ශ්‍රේණිය': 'Grade 9', '10 වන ශ්‍රේණිය': 'Grade 10', '11 වන ශ්‍රේණිය': 'Grade 11'
+                        };
+                        const originalText = classNames[index];
+                        button.textContent = enClassMap[originalText];
+                    } else if (lang === 'ta') {
+                        const taClassMap = {
+                            '6 වන ශ්‍රේණිය': '6 ஆம் வகுப்பு', '7 වන ශ්‍රේණිය': '7 ஆம் வகுப்பு', '8 වන ශ්‍රේණිය': '8 ஆம் வகுப்பு',
+                            '9 වන ශ්‍රේණිය': '9 ஆம் வகுப்பு', '10 වන ශ්‍රේණිය': '10 ஆம் வகுப்பு', '11 වන ශ්‍රේණිය': '11 ஆம் வகுப்பு'
+                        };
+                        const originalText = classNames[index];
+                        button.textContent = taClassMap[originalText];
+                    } else {
+                        button.textContent = classNames[index];
+                    }
+                });
+
+                // Re-display lessons if a class is already selected
+                const selectedClassButton = document.querySelector('.class-button.bg-red-600');
+                if (selectedClassButton) {
+                    const originalClassText = Object.keys(lessons['si']).find(key => {
+                        const enClassMap = { 'Grade 6': '6 වන ශ්‍රේණිය', 'Grade 7': '7 වන ශ්‍රේණිය', 'Grade 8': '8 වන ශ්‍රේණිය', 'Grade 9': '9 වන ශ්‍රේණිය', 'Grade 10': '10 වන ශ්‍රේණිය', 'Grade 11': '11 වන ශ්‍රේණිය' };
+                        const taClassMap = { '6 ஆம் வகுப்பு': '6 වන ශ්‍රේණිය', '7 ஆம் வகுப்பு': '7 වන ශ්‍රේණිය', '8 ஆம் வகுப்பு': '8 වන ශ්‍රේණිය', '9 ஆம் வகுப்பு': '9 වන ශ්‍රේණිය', '10 ஆம் வகுப்பு': '10 වන ශ්‍රේණිය', '11 ஆம் வகுப்பு': '11 වන ශ්‍රේණිය' };
+                        
+                        return (lang === 'si' && selectedClassButton.textContent.trim() === key) ||
+                               (lang === 'en' && enClassMap[selectedClassButton.textContent.trim()] === key) ||
+                               (lang === 'ta' && taClassMap[selectedClassButton.textContent.trim()] === key);
+                    });
+                    if (originalClassText) {
+                        displayLessons(originalClassText);
+                    }
+                }
+            }
+
+            // Function to display lessons based on the selected class
+            function displayLessons(className) {
+                lessonsContainer.innerHTML = ''; // Clear existing lesson buttons
+                let selectedLessons = lessons[currentLang][className];
+                
+                if (!selectedLessons) {
+                    const originalClassKey = Object.keys(lessons['si']).find(key => {
+                        const enClassMap = { 'Grade 6': '6 වන ශ්‍රේණිය', 'Grade 7': '7 වන ශ්‍රේණිය', 'Grade 8': '8 වන ශ්‍රේණිය', 'Grade 9': '9 වන ශ්‍රේණිය', 'Grade 10': '10 වන ශ්‍රේණිය', 'Grade 11': '11 වන ශ්‍රේණිය' };
+                        const taClassMap = { '6 ஆம் வகுப்பு': '6 වන ශ්‍රේණිය', '7 ஆம் வகுப்பு': '7 වන ශ්‍රේණිය', '8 ஆம் வகுப்பு': '8 වන ශ්‍රේණිය', '9 ஆம் வகுப்பு': '9 වන ශ්‍රේණිය', '10 ஆம் வகுப்பு': '10 ஆம் வகுப்பு', '11 ஆம் வகுப்பு': '11 ஆம் வகுப்பு' };
+                        
+                        return (currentLang === 'en' && enClassMap[className] === key) ||
+                               (currentLang === 'ta' && taClassMap[className] === key);
+                    });
+                    if (originalClassKey) {
+                        selectedLessons = lessons[currentLang][originalClassKey];
+                    }
+                }
+
+                if (selectedLessons) {
+                    selectedLessons.forEach((lesson, index) => {
+                        const lessonButton = document.createElement('button');
+                        // Add the number to the button text
+                        lessonButton.textContent = `${index + 1}. ${lesson}`;
+                        lessonButton.classList.add('lesson-button', 'bg-purple-600', 'hover:bg-purple-700', 'text-white', 'font-medium', 'py-3', 'px-6', 'rounded-xl', 'shadow-md', 'transition-transform', 'transform', 'hover:scale-105');
+                        lessonsContainer.appendChild(lessonButton);
+                    });
+                    lessonSelectionDiv.classList.remove('hidden'); // Show the lesson section
+                } else {
+                    lessonSelectionDiv.classList.add('hidden'); // Hide the lesson section
+                }
+            }
+        });
+    </script>
 </body>
 </html>
