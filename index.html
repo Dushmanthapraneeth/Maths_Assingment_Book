@@ -59,9 +59,6 @@
             color: #e2e8f0; /* Light text */
             padding: 1.5rem;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-            display: flex;
-            justify-content: space-between; /* Space out items */
-            align-items: center;
         }
         .light-mode .fixed-header {
             background-color: #2c5282; /* A shade of blue for light mode header */
@@ -69,18 +66,21 @@
         }
         /* Add padding to the body to prevent content from being hidden behind the fixed header */
         body {
-            padding-top: 6rem; 
+            padding-top: 8rem;
         }
     </style>
 </head>
 <body class="light-mode flex flex-col items-center justify-start min-h-screen p-4">
 
     <!-- Fixed Header -->
-    <div class="fixed-header">
-        <div class="flex-1 text-left">
+    <div class="fixed-header flex flex-col items-start">
+        <!-- Welcome to the Quiz Game! section -->
+        <div class="w-full">
             <h1 id="header-title" class="text-xl md:text-2xl font-bold">Welcome to the Quiz Game!</h1>
         </div>
-        <div class="flex items-center gap-4">
+        <!-- Language and Dark Mode buttons section -->
+        <!-- Add 'w-full' and 'justify-end' to align the buttons to the right -->
+        <div class="w-full flex items-center justify-end gap-4 mt-2">
             <!-- Language Buttons -->
             <div class="flex gap-2">
                 <button class="lang-button bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white font-medium py-1 px-3 rounded-md shadow-inner transition-colors selected" data-lang="si">Si</button>
