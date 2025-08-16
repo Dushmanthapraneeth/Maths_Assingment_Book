@@ -79,7 +79,6 @@
             <h1 id="header-title" class="text-xl md:text-2xl font-bold">Welcome to the Quiz Game!</h1>
         </div>
         <!-- Language and Dark Mode buttons section -->
-        <!-- Add 'w-full' and 'justify-end' to align the buttons to the right -->
         <div class="w-full flex items-center justify-end gap-4 mt-2">
             <!-- Language Buttons -->
             <div class="flex gap-2">
@@ -102,12 +101,12 @@
             <div class="section-card p-6 rounded-2xl border border-gray-200 dark:border-gray-700">
                 <h2 id="class-title" class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Select Class</h2>
                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 justify-center">
-                    <button class="class-button bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-xl shadow-md transition-transform transform hover:scale-105">6 වන ශ්‍රේණිය</button>
-                    <button class="class-button bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-xl shadow-md transition-transform transform hover:scale-105">7 වන ශ්‍රේණිය</button>
-                    <button class="class-button bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-xl shadow-md transition-transform transform hover:scale-105">8 වන ශ්‍රේණිය</button>
-                    <button class="class-button bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-xl shadow-md transition-transform transform hover:scale-105">9 වන ශ්‍රේණිය</button>
-                    <button class="class-button bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-xl shadow-md transition-transform transform hover:scale-105">10 වන ශ්‍රේණිය</button>
-                    <button class="class-button bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-xl shadow-md transition-transform transform hover:scale-105">11 වන ශ්‍රේණිය</button>
+                    <button class="class-button bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-xl shadow-md transition-transform transform hover:scale-105" data-class="grade6">6 වන ශ්‍රේණිය</button>
+                    <button class="class-button bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-xl shadow-md transition-transform transform hover:scale-105" data-class="grade7">7 වන ශ්‍රේණිය</button>
+                    <button class="class-button bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-xl shadow-md transition-transform transform hover:scale-105" data-class="grade8">8 වන ශ්‍රේණිය</button>
+                    <button class="class-button bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-xl shadow-md transition-transform transform hover:scale-105" data-class="grade9">9 වන ශ්‍රේණිය</button>
+                    <button class="class-button bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-xl shadow-md transition-transform transform hover:scale-105" data-class="grade10">10 වන ශ්‍රේණිය</button>
+                    <button class="class-button bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-xl shadow-md transition-transform transform hover:scale-105" data-class="grade11">11 වන ශ්‍රේණිය</button>
                 </div>
             </div>
 
@@ -122,78 +121,78 @@
     </div>
 
     <script>
-        // පාඩම් සඳහා දත්ත (Data for Lessons)
+        // පාඩම් සහ ශ්‍රේණි සඳහා දත්ත (Data for Lessons and Grades)
+        // Now using a standardized key for each grade
         const lessons = {
-            'si': {
-                '6 වන ශ්‍රේණිය': ['වාණිජ', 'ස්ථානීය අගය', 'පූර්ණ සංඛ්‍යා මත ගණිත කර්ම', 'කාලය', 'සංඛ්‍යා රේඛාව', 'නිමානයක සභා වටුවීම', 'කෝණ', 'දිශා'],
-                '7 වන ශ්‍රේණිය': ['ගණිතය', 'විද්‍යාව', 'සිංහල', 'භූගෝල විද්‍යාව'],
-                '8 වන ශ්‍රේණිය': ['ගණිතය', 'විද්‍යාව', 'ඉංග්‍රීසි', 'සමාජ අධ්‍යයනය'],
-                '9 වන ශ්‍රේණිය': ['ගණිතය', 'විද්‍යාව', 'ICT', 'සෞඛ්‍ය විද්‍යාව'],
-                '10 වන ශ්‍රේණිය': ['ගණිතය', 'විද්‍යාව', 'සිංහල', 'බුද්ධ ධර්මය', 'ඉතිහාසය'],
-                '11 වන ශ්‍රේණිය': ['ගණිතය', 'විද්‍යාව', 'කලා', 'වාණිජ', 'තාක්ෂණ'],
+            'grade6': {
+                'si': ['වාණිජ', 'ස්ථානීය අගය', 'පූර්ණ සංඛ්‍යා මත ගණිත කර්ම', 'කාලය', 'සංඛ්‍යා රේඛාව', 'නිමානයක සභා වටුවීම', 'කෝණ', 'දිශා'],
+                'en': ['Commerce', 'Place Value', 'Arithmetic Operations on Integers', 'Time', 'Number Line', 'Rounding Off', 'Angles', 'Directions'],
+                'ta': ['வணிகம்', 'இட மதிப்பு', 'முழு எண்களில் கணித செயல்பாடுகள்', 'நேரம்', 'எண் கோடு', 'வட்டமிடல்', 'கோணங்கள்', 'திசைகள்'],
             },
-            'en': {
-                'Grade 6': ['Commerce', 'Place Value', 'Arithmetic Operations on Integers', 'Time', 'Number Line', 'Rounding Off', 'Angles', 'Directions'],
-                'Grade 7': ['Mathematics', 'Science', 'Sinhala', 'Geography'],
-                'Grade 8': ['Mathematics', 'Science', 'English', 'Social Studies'],
-                'Grade 9': ['Mathematics', 'Science', 'ICT', 'Health Science'],
-                'Grade 10': ['Mathematics', 'Science', 'Sinhala', 'Buddhism', 'History'],
-                'Grade 11': ['Mathematics', 'Science', 'Arts', 'Commerce', 'Technology'],
+            'grade7': {
+                'si': ['ගණිතය', 'විද්‍යාව', 'සිංහල', 'භූගෝල විද්‍යාව'],
+                'en': ['Mathematics', 'Science', 'Sinhala', 'Geography'],
+                'ta': ['கணிதம்', 'விஞ்ஞானம்', 'சிங்களம்', 'புவியியல்'],
             },
-            'ta': {
-                '6 ஆம் வகுப்பு': ['வணிகம்', 'இட மதிப்பு', 'முழு எண்களில் கணித செயல்பாடுகள்', 'நேரம்', 'எண் கோடு', 'வட்டமிடல்', 'கோணங்கள்', 'திசைகள்'],
-                '7 ஆம் வகுப்பு': ['கணிதம்', 'விஞ்ஞானம்', 'சிங்களம்', 'புவியியல்'],
-                '8 ஆம் வகுப்பு': ['கணிதம்', 'விஞ்ஞானம்', 'ஆங்கிலம்', 'சமூக ஆய்வு'],
-                '9 ஆம் வகுப்பு': ['கணிதம்', 'விஞ்ஞானம்', 'ICT', 'சுகாதார விஞ்ஞானம்'],
-                '10 ஆம் வகுப்பு': ['கணிதம்', 'விஞ்ஞானம்', 'சிங்களம்', 'பௌத்தம்', 'வரலாறு'],
-                '11 ஆம் வகுப்பு': ['கணிதம்', 'விஞ்ஞானம்', 'கலை', 'வர்த்தகம்', 'தொழில்நுட்பம்'],
+            'grade8': {
+                'si': ['ගණිතය', 'විද්‍යාව', 'ඉංග්‍රීසි', 'සමාජ අධ්‍යයනය'],
+                'en': ['Mathematics', 'Science', 'English', 'Social Studies'],
+                'ta': ['கணிதம்', 'விஞ்ஞானம்', 'ஆங்கிலம்', 'சமூக ஆய்வு'],
+            },
+            'grade9': {
+                'si': ['ගණිතය', 'විද්‍යාව', 'ICT', 'සෞඛ්‍ය විද්‍යාව'],
+                'en': ['Mathematics', 'Science', 'ICT', 'Health Science'],
+                'ta': ['கணிதம்', 'விஞ்ஞானம்', 'ICT', 'சுகாதார விஞ்ஞானம்'],
+            },
+            'grade10': {
+                'si': ['ගණිතය', 'විද්‍යාව', 'සිංහල', 'බුද්ධ ධර්මය', 'ඉතිහාසය'],
+                'en': ['Mathematics', 'Science', 'Sinhala', 'Buddhism', 'History'],
+                'ta': ['கணிதம்', 'விஞ்ஞானம்', 'சிங்களம்', 'பௌத்தம்', 'வரலாறு'],
+            },
+            'grade11': {
+                'si': ['ගණිතය', 'විද්‍යාව', 'කලා', 'වාණිජ', 'තාක්ෂණ'],
+                'en': ['Mathematics', 'Science', 'Arts', 'Commerce', 'Technology'],
+                'ta': ['கணிதம்', 'விஞ்ஞானம்', 'கலை', 'வர்த்தகம்', 'தொழில்நுட்பம்'],
             }
+        };
+
+        // ශ්‍රේණි නාම පරිවර්තන (Grade Name Translations)
+        const classTranslations = {
+            'grade6': {'si': '6 වන ශ්‍රේණිය', 'en': 'Grade 6', 'ta': '6 ஆம் வகுப்பு'},
+            'grade7': {'si': '7 වන ශ්‍රේණිය', 'en': 'Grade 7', 'ta': '7 ஆம் வகுப்பு'},
+            'grade8': {'si': '8 වන ශ්‍රේණිය', 'en': 'Grade 8', 'ta': '8 ஆம் வகுப்பு'},
+            'grade9': {'si': '9 වන ශ්‍රේණිය', 'en': 'Grade 9', 'ta': '9 ஆம் வகுப்பு'},
+            'grade10': {'si': '10 වන ශ්‍රේණිය', 'en': 'Grade 10', 'ta': '10 ஆம் வகுப்பு'},
+            'grade11': {'si': '11 වන ශ්‍රේණිය', 'en': 'Grade 11', 'ta': '11 ஆம் வகுப்பு'},
         };
 
         // පරිවර්තන සඳහා දත්ත (Data for Translations)
         const translations = {
             'si': {
                 'headerTitle': 'Quiz Game එකට සාදරයෙන් පිළිගනිමු!',
-                'headerSubtitle': 'ඔබේ දැනුම අලුත් කරගන්න',
                 'classTitle': 'පන්තිය තෝරන්න',
                 'lessonTitle': 'පාඩම තෝරන්න',
-                'darkMode': 'Dark Mode',
-                'lightMode': 'Light Mode',
-                'langSi': 'Si',
-                'langTa': 'Ta',
-                'langEn': 'En',
                 'nightMode': 'NIGHTMODE',
                 'lightMode': 'LIGHTMODE',
             },
             'en': {
                 'headerTitle': 'Welcome to the Quiz Game!',
-                'headerSubtitle': 'Refresh your knowledge',
                 'classTitle': 'Select Class',
                 'lessonTitle': 'Select Lesson',
-                'darkMode': 'Dark Mode',
-                'lightMode': 'Light Mode',
-                'langSi': 'Si',
-                'langTa': 'Ta',
-                'langEn': 'En',
                 'nightMode': 'NIGHTMODE',
                 'lightMode': 'LIGHTMODE',
             },
             'ta': {
                 'headerTitle': 'வினாடி வினா விளையாட்டுக்கு வரவேற்கிறோம்!',
-                'headerSubtitle': 'உங்கள் அறிவை புதுப்பித்துக் கொள்ளுங்கள்',
                 'classTitle': 'வகுப்பைத் தேர்ந்தெடுக்கவும்',
                 'lessonTitle': 'பாடத்தைத் தேர்ந்தெடுக்கவும்',
-                'darkMode': 'இருண்ட பயன்முறை',
-                'lightMode': 'ஒளி பயன்முறை',
-                'langSi': 'Si',
-                'langTa': 'Ta',
-                'langEn': 'En',
                 'nightMode': 'NIGHTMODE',
                 'lightMode': 'LIGHTMODE',
             }
         };
 
         let currentLang = 'si';
+        let selectedClassKey = null;
 
         document.addEventListener('DOMContentLoaded', () => {
             const modeToggleBtn = document.getElementById('mode-toggle');
@@ -229,7 +228,9 @@
                     button.classList.add('selected');
                     currentLang = button.dataset.lang;
                     updateLanguage();
-                    displayLessons(document.querySelector('.class-button.bg-red-600')?.textContent.trim() || null);
+                    if (selectedClassKey) {
+                        displayLessons(selectedClassKey);
+                    }
                 });
             });
 
@@ -243,16 +244,14 @@
                     // Remove any highlight from previously selected lesson buttons
                     document.querySelectorAll('.lesson-button').forEach(btn => btn.classList.remove('bg-red-600', 'hover:bg-red-700'));
 
-                    const className = button.textContent.trim();
-                    displayLessons(className);
+                    selectedClassKey = button.dataset.class;
+                    displayLessons(selectedClassKey);
                 });
             });
 
             // Function to update all text based on selected language
             function updateLanguage() {
-                const lang = currentLang;
-                const texts = translations[lang];
-
+                const texts = translations[currentLang];
                 document.getElementById('header-title').textContent = texts.headerTitle;
                 document.getElementById('class-title').textContent = texts.classTitle;
                 document.getElementById('lesson-title').textContent = texts.lessonTitle;
@@ -265,62 +264,17 @@
                 }
 
                 // Update class button texts
-                const classNames = Object.keys(lessons['si']);
-                classButtons.forEach((button, index) => {
-                    if (lang === 'en') {
-                        const enClassMap = {
-                            '6 වන ශ්‍රේණිය': 'Grade 6', '7 වන ශ්‍රේණිය': 'Grade 7', '8 වන ශ්‍රේණිය': 'Grade 8',
-                            '9 වන ශ්‍රේණිය': 'Grade 9', '10 වන ශ්‍රේණිය': 'Grade 10', '11 වන ශ්‍රේණිය': 'Grade 11'
-                        };
-                        const originalText = classNames[index];
-                        button.textContent = enClassMap[originalText];
-                    } else if (lang === 'ta') {
-                        const taClassMap = {
-                            '6 ஆம் வகுப்பு': '6 වන ශ්‍රේණිය', '7 ஆம் வகுப்பு': '7 වන ශ්‍රේණිය', '8 ஆம் வகுப்பு': '8 වන ශ්‍රේණිය',
-                            '9 ஆம் வகுப்பு': '9 වන ශ්‍රේණිය', '10 ஆம் வகுப்பு': '10 ஆம் வகுப்பு', '11 ஆம் வகுப்பு': '11 ஆம் வகுப்பு'
-                        };
-                        const originalText = classNames[index];
-                        button.textContent = taClassMap[originalText];
-                    } else {
-                        button.textContent = classNames[index];
-                    }
+                classButtons.forEach(button => {
+                    const classKey = button.dataset.class;
+                    button.textContent = classTranslations[classKey][currentLang];
                 });
-
-                // Re-display lessons if a class is already selected
-                const selectedClassButton = document.querySelector('.class-button.bg-red-600');
-                if (selectedClassButton) {
-                    const originalClassText = Object.keys(lessons['si']).find(key => {
-                        const enClassMap = { 'Grade 6': '6 වන ශ්‍රේණිය', 'Grade 7': '7 වන ශ්‍රේණිය', 'Grade 8': '8 වන ශ්‍රේණිය', 'Grade 9': '9 වන ශ්‍රේණිය', 'Grade 10': '10 වන ශ්‍රේණිය', 'Grade 11': '11 වන ශ්‍රේණිය' };
-                        const taClassMap = { '6 ஆம் வகுப்பு': '6 වන ශ්‍රේණිය', '7 ஆம் வகுப்பு': '7 වන ශ්‍රේණිය', '8 ஆம் வகுப்பு': '8 වන ශ්‍රේණිය', '9 ஆம் வகுப்பு': '9 වන ශ්‍රේණිය', '10 ஆம் வகுப்பு': '10 ஆம் வகுப்பு', '11 ஆம் வகுப்பு': '11 ஆம் வகுப்பு' };
-                        
-                        return (lang === 'si' && selectedClassButton.textContent.trim() === key) ||
-                               (lang === 'en' && enClassMap[selectedClassButton.textContent.trim()] === key) ||
-                               (lang === 'ta' && taClassMap[selectedClassButton.textContent.trim()] === key);
-                    });
-                    if (originalClassText) {
-                        displayLessons(originalClassText);
-                    }
-                }
             }
 
             // Function to display lessons based on the selected class
-            function displayLessons(className) {
+            function displayLessons(classKey) {
                 lessonsContainer.innerHTML = ''; // Clear existing lesson buttons
-                let selectedLessons = lessons[currentLang][className];
+                const selectedLessons = lessons[classKey][currentLang];
                 
-                if (!selectedLessons) {
-                    const originalClassKey = Object.keys(lessons['si']).find(key => {
-                        const enClassMap = { 'Grade 6': '6 වන ශ්‍රේණිය', 'Grade 7': '7 වන ශ්‍රේණිය', 'Grade 8': '8 වන ශ්‍රේණිය', 'Grade 9': '9 වන ශ්‍රේණිය', '10 වන ශ්‍රේණිය': '10 වන ශ්‍රේණිය', '11 වන ශ්‍රේණිය': '11 වන ශ්‍රේණිය' };
-                        const taClassMap = { '6 ஆம் வகுப்பு': '6 වන ශ්‍රේණිය', '7 ஆம் வகுப்பு': '7 වන ශ්‍රේණිය', '8 ஆம் வகுப்பு': '8 වන ශ්‍රේණිය', '9 ஆம் வகுப்பு': '9 වන ශ්‍රේණිය', '10 ஆம் வகுப்பு': '10 ஆம் வகுப்பு', '11 ஆம் வகுப்பு': '11 ஆம் வகுப்பு' };
-                        
-                        return (currentLang === 'en' && enClassMap[className] === key) ||
-                               (currentLang === 'ta' && taClassMap[className] === key);
-                    });
-                    if (originalClassKey) {
-                        selectedLessons = lessons[currentLang][originalClassKey];
-                    }
-                }
-
                 if (selectedLessons) {
                     selectedLessons.forEach((lesson, index) => {
                         const lessonButton = document.createElement('button');
@@ -350,6 +304,9 @@
                     lessonSelectionDiv.classList.add('hidden'); // Hide the lesson section
                 }
             }
+
+            // Initial language update to set correct text on load
+            updateLanguage();
         });
     </script>
 </body>
