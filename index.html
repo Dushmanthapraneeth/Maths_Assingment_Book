@@ -23,7 +23,6 @@
         }
         .main-card {
             transition: background-color 0.3s, box-shadow 0.3s;
-            padding-top: 10rem; /* Add padding to account for fixed header */
         }
         .light-mode .main-card {
             background-color: #ffffff;
@@ -61,23 +60,27 @@
             padding: 1.5rem;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
             display: flex;
-            justify-content: center;
+            justify-content: space-between; /* Space out items */
             align-items: center;
         }
         .light-mode .fixed-header {
             background-color: #2c5282; /* A shade of blue for light mode header */
             color: #ffffff; /* White text */
         }
+        /* Add padding to the body to prevent content from being hidden behind the fixed header */
+        body {
+            padding-top: 6rem; 
+        }
     </style>
 </head>
-<body class="light-mode flex items-center justify-center min-h-screen p-4">
+<body class="light-mode flex flex-col items-center justify-start min-h-screen p-4">
 
     <!-- Fixed Header -->
     <div class="fixed-header">
-        <div class="flex-1 text-center">
-            <h1 id="header-title" class="text-3xl md:text-4xl font-bold">Welcome to the Quiz Game!</h1>
+        <div class="flex-1 text-left">
+            <h1 id="header-title" class="text-xl md:text-2xl font-bold">Welcome to the Quiz Game!</h1>
         </div>
-        <div class="flex items-center gap-4 absolute right-4">
+        <div class="flex items-center gap-4">
             <!-- Language Buttons -->
             <div class="flex gap-2">
                 <button class="lang-button bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white font-medium py-1 px-3 rounded-md shadow-inner transition-colors selected" data-lang="si">Si</button>
@@ -92,7 +95,7 @@
         </div>
     </div>
 
-    <div class="main-card rounded-3xl p-8 md:p-12 w-full max-w-2xl">
+    <div class="main-card rounded-3xl p-8 md:p-12 w-full max-w-2xl mt-8">
         <!-- Main Content Sections -->
         <div class="flex flex-col gap-8">
             <!-- පන්තිය තෝරාගැනීම (Class Selection) -->
@@ -215,7 +218,7 @@
                     modeIconSpan.textContent = '☀️';
                 } else {
                     modeTextSpan.textContent = translations[currentLang].nightMode;
-                    modeIconSpan.textContent = '�';
+                    modeIconSpan.textContent = '🌙';
                 }
             });
 
@@ -226,15 +229,20 @@
                     button.classList.add('selected');
                     currentLang = button.dataset.lang;
                     updateLanguage();
-                    displayLessons(classButtons.querySelector('.bg-red-600')?.textContent.trim() || null);
+                    displayLessons(document.querySelector('.class-button.bg-red-600')?.textContent.trim() || null);
                 });
             });
 
             // Class Selection
             classButtons.forEach(button => {
                 button.addEventListener('click', () => {
+                    // Remove the red highlight from any previously selected class button
                     classButtons.forEach(btn => btn.classList.remove('bg-red-600', 'hover:bg-red-700'));
+                    // Add the red highlight to the clicked class button
                     button.classList.add('bg-red-600', 'hover:bg-red-700');
+                    // Remove any highlight from previously selected lesson buttons
+                    document.querySelectorAll('.lesson-button').forEach(btn => btn.classList.remove('bg-red-600', 'hover:bg-red-700'));
+
                     const className = button.textContent.trim();
                     displayLessons(className);
                 });
@@ -246,7 +254,6 @@
                 const texts = translations[lang];
 
                 document.getElementById('header-title').textContent = texts.headerTitle;
-                // document.getElementById('header-subtitle').textContent = texts.headerSubtitle; // subtitle removed
                 document.getElementById('class-title').textContent = texts.classTitle;
                 document.getElementById('lesson-title').textContent = texts.lessonTitle;
                 
@@ -269,8 +276,8 @@
                         button.textContent = enClassMap[originalText];
                     } else if (lang === 'ta') {
                         const taClassMap = {
-                            '6 වන ශ්‍රේණිය': '6 ஆம் வகுப்பு', '7 වන ශ්‍රේණිය': '7 ஆம் வகுப்பு', '8 වන ශ්‍රේණිය': '8 ஆம் வகுப்பு',
-                            '9 වන ශ්‍රේණිය': '9 ஆம் வகுப்பு', '10 වන ශ්‍රේණිය': '10 ஆம் வகுப்பு', '11 වන ශ්‍රේණිය': '11 ஆம் வகுப்பு'
+                            '6 ஆம் வகுப்பு': '6 වන ශ්‍රේණිය', '7 ஆம் வகுப்பு': '7 වන ශ්‍රේණිය', '8 ஆம் வகுப்பு': '8 වන ශ්‍රේණිය',
+                            '9 ஆம் வகுப்பு': '9 වන ශ්‍රේණිය', '10 ஆம் வகுப்பு': '10 ஆம் வகுப்பு', '11 ஆம் வகுப்பு': '11 ஆம் வகுப்பு'
                         };
                         const originalText = classNames[index];
                         button.textContent = taClassMap[originalText];
@@ -317,9 +324,25 @@
                 if (selectedLessons) {
                     selectedLessons.forEach((lesson, index) => {
                         const lessonButton = document.createElement('button');
-                        // Add the number to the button text
                         lessonButton.textContent = `${index + 1}. ${lesson}`;
                         lessonButton.classList.add('lesson-button', 'bg-purple-600', 'hover:bg-purple-700', 'text-white', 'font-medium', 'py-3', 'px-6', 'rounded-xl', 'shadow-md', 'transition-transform', 'transform', 'hover:scale-105');
+                        
+                        // පාඩම බොත්තම ක්ලික් කිරීම සඳහා නව Event Listener එක
+                        lessonButton.addEventListener('click', () => {
+                            // සියලුම පන්ති බොත්තම්වලින් රතු පැහැය ඉවත් කරන්න
+                            classButtons.forEach(btn => btn.classList.remove('bg-red-600', 'hover:bg-red-700'));
+                            
+                            // සියලුම පාඩම් බොත්තම්වලින් රතු පැහැය ඉවත් කරන්න
+                            document.querySelectorAll('.lesson-button').forEach(btn => {
+                                btn.classList.remove('bg-red-600', 'hover:bg-red-700');
+                                btn.classList.add('bg-purple-600', 'hover:bg-purple-700');
+                            });
+                            
+                            // ක්ලික් කළ පාඩම් බොත්තම රතු පැහැයට වෙනස් කරන්න
+                            lessonButton.classList.remove('bg-purple-600', 'hover:bg-purple-700');
+                            lessonButton.classList.add('bg-red-600', 'hover:bg-red-700');
+                        });
+                        
                         lessonsContainer.appendChild(lessonButton);
                     });
                     lessonSelectionDiv.classList.remove('hidden'); // Show the lesson section
@@ -331,4 +354,3 @@
     </script>
 </body>
 </html>
-�
