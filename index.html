@@ -1,383 +1,253 @@
 <!DOCTYPE html>
 <html lang="si">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>පාසල් වෙබ් අඩවිය</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-        /* CSS Code */
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lesson 1: සංඛ්‍යා රටා - Quiz</title>
+<style>
+body {
+  font-family: 'Arial', sans-serif;
+  margin: 0;
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+  animation: bgAnim 20s ease-in-out infinite alternate;
+}
 
-        :root {
-            --light-bg: #f4f7f6;
-            --light-text: #2c3e50;
-            --light-primary: #3498db;
-            --light-accent: #e74c3c;
-            --light-card-bg: #ffffff;
-            --light-border: #ecf0f1;
+@keyframes bgAnim {
+  0% { background: linear-gradient(120deg, #d1c4e9, #ffccbc); }
+  50% { background: linear-gradient(120deg, #b2dfdb, #ffe082); }
+  100% { background: linear-gradient(120deg, #c8e6c9, #f48fb1); }
+}
 
-            --dark-bg: #1a202c;
-            --dark-text: #e2e8f0;
-            --dark-primary: #4299e1;
-            --dark-accent: #f56565;
-            --dark-card-bg: #2d3748;
-            --dark-border: #4a5568;
-        }
+.quiz-container {
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  padding: 30px;
+  max-width: 700px;
+  width: 100%;
+  perspective: 1000px;
+}
 
-        body {
-            font-family: 'Poppins', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: var(--light-bg);
-            color: var(--light-text);
-            transition: background-color 0.4s, color 0.4s;
-        }
+h1 {
+  text-align: center;
+  color: #4a148c;
+}
 
-        body.dark-mode {
-            background-color: var(--dark-bg);
-            color: var(--dark-text);
-        }
+.progress-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
+.progress-container {
+  background: #b2dfdb;
+  height: 25px;
+  border-radius: 20px;
+  overflow: hidden;
+  flex: 1;
+  margin-right: 10px;
+  box-shadow: inset 0 4px 6px rgba(0,0,0,0.2), 0 4px 6px rgba(0,0,0,0.1);
+  perspective: 500px;
+}
 
-        /* Header and Navigation */
-        .header {
-            background-color: var(--light-card-bg);
-            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
-            position: fixed;
-            width: 100%;
-            top: 0;
-            left: 0;
-            z-index: 1000;
-        }
-        .dark-mode .header {
-            background-color: var(--dark-card-bg);
-            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.5);
-        }
+.progress-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(270deg, #00796b, #26a69a, #004d40, #26a69a);
+  background-size: 800% 100%;
+  border-radius: 20px;
+  transition: width 0.5s ease;
+  transform-style: preserve-3d;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  animation: flow 4s linear infinite;
+}
 
-        .navbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 0;
-        }
+@keyframes flow {
+  0% { background-position: 0% 0; }
+  50% { background-position: 100% 0; }
+  100% { background-position: 0% 0; }
+}
 
-        .logo {
-            display: flex;
-            align-items: center;
-            font-size: 1.2rem;
-            font-weight: 600;
-        }
-        .logo img {
-            height: 40px;
-            margin-right: 10px;
-        }
+#scoreDisplay {
+  font-weight: bold;
+  color: #004d40;
+  min-width: 50px;
+  text-align: right;
+}
 
-        .nav-links {
-            list-style: none;
-            display: flex;
-            margin: 0;
-            padding: 0;
-        }
+.question {
+  margin-bottom: 20px;
+  font-size: 1.2em;
+  color: #311b92;
+}
 
-        .nav-link {
-            text-decoration: none;
-            color: var(--light-text);
-            padding: 10px 15px;
-            font-weight: 400;
-            transition: color 0.3s, background-color 0.3s;
-            position: relative;
-        }
-        .dark-mode .nav-link {
-            color: var(--dark-text);
-        }
+.answers {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
 
-        .nav-link:hover {
-            color: var(--light-primary);
-        }
-        .dark-mode .nav-link:hover {
-            color: var(--dark-primary);
-        }
+.answer-btn {
+  padding: 12px;
+  font-size: 1em;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  background: linear-gradient(145deg, #ff8a65, #ff7043);
+  color: #fff;
+  font-weight: bold;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  transform-style: preserve-3d;
+}
 
-        .navbar-controls {
-            display: flex;
-            align-items: center;
-        }
+.answer-btn:hover {
+  transform: translateY(-5px) rotateX(10deg) rotateY(10deg) scale(1.05);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+}
 
-        .control-btn, .lang-btn {
-            background-color: transparent;
-            border: none;
-            color: var(--light-text);
-            cursor: pointer;
-            font-size: 1.2rem;
-            padding: 8px 12px;
-            border-radius: 5px;
-            transition: background-color 0.3s;
-        }
-        .dark-mode .control-btn, .dark-mode .lang-btn {
-            color: var(--dark-text);
-        }
+.answer-btn.correct {
+  background: #4caf50 !important;
+}
 
-        .control-btn:hover, .lang-btn:hover {
-            background-color: var(--light-border);
-        }
-        .dark-mode .control-btn:hover, .dark-mode .lang-btn:hover {
-            background-color: var(--dark-border);
-        }
+.answer-btn.wrong {
+  background: #f44336 !important;
+}
 
-        .lang-switcher {
-            margin-left: 15px;
-        }
-        .lang-btn.active {
-            background-color: var(--light-primary);
-            color: white;
-        }
-        .dark-mode .lang-btn.active {
-            background-color: var(--dark-primary);
-        }
+#result {
+  font-size: 1.2em;
+  font-weight: bold;
+  margin-top: 20px;
+  text-align: left;
+  color: #311b92;
+}
 
-        /* Main Content */
-        .main-content {
-            padding-top: 80px;
-        }
-
-        .page-section {
-            min-height: 100vh;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            position: relative;
-            padding: 60px 0;
-            background-size: cover;
-            background-position: center;
-        }
-        .page-section.active {
-            display: flex;
-        }
-
-        .page-section .overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-        }
-
-        .dark-mode .page-section .overlay {
-            background: rgba(0, 0, 0, 0.8);
-        }
-
-        .page-section .container {
-            position: relative;
-            z-index: 2;
-        }
-
-        .content-box {
-            background-color: rgba(255, 255, 255, 0.9);
-            padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
-            max-width: 800px;
-        }
-
-        .dark-mode .content-box {
-            background-color: rgba(45, 55, 72, 0.9);
-        }
-
-        .section-title {
-            font-size: 2.5rem;
-            color: var(--light-primary);
-            margin-bottom: 15px;
-        }
-        .dark-mode .section-title {
-            color: var(--dark-primary);
-        }
-
-        .section-text {
-            font-size: 1.1rem;
-            line-height: 1.6;
-            color: var(--light-text);
-        }
-        .dark-mode .section-text {
-            color: var(--dark-text);
-        }
-
-        @media (max-width: 768px) {
-            .navbar {
-                flex-direction: column;
-                text-align: center;
-            }
-            .nav-links {
-                margin-top: 15px;
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-            .logo {
-                margin-bottom: 10px;
-            }
-            .nav-link {
-                padding: 5px 10px;
-            }
-            .page-section .content-box {
-                padding: 20px;
-            }
-            .section-title {
-                font-size: 2rem;
-            }
-        }
-    </style>
+#questionRemaining {
+  margin-bottom: 10px;
+  font-weight: bold;
+  color: #004d40;
+}
+</style>
 </head>
 <body>
+<div class="quiz-container">
+  <h1>Lesson 1: සංඛ්‍යා රටා - Quiz</h1>
+  <div class="progress-wrapper">
+    <div class="progress-container">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+    <div id="scoreDisplay">Score: 0</div>
+  </div>
+  <div id="questionRemaining">Question 1 of 20</div>
+  <div id="quiz">
+    <div class="question" id="questionText"></div>
+    <div class="answers" id="answerButtons"></div>
+  </div>
+  <div id="result"></div>
+</div>
 
-    <header class="header">
-        <div class="container">
-            <nav class="navbar">
-                <div class="logo">
-                    <img src="school_logo.png" alt="School Logo">
-                    <h1>ප්‍රමුඛ විද්‍යාලය</h1>
-                </div>
-                <ul class="nav-links">
-                    <li><a href="#home" class="nav-link" data-lang-si="මුල් පිටුව" data-lang-ta="முகப்பு" data-lang-en="Home">මුල් පිටුව</a></li>
-                    <li><a href="#student-data" class="nav-link" data-lang-si="ශිෂ්‍ය දත්ත" data-lang-ta="மாணவர் தரவு" data-lang-en="Student Data">ශිෂ්‍ය දත්ත</a></li>
-                    <li><a href="#news" class="nav-link" data-lang-si="පුවත්" data-lang-ta="செய்திகள்" data-lang-en="News">පුවත්</a></li>
-                    <li><a href="#about-us" class="nav-link" data-lang-si="අප ගැන" data-lang-ta="எங்களைப் பற்றி" data-lang-en="About Us">අප ගැන</a></li>
-                </ul>
-                <div class="navbar-controls">
-                    <button id="theme-toggle" class="control-btn"><i class="fas fa-moon"></i></button>
-                    <div class="lang-switcher">
-                        <button class="lang-btn active" data-lang="si">සිං</button>
-                        <button class="lang-btn" data-lang="ta">த</button>
-                        <button class="lang-btn" data-lang="en">En</button>
-                    </div>
-                </div>
-            </nav>
-        </div>
-    </header>
+<script>
+const quizDataOriginal = [
+  {q:"8, 12, 16, 20, ... ඊලග පදය කුමක්ද?", a:["22, 26","24, 28","25, 30","23, 27"], correct:1},
+  {q:"21, 28, 35, 42, ... පොදු අන්තරය කීයද?", a:["5","6","7","8"], correct:2},
+  {q:"100, 88, 76, 64, ... පොදු අන්තරය:", a:["-10","-12","-14","-8"], correct:1},
+  {q:"පොදු අන්තරය 5 සහ මුල් පදය 2 නම්, 6 වන පදය කීයද?", a:["27","25","22","30"], correct:1},
+  {q:"11 වන පදය 63 නම්, පොදු අන්තරය කීයද? (මුල් පදය 3)", a:["5","6","7","8"], correct:2},
+  {q:"7, 11, 17, 25, 30, ... යන්න arithmetic progression නොවන්නේ ඇයි?", a:["පොදු අන්තරය එකක් නොවීම","පද ගණන අඩු වීම","මුල් පදය 0 වීම","කුමක්ම නොවෙයි"], correct:0},
+  {q:"පොදු අන්තරය 4, මුල් පදය 5 නම්, 15 වන පදය කීයද?", a:["60","61","62","63"], correct:0},
+  {q:"15, 15, 15, 15,... පොදු අන්තරය කීයද?", a:["15","0","1","-15"], correct:1},
+  {q:"89, 70, 53, 38, ... පොදු අන්තරය කීයද?", a:["-15","-17","-18","-19"], correct:2},
+  {q:"Arithmetic progression එකක පොදු අන්තරය negative නම්, පද මාලාව:", a:["වැඩිවෙයි","අඩුවෙයි","එකේම පදය නැවත නැවත ලැබේ","අනියම්ව වෙනස් වේ"], correct:1},
+  {q:"61, 54, 47, 40,... පොදු අන්තරය කීයද?", a:["5","-6","-7","-8"], correct:2},
+  {q:"මුල් පදය 7 සහ පොදු අන්තරය 5 නම්, 10 වන පදය කීයද?", a:["52","54","55","56"], correct:2},
+  {q:"මුල් පදය 3 සහ පොදු අන්තරය 7 නම්, 8 වන පදය කීයද?", a:["49","52","53","54"], correct:2},
+  {q:"32, 28, 24, 20, ... පොදු අන්තරය කීයද?", a:["-2","-3","-4","-5"], correct:2},
+  {q:"5, 12, 19, 26, ... පොදු අන්තරය කීයද?", a:["6","7","8","9"], correct:1},
+  {q:"මුල් පදය 4 සහ පොදු අන්තරය 9 නම්, 12 වන පදය කීයද?", a:["101","102","103","104"], correct:1},
+  {q:"මුල් පදය 10 සහ පොදු අන්තරය 2 නම්, 25 වන පදය කීයද?", a:["58","59","60","61"], correct:2},
+  {q:"99, 93, 87, 81, ... පොදු අන්තරය කීයද?", a:["-4","-5","-6","-7"], correct:2},
+  {q:"මුල් පදය 1 සහ පොදු අන්තරය 4 නම්, 20 වන පදය කීයද?", a:["77","78","79","80"], correct:2},
+  {q:"මුල් පදය 6 සහ පොදු අන්තරය -3 නම්, 15 වන පදය කීයද?", a:["-37","-38","-39","-40"], correct:2}
+];
 
-    <main class="main-content">
-        <section id="home" class="page-section active" style="background-image: url('school_building.jpg');">
-            <div class="overlay"></div>
-            <div class="container">
-                <div class="content-box">
-                    <h2 class="section-title" data-lang-si="අපගේ විද්‍යාලයට සාදරයෙන් පිළිගනිමු" data-lang-ta="எமது பாடசாலைக்கு வரவேற்கிறோம்" data-lang-en="Welcome to Our School">අපගේ විද්‍යාලයට සාදරයෙන් පිළිගනිමු</h2>
-                    <p class="section-text" data-lang-si="අධ්‍යාපනය, විනය සහ අනාගතය වෙනුවෙන් කැප වූ පාසලක්." data-lang-ta="கல்வி, ஒழுக்கம் மற்றும் எதிர்காலத்திற்காக அர்ப்பணிக்கப்பட்ட ஒரு பாடசாலை." data-lang-en="A school dedicated to education, discipline, and the future.">අධ්‍යාපනය, විනය සහ අනාගතය වෙනුවෙන් කැප වූ පාසලක්.</p>
-                </div>
-            </div>
-        </section>
+let quizData = [...quizDataOriginal].sort(()=>Math.random()-0.5);
+let current = 0;
+let score = 0;
+const selectedAnswers = [];
 
-        <section id="student-data" class="page-section">
-            <div class="container">
-                <div class="content-box">
-                    <h2 class="section-title" data-lang-si="ශිෂ්‍ය දත්ත" data-lang-ta="மாணவர் தரவு" data-lang-en="Student Data">ශිෂ්‍ය දත්ත</h2>
-                    <p class="section-text" data-lang-si="මෙම කොටසින් ශිෂ්‍යයන්ගේ සියලු තොරතුරු ලබා ගත හැක." data-lang-ta="இந்த பிரிவில், மாணவர்களின் அனைத்து தகவல்களையும் பெறலாம்." data-lang-en="In this section, all student information can be obtained.">මෙම කොටසින් ශිෂ්‍යයන්ගේ සියලු තොරතුරු ලබා ගත හැක.</p>
-                </div>
-            </div>
-        </section>
+const questionText = document.getElementById("questionText");
+const answerButtons = document.getElementById("answerButtons");
+const resultDiv = document.getElementById("result");
+const progressBar = document.getElementById("progressBar");
+const questionRemaining = document.getElementById("questionRemaining");
+const scoreDisplay = document.getElementById("scoreDisplay");
 
-        <section id="news" class="page-section">
-            <div class="container">
-                <div class="content-box">
-                    <h2 class="section-title" data-lang-si="නවතම පුවත්" data-lang-ta="சமீபத்திய செய்திகள்" data-lang-en="Latest News">නවතම පුවත්</h2>
-                    <p class="section-text" data-lang-si="පාසලේ සිදුවන නවතම ක්‍රියාකාරකම් සහ සිදුවීම් පිළිබඳව දැනුවත් වන්න." data-lang-ta="பாடசாலையில் நடக்கும் சமீபத்திய நடவடிக்கைகள் மற்றும் நிகழ்வுகள் பற்றி அறிந்து கொள்ளுங்கள்." data-lang-en="Stay informed about the latest activities and events at the school.">පාසලේ සිදුවන නවතම ක්‍රියාකාරකම් සහ සිදුවීම් පිළිබඳව දැනුවත් වන්න.</p>
-                </div>
-            </div>
-        </section>
+function showQuestion(index) {
+  questionText.style.display = "block";
+  answerButtons.style.display = "flex";
+  const q = quizData[index];
+  questionText.textContent = q.q;
+  answerButtons.innerHTML = "";
+  q.a.forEach((answer, i) => {
+    const btn = document.createElement("button");
+    btn.textContent = answer;
+    btn.classList.add("answer-btn");
+    btn.addEventListener("click", () => selectAnswer(i, btn));
+    answerButtons.appendChild(btn);
+  });
+  questionRemaining.textContent = `Question ${current + 1} of ${quizData.length}`;
+  progressBar.style.width = `${(current/quizData.length)*100}%`;
+  scoreDisplay.textContent = `Score: ${score}`;
+}
 
-        <section id="about-us" class="page-section">
-            <div class="container">
-                <div class="content-box">
-                    <h2 class="section-title" data-lang-si="අප ගැන" data-lang-ta="எங்களைப் பற்றி" data-lang-en="About Us">අප ගැන</h2>
-                    <p class="section-text" data-lang-si="අපගේ පාසලේ ඉතිහාසය, දැක්ම සහ මෙහෙවර පිළිබඳ තොරතුරු." data-lang-ta="எமது பாடசாலையின் வரலாறு, நோக்கு மற்றும் இலக்கு பற்றிய தகவல்கள்." data-lang-en="Information about our school's history, vision, and mission.">අපගේ පාසලේ ඉතිහාසය, දැක්ම සහ මෙහෙවර පිළිබඳ තොරතුරු.</p>
-                </div>
-            </div>
-        </section>
-    </main>
-    
-    <script>
-        // JavaScript Code
-        document.addEventListener('DOMContentLoaded', () => {
-            // Theme toggle (Dark/Light Mode)
-            const themeToggleBtn = document.getElementById('theme-toggle');
-            const icon = themeToggleBtn.querySelector('i');
-            const body = document.body;
+function selectAnswer(i, btn) {
+  const correctIndex = quizData[current].correct;
+  selectedAnswers.push(i);
+  Array.from(answerButtons.children).forEach((b, idx)=>{
+    b.disabled = true;
+    if(idx === correctIndex) b.classList.add("correct");
+    if(idx === i && i !== correctIndex) b.classList.add("wrong");
+  });
+  if(i === correctIndex) score++;
+  scoreDisplay.textContent = `Score: ${score}`;
+  setTimeout(() => {
+    current++;
+    if(current < quizData.length){
+      showQuestion(current);
+    } else {
+      showResult();
+    }
+  }, 500);
+}
 
-            // Check for saved theme preference
-            const savedTheme = localStorage.getItem('theme');
-            if (savedTheme === 'dark-mode') {
-                body.classList.add('dark-mode');
-                icon.classList.remove('fa-moon');
-                icon.classList.add('fa-sun');
-            }
+function showResult(){
+  questionText.style.display = "none";
+  answerButtons.style.display = "none";
+  questionRemaining.style.display = "none";
+  progressBar.style.width = "100%";
 
-            themeToggleBtn.addEventListener('click', () => {
-                body.classList.toggle('dark-mode');
-                if (body.classList.contains('dark-mode')) {
-                    icon.classList.remove('fa-moon');
-                    icon.classList.add('fa-sun');
-                    localStorage.setItem('theme', 'dark-mode');
-                } else {
-                    icon.classList.remove('fa-sun');
-                    icon.classList.add('fa-moon');
-                    localStorage.setItem('theme', 'light-mode');
-                }
-            });
+  let html = `<h2>ඔබේ ලකුණු: ${score} / ${quizData.length}</h2>`;
+  html += `<ul>`;
+  quizData.forEach((q, idx)=>{
+    html += `<li>${idx+1}. ${q.q} <br>`;
+    q.a.forEach((ans, i)=>{
+      let clickClass = '';
+      if(selectedAnswers[idx] === i && i !== q.correct) clickClass = ' (selected)';
+      if(i===q.correct) html += `<span style="color:green;">✔ ${ans}${clickClass}</span> `;
+      else if(selectedAnswers[idx] === i) html += `<span style="color:red;">✖ ${ans}${clickClass}</span> `;
+      else html += `${ans} `;
+    });
+    html += `</li><br>`;
+  });
+  html += `</ul>`;
+  resultDiv.innerHTML = html;
+}
 
-            // Language switcher
-            const langButtons = document.querySelectorAll('.lang-btn');
-            const changeLanguage = (lang) => {
-                const elements = document.querySelectorAll('[data-lang-si]');
-                elements.forEach(el => {
-                    const text = el.getAttribute(`data-lang-${lang}`);
-                    if (text) {
-                        el.textContent = text;
-                    }
-                });
-                document.documentElement.lang = lang;
-
-                langButtons.forEach(btn => btn.classList.remove('active'));
-                document.querySelector(`.lang-btn[data-lang="${lang}"]`).classList.add('active');
-            };
-
-            langButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    const lang = button.getAttribute('data-lang');
-                    changeLanguage(lang);
-                });
-            });
-
-            // Initial language set to Sinhala
-            changeLanguage('si');
-
-            // Page navigation
-            const navLinks = document.querySelectorAll('.nav-link');
-            const pageSections = document.querySelectorAll('.page-section');
-
-            navLinks.forEach(link => {
-                link.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const targetId = link.getAttribute('href');
-                    
-                    pageSections.forEach(section => {
-                        section.classList.remove('active');
-                    });
-                    
-                    const targetSection = document.querySelector(targetId);
-                    if (targetSection) {
-                        targetSection.classList.add('active');
-                    }
-                });
-            });
-
-            // Initial page load
-            document.querySelector('.page-section.active').style.display = 'flex';
-        });
-    </script>
+showQuestion(current);
+</script>
 </body>
 </html>
