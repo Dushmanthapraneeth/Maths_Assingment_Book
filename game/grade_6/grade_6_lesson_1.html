@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lesson 1: සංඛ්‍යා රටා - Quiz</title>
+<style>
+body {
+  font-family: 'Arial', sans-serif;
+  margin: 0;
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+  animation: bgAnim 20s ease-in-out infinite alternate;
+}
+
+@keyframes bgAnim {
+  0% { background: linear-gradient(120deg, #d1c4e9, #ffccbc); }
+  50% { background: linear-gradient(120deg, #b2dfdb, #ffe082); }
+  100% { background: linear-gradient(120deg, #c8e6c9, #f48fb1); }
+}
+
+.quiz-container {
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  padding: 30px;
+  max-width: 700px;
+  width: 100%;
+  perspective: 1000px;
+}
+
+h1 {
+  text-align: center;
+  color: #4a148c;
+}
+
+.progress-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.progress-container {
+  background: #b2dfdb;
+  height: 25px;
+  border-radius: 20px;
+  overflow: hidden;
+  flex: 1;
+  margin-right: 10px;
+  box-shadow: inset 0 4px 6px rgba(0,0,0,0.2), 0 4px 6px rgba(0,0,0,0.1);
+  perspective: 500px;
+}
+
+.progress-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(270deg, #00796b, #26a69a, #004d40, #26a69a);
+  background-size: 800% 100%;
+  border-radius: 20px;
+  transition: width 0.5s ease;
+  transform-style: preserve-3d;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  animation: flow 4s linear infinite;
+}
+
+@keyframes flow {
+  0% { background-position: 0% 0; }
+  50% { background-position: 100% 0; }
+  100% { background-position: 0% 0; }
+}
+
+#scoreDisplay {
+  font-weight: bold;
+  color: #004d40;
+  min-width: 50px;
+  text-align: right;
+}
+
+.question {
+  margin-bottom: 20px;
+  font-size: 1.2em;
+  color: #311b92;
+}
+
+.answers {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.answer-btn {
+  padding: 12px;
+  font-size: 1em;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  background: linear-gradient(145deg, #ff8a65, #ff7043);
+  color: #fff;
+  font-weight: bold;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  transform-style: preserve-3d;
+}
+
+.answer-btn:hover {
+  transform: translateY(-5px) rotateX(10deg) rotateY(10deg) scale(1.05);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+}
+
+.answer-btn.correct {
+  background: #4caf50 !important;
+}
+
+.answer-btn.wrong {
+  background: #f44336 !important;
+}
+
+#result {
+  font-size: 1.2em;
+  font-weight: bold;
+  margin-top: 20px;
+  text-align: left;
+  color: #311b92;
+}
+
+#questionRemaining {
+  margin-bottom: 10px;
+  font-weight: bold;
+  color: #004d40;
+}
+</style>
+</head>
+<body>
+<div class="quiz-container">
+  <h1>Lesson 1: සංඛ්‍යා රටා - Quiz</h1>
+  <div class="progress-wrapper">
+    <div class="progress-container">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+    <div id="scoreDisplay">Score: 0</div>
+  </div>
+  <div id="questionRemaining">Question 1 of 20</div>
+  <div id="quiz">
+    <div class="question" id="questionText"></div>
+    <div class="answers" id="answerButtons"></div>
+  </div>
+  <div id="result"></div>
+</div>
+
+<script>
+const quizDataOriginal = [
+  {q:"8, 12, 16, 20, ... ඊලග පදය කුමක්ද?", a:["22, 26","24, 28","25, 30","23, 27"], correct:1},
+  {q:"21, 28, 35, 42, ... පොදු අන්තරය කීයද?", a:["5","6","7","8"], correct:2},
+  {q:"100, 88, 76, 64, ... පොදු අන්තරය:", a:["-10","-12","-14","-8"], correct:1},
+  {q:"පොදු අන්තරය 5 සහ මුල් පදය 2 නම්, 6 වන පදය කීයද?", a:["27","25","22","30"], correct:1},
+  {q:"11 වන පදය 63 නම්, පොදු අන්තරය කීයද? (මුල් පදය 3)", a:["5","6","7","8"], correct:2},
+  {q:"7, 11, 17, 25, 30, ... යන්න arithmetic progression නොවන්නේ ඇයි?", a:["පොදු අන්තරය එකක් නොවීම","පද ගණන අඩු වීම","මුල් පදය 0 වීම","කුමක්ම නොවෙයි"], correct:0},
+  {q:"පොදු අන්තරය 4, මුල් පදය 5 නම්, 15 වන පදය කීයද?", a:["60","61","62","63"], correct:0},
+  {q:"15, 15, 15, 15,... පොදු අන්තරය කීයද?", a:["15","0","1","-15"], correct:1},
+  {q:"89, 70, 53, 38, ... පොදු අන්තරය කීයද?", a:["-15","-17","-18","-19"], correct:2},
+  {q:"Arithmetic progression එකක පොදු අන්තරය negative නම්, පද මාලාව:", a:["වැඩිවෙයි","අඩුවෙයි","එකේම පදය නැවත නැවත ලැබේ","අනියම්ව වෙනස් වේ"], correct:1},
+  {q:"61, 54, 47, 40,... පොදු අන්තරය කීයද?", a:["5","-6","-7","-8"], correct:2},
+  {q:"මුල් පදය 7 සහ පොදු අන්තරය 5 නම්, 10 වන පදය කීයද?", a:["52","54","55","56"], correct:2},
+  {q:"මුල් පදය 3 සහ පොදු අන්තරය 7 නම්, 8 වන පදය කීයද?", a:["49","52","53","54"], correct:2},
+  {q:"32, 28, 24, 20, ... පොදු අන්තරය කීයද?", a:["-2","-3","-4","-5"], correct:2},
+  {q:"5, 12, 19, 26, ... පොදු අන්තරය කීයද?", a:["6","7","8","9"], correct:1},
+  {q:"මුල් පදය 4 සහ පොදු අන්තරය 9 නම්, 12 වන පදය කීයද?", a:["101","102","103","104"], correct:1},
+  {q:"මුල් පදය 10 සහ පොදු අන්තරය 2 නම්, 25 වන පදය කීයද?", a:["58","59","60","61"], correct:2},
+  {q:"99, 93, 87, 81, ... පොදු අන්තරය කීයද?", a:["-4","-5","-6","-7"], correct:2},
+  {q:"මුල් පදය 1 සහ පොදු අන්තරය 4 නම්, 20 වන පදය කීයද?", a:["77","78","79","80"], correct:2},
+  {q:"මුල් පදය 6 සහ පොදු අන්තරය -3 නම්, 15 වන පදය කීයද?", a:["-37","-38","-39","-40"], correct:2}
+];
+
+let quizData = [...quizDataOriginal].sort(()=>Math.random()-0.5);
+let current = 0;
+let score = 0;
+const selectedAnswers = [];
+
+const questionText = document.getElementById("questionText");
+const answerButtons = document.getElementById("answerButtons");
+const resultDiv = document.getElementById("result");
+const progressBar = document.getElementById("progressBar");
+const questionRemaining = document.getElementById("questionRemaining");
+const scoreDisplay = document.getElementById("scoreDisplay");
+
+function showQuestion(index) {
+  questionText.style.display = "block";
+  answerButtons.style.display = "flex";
+  const q = quizData[index];
+  questionText.textContent = q.q;
+  answerButtons.innerHTML = "";
+  q.a.forEach((answer, i) => {
+    const btn = document.createElement("button");
+    btn.textContent = answer;
+    btn.classList.add("answer-btn");
+    btn.addEventListener("click", () => selectAnswer(i, btn));
+    answerButtons.appendChild(btn);
+  });
+  questionRemaining.textContent = `Question ${current + 1} of ${quizData.length}`;
+  progressBar.style.width = `${(current/quizData.length)*100}%`;
+  scoreDisplay.textContent = `Score: ${score}`;
+}
+
+function selectAnswer(i, btn) {
+  const correctIndex = quizData[current].correct;
+  selectedAnswers.push(i);
+  Array.from(answerButtons.children).forEach((b, idx)=>{
+    b.disabled = true;
+    if(idx === correctIndex) b.classList.add("correct");
+    if(idx === i && i !== correctIndex) b.classList.add("wrong");
+  });
+  if(i === correctIndex) score++;
+  scoreDisplay.textContent = `Score: ${score}`;
+  setTimeout(() => {
+    current++;
+    if(current < quizData.length){
+      showQuestion(current);
+    } else {
+      showResult();
+    }
+  }, 500);
+}
+
+function showResult(){
+  questionText.style.display = "none";
+  answerButtons.style.display = "none";
+  questionRemaining.style.display = "none";
+  progressBar.style.width = "100%";
+
+  let html = `<h2>ඔබේ ලකුණු: ${score} / ${quizData.length}</h2>`;
+  html += `<ul>`;
+  quizData.forEach((q, idx)=>{
+    html += `<li>${idx+1}. ${q.q} <br>`;
+    q.a.forEach((ans, i)=>{
+      let clickClass = '';
+      if(selectedAnswers[idx] === i && i !== q.correct) clickClass = ' (selected)';
+      if(i===q.correct) html += `<span style="color:green;">✔ ${ans}${clickClass}</span> `;
+      else if(selectedAnswers[idx] === i) html += `<span style="color:red;">✖ ${ans}${clickClass}</span> `;
+      else html += `${ans} `;
+    });
+    html += `</li><br>`;
+  });
+  html += `</ul>`;
+  resultDiv.innerHTML = html;
+}
+
+showQuestion(current);
+</script>
+</body>
+</html>
