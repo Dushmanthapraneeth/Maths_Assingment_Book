@@ -12,6 +12,7 @@
         body {
             font-family: 'Inter', sans-serif;
             transition: background-color 0.3s, color 0.3s;
+            overflow-x: hidden; /* Prevents horizontal scroll bar */
         }
         body.light-mode {
             background-color: #f0f4f8; /* Light gray background */
@@ -21,8 +22,24 @@
             background-color: #1a202c; /* Dark background */
             color: #e2e8f0; /* Light text */
         }
+        .main-content-wrapper {
+            transition: transform 0.3s ease-in-out;
+            width: 100%;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        body.sidebar-open .main-content-wrapper {
+            transform: translateX(280px); /* Pushes content to the right by the sidebar's width */
+        }
+        /* Hide the menu toggle button when the sidebar is open */
+        body.sidebar-open #menu-toggle {
+            display: none;
+        }
         .main-card {
             transition: background-color 0.3s, box-shadow 0.3s;
+            max-width: 2xl;
         }
         .light-mode .main-card {
             background-color: #ffffff;
@@ -70,7 +87,7 @@
         }
         .sidebar-header {
             display: flex;
-            justify-content: space-between;
+            justify-content: space-between; /* Space between title and close button */
             align-items: center;
         }
         .sidebar-header h1 {
@@ -101,17 +118,18 @@
         }
     </style>
 </head>
-<body class="light-mode flex flex-col items-center justify-start min-h-screen p-4">
+<body class="light-mode">
 
-    <!-- Menu Toggle Button -->
+    <!-- Menu Toggle Button, always visible on the main page until the sidebar is open -->
     <button id="menu-toggle" class="fixed top-4 left-4 z-2000 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white font-medium p-2 rounded-full shadow-lg transition-colors">
-        <span id="menu-icon" class="text-2xl">☰</span>
+        ☰
     </button>
 
     <!-- Sidebar Menu -->
     <div id="sidebar-menu" class="sidebar light-mode">
         <div class="sidebar-header">
             <h1 id="sidebar-title">Quiz Game</h1>
+            <!-- Close button for the sidebar -->
             <button id="close-menu" class="text-gray-800 dark:text-white">
                 &times;
             </button>
@@ -140,27 +158,30 @@
     <!-- Overlay for the sidebar -->
     <div id="sidebar-overlay" class="overlay"></div>
 
-    <div class="main-card rounded-3xl p-8 md:p-12 w-full max-w-2xl mt-8">
-        <!-- Main Content Sections -->
-        <div class="flex flex-col gap-8">
-            <!-- පන්තිය තෝරාගැනීම (Class Selection) -->
-            <div class="section-card p-6 rounded-2xl border border-gray-200 dark:border-gray-700">
-                <h2 id="class-title" class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Select Class</h2>
-                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 justify-center">
-                    <button class="class-button bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-xl shadow-md transition-transform transform hover:scale-105" data-class="grade6">6 වන ශ්‍රේණිය</button>
-                    <button class="class-button bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-xl shadow-md transition-transform transform hover:scale-105" data-class="grade7">7 වන ශ්‍රේණිය</button>
-                    <button class="class-button bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-xl shadow-md transition-transform transform hover:scale-105" data-class="grade8">8 වන ශ්‍රේණිය</button>
-                    <button class="class-button bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-xl shadow-md transition-transform transform hover:scale-105" data-class="grade9">9 වන ශ්‍රේණිය</button>
-                    <button class="class-button bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-xl shadow-md transition-transform transform hover:scale-105" data-class="grade10">10 වන ශ්‍රේණිය</button>
-                    <button class="class-button bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-xl shadow-md transition-transform transform hover:scale-105" data-class="grade11">11 වන ශ්‍රේණිය</button>
+    <!-- Wrapper for the main content to enable sliding -->
+    <div id="main-content-wrapper" class="main-content-wrapper flex flex-col items-center justify-start min-h-screen">
+        <div class="main-card rounded-3xl p-8 md:p-12 w-full max-w-2xl mt-8">
+            <!-- Main Content Sections -->
+            <div class="flex flex-col gap-8">
+                <!-- පන්තිය තෝරාගැනීම (Class Selection) -->
+                <div class="section-card p-6 rounded-2xl border border-gray-200 dark:border-gray-700">
+                    <h2 id="class-title" class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Select Class</h2>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 justify-center">
+                        <button class="class-button bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-xl shadow-md transition-transform transform hover:scale-105" data-class="grade6">6 වන ශ්‍රේණිය</button>
+                        <button class="class-button bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-xl shadow-md transition-transform transform hover:scale-105" data-class="grade7">7 වන ශ්‍රේණිය</button>
+                        <button class="class-button bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-xl shadow-md transition-transform transform hover:scale-105" data-class="grade8">8 වන ශ්‍රේණිය</button>
+                        <button class="class-button bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-xl shadow-md transition-transform transform hover:scale-105" data-class="grade9">9 වන ශ්‍රේණිය</button>
+                        <button class="class-button bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-xl shadow-md transition-transform transform hover:scale-105" data-class="grade10">10 වන ශ්‍රේණිය</button>
+                        <button class="class-button bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-xl shadow-md transition-transform transform hover:scale-105" data-class="grade11">11 වන ශ්‍රේණිය</button>
+                    </div>
                 </div>
-            </div>
 
-            <!-- පාඩම තෝරාගැනීම (Lesson Selection - Initially hidden) -->
-            <div id="lesson-selection" class="section-card p-6 rounded-2xl border border-gray-200 dark:border-gray-700 hidden">
-                <h2 id="lesson-title" class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">පාඩම තෝරන්න</h2>
-                <div id="lessons-container" class="flex flex-wrap justify-center gap-4">
-                    <!-- Lessons buttons will be dynamically added here -->
+                <!-- පාඩම තෝරාගැනීම (Lesson Selection - Initially hidden) -->
+                <div id="lesson-selection" class="section-card p-6 rounded-2xl border border-gray-200 dark:border-gray-700 hidden">
+                    <h2 id="lesson-title" class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">පාඩම තෝරන්න</h2>
+                    <div id="lessons-container" class="flex flex-wrap justify-center gap-4">
+                        <!-- Lessons buttons will be dynamically added here -->
+                    </div>
                 </div>
             </div>
         </div>
@@ -177,7 +198,7 @@
             'grade7': {
                 'si': ['ගණිතය', 'විද්‍යාව', 'සිංහල', 'භූගෝල විද්‍යාව'],
                 'en': ['Mathematics', 'Science', 'Sinhala', 'Geography'],
-                'ta': ['கணிதம்', 'விஞ்ஞானம்', 'සිங்களம்', 'புவியியல்'],
+                'ta': ['கணிதம்', 'விஞ்ஞானம்', 'සිංහල', 'புவியிල'],
             },
             'grade8': {
                 'si': ['ගණිතය', 'විද්‍යාව', 'ඉංග්‍රීසි', 'සමාජ අධ්‍යයනය'],
@@ -192,7 +213,7 @@
             'grade10': {
                 'si': ['ගණිතය', 'විද්‍යාව', 'සිංහල', 'බුද්ධ ධර්මය', 'ඉතිහාසය'],
                 'en': ['Mathematics', 'Science', 'Sinhala', 'Buddhism', 'History'],
-                'ta': ['கணிதம்', 'விஞ்ஞானம்', 'සිங்களம்', 'පௌத்தம்', 'வரலாறு'],
+                'ta': ['கணிதம்', 'விஞ்ஞானம்', 'සිංහල', 'පෞத்தம்', 'வரලාறு'],
             },
             'grade11': {
                 'si': ['ගණිතය', 'විද්‍යාව', 'කලා', 'වාණිජ', 'තාක්ෂණ'],
@@ -262,27 +283,22 @@
             // Set initial language button as selected
             document.querySelector(`[data-lang="${currentLang}"]`).classList.add('selected');
 
-            // Sidebar toggle functionality
+            // Open sidebar functionality
             menuToggleBtn.addEventListener('click', () => {
                 sidebarMenu.classList.add('open');
                 sidebarOverlay.classList.add('active');
-                body.style.overflow = 'hidden'; // Prevents scrolling on the main page
-                menuToggleBtn.classList.add('hidden'); // Hide the menu toggle button
+                body.classList.add('sidebar-open');
             });
 
-            closeMenuBtn.addEventListener('click', () => {
+            // Close sidebar functionality
+            const closeSidebar = () => {
                 sidebarMenu.classList.remove('open');
                 sidebarOverlay.classList.remove('active');
-                body.style.overflow = ''; // Restores scrolling
-                menuToggleBtn.classList.remove('hidden'); // Show the menu toggle button
-            });
+                body.classList.remove('sidebar-open');
+            };
 
-            sidebarOverlay.addEventListener('click', () => {
-                sidebarMenu.classList.remove('open');
-                sidebarOverlay.classList.remove('active');
-                body.style.overflow = ''; // Restores scrolling
-                menuToggleBtn.classList.remove('hidden'); // Show the menu toggle button
-            });
+            closeMenuBtn.addEventListener('click', closeSidebar);
+            sidebarOverlay.addEventListener('click', closeSidebar);
 
             // Dark/Light Mode Toggle
             modeToggleBtn.addEventListener('click', () => {
@@ -299,7 +315,7 @@
                     sidebarMenu.classList.add('light-mode');
                     sidebarMenu.classList.remove('dark-mode');
                     modeTextSpan.textContent = translations[currentLang].nightMode;
-                    modeIconSpan.textContent = '�';
+                    modeIconSpan.textContent = '🌙';
                 }
             });
 
@@ -397,4 +413,3 @@
     </script>
 </body>
 </html>
-�
