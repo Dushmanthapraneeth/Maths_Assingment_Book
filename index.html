@@ -49,50 +49,96 @@
         .lang-button:hover.selected {
             background-color: #b91c1c; /* Darker red on hover */
         }
-        .fixed-header {
+        /* Sidebar styles */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 280px;
+            z-index: 1001;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-in-out;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.2);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+        .sidebar.open {
+            transform: translateX(0);
+        }
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .sidebar-header h1 {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        .sidebar-header button {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            line-height: 1;
+        }
+        .overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
             z-index: 1000;
-            background-color: #1a202c; /* Dark background */
-            color: #e2e8f0; /* Light text */
-            padding: 1.5rem;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            display: none;
+            transition: opacity 0.3s ease-in-out;
+            opacity: 0;
         }
-        .light-mode .fixed-header {
-            background-color: #2c5282; /* A shade of blue for light mode header */
-            color: #ffffff; /* White text */
-        }
-        /* Add padding to the body to prevent content from being hidden behind the fixed header */
-        body {
-            padding-top: 8rem;
+        .overlay.active {
+            display: block;
+            opacity: 1;
         }
     </style>
 </head>
 <body class="light-mode flex flex-col items-center justify-start min-h-screen p-4">
 
-    <!-- Fixed Header -->
-    <div class="fixed-header flex flex-col items-start">
-        <!-- Welcome to the Quiz Game! section -->
-        <div class="w-full">
-            <h1 id="header-title" class="text-xl md:text-2xl font-bold">Welcome to the Quiz Game!</h1>
+    <!-- Menu Toggle Button -->
+    <button id="menu-toggle" class="fixed top-4 left-4 z-2000 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white font-medium p-2 rounded-full shadow-lg transition-colors">
+        <span id="menu-icon" class="text-2xl">☰</span>
+    </button>
+
+    <!-- Sidebar Menu -->
+    <div id="sidebar-menu" class="sidebar light-mode">
+        <div class="sidebar-header">
+            <h1 id="sidebar-title">Quiz Game</h1>
+            <button id="close-menu" class="text-gray-800 dark:text-white">
+                &times;
+            </button>
         </div>
-        <!-- Language and Dark Mode buttons section -->
-        <div class="w-full flex items-center justify-end gap-4 mt-2">
-            <!-- Language Buttons -->
-            <div class="flex gap-2">
-                <button class="lang-button bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white font-medium py-1 px-3 rounded-md shadow-inner transition-colors selected" data-lang="si">Si</button>
-                <button class="lang-button bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white font-medium py-1 px-3 rounded-md shadow-inner transition-colors" data-lang="ta">Ta</button>
-                <button class="lang-button bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white font-medium py-1 px-3 rounded-md shadow-inner transition-colors" data-lang="en">En</button>
+
+        <!-- Language Buttons -->
+        <div class="flex flex-col gap-4">
+            <h2 class="text-lg font-semibold" id="language-title">භාෂාව</h2>
+            <div class="flex flex-col gap-2">
+                <button class="lang-button bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white font-medium py-2 px-4 rounded-md shadow-inner transition-colors selected" data-lang="si">සිංහල</button>
+                <button class="lang-button bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white font-medium py-2 px-4 rounded-md shadow-inner transition-colors" data-lang="ta">தமிழ்</button>
+                <button class="lang-button bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white font-medium py-2 px-4 rounded-md shadow-inner transition-colors" data-lang="en">English</button>
             </div>
-            <!-- Mode Toggle Button -->
+        </div>
+
+        <!-- Mode Toggle Button -->
+        <div class="flex flex-col gap-4">
+            <h2 class="text-lg font-semibold" id="mode-title">මාදිලිය</h2>
             <button id="mode-toggle" class="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white font-medium py-2 px-4 rounded-full shadow-inner transition-colors">
                 <span id="mode-icon" class="mr-2">🌙</span>
                 <span id="mode-text">NIGHTMODE</span>
             </button>
         </div>
     </div>
+    
+    <!-- Overlay for the sidebar -->
+    <div id="sidebar-overlay" class="overlay"></div>
 
     <div class="main-card rounded-3xl p-8 md:p-12 w-full max-w-2xl mt-8">
         <!-- Main Content Sections -->
@@ -121,8 +167,7 @@
     </div>
 
     <script>
-        // පාඩම් සහ ශ්‍රේණි සඳහා දත්ත (Data for Lessons and Grades)
-        // Now using a standardized key for each grade
+        // Data for Lessons and Grades
         const lessons = {
             'grade6': {
                 'si': ['වාණිජ', 'ස්ථානීය අගය', 'පූර්ණ සංඛ්‍යා මත ගණිත කර්ම', 'කාලය', 'සංඛ්‍යා රේඛාව', 'නිමානයක සභා වටුවීම', 'කෝණ', 'දිශා'],
@@ -132,7 +177,7 @@
             'grade7': {
                 'si': ['ගණිතය', 'විද්‍යාව', 'සිංහල', 'භූගෝල විද්‍යාව'],
                 'en': ['Mathematics', 'Science', 'Sinhala', 'Geography'],
-                'ta': ['கணிதம்', 'விஞ்ஞானம்', 'சிங்களம்', 'புவியியல்'],
+                'ta': ['கணிதம்', 'விஞ்ஞானம்', 'සිங்களம்', 'புவியியல்'],
             },
             'grade8': {
                 'si': ['ගණිතය', 'විද්‍යාව', 'ඉංග්‍රීසි', 'සමාජ අධ්‍යයනය'],
@@ -147,16 +192,16 @@
             'grade10': {
                 'si': ['ගණිතය', 'විද්‍යාව', 'සිංහල', 'බුද්ධ ධර්මය', 'ඉතිහාසය'],
                 'en': ['Mathematics', 'Science', 'Sinhala', 'Buddhism', 'History'],
-                'ta': ['கணிதம்', 'விஞ்ஞானம்', 'சிங்களம்', 'பௌத்தம்', 'வரலாறு'],
+                'ta': ['கணிதம்', 'விஞ்ஞானம்', 'සිங்களம்', 'පௌத்தம்', 'வரலாறு'],
             },
             'grade11': {
                 'si': ['ගණිතය', 'විද්‍යාව', 'කලා', 'වාණිජ', 'තාක්ෂණ'],
                 'en': ['Mathematics', 'Science', 'Arts', 'Commerce', 'Technology'],
-                'ta': ['கணிதம்', 'விஞ்ஞானம்', 'கலை', 'வர்த்தகம்', 'தொழில்நுட்பம்'],
+                'ta': ['கணிதம்', 'விஞ்ஞானம்', 'කලා', 'வர்த்தகம்', 'தொழில்நுட்பය'],
             }
         };
 
-        // ශ්‍රේණි නාම පරිවර්තන (Grade Name Translations)
+        // Grade Name Translations
         const classTranslations = {
             'grade6': {'si': '6 වන ශ්‍රේණිය', 'en': 'Grade 6', 'ta': '6 ஆம் வகுப்பு'},
             'grade7': {'si': '7 වන ශ්‍රේණිය', 'en': 'Grade 7', 'ta': '7 ஆம் வகுப்பு'},
@@ -166,24 +211,30 @@
             'grade11': {'si': '11 වන ශ්‍රේණිය', 'en': 'Grade 11', 'ta': '11 ஆம் வகுப்பு'},
         };
 
-        // පරිවර්තන සඳහා දත්ත (Data for Translations)
+        // Translations for UI text
         const translations = {
             'si': {
-                'headerTitle': 'Quiz Game එකට සාදරයෙන් පිළිගනිමු!',
+                'sidebarTitle': 'Quiz Game',
+                'languageTitle': 'භාෂාව',
+                'modeTitle': 'මාදිලිය',
                 'classTitle': 'පන්තිය තෝරන්න',
                 'lessonTitle': 'පාඩම තෝරන්න',
                 'nightMode': 'NIGHTMODE',
                 'lightMode': 'LIGHTMODE',
             },
             'en': {
-                'headerTitle': 'Welcome to the Quiz Game!',
+                'sidebarTitle': 'Quiz Game',
+                'languageTitle': 'Language',
+                'modeTitle': 'Mode',
                 'classTitle': 'Select Class',
                 'lessonTitle': 'Select Lesson',
                 'nightMode': 'NIGHTMODE',
                 'lightMode': 'LIGHTMODE',
             },
             'ta': {
-                'headerTitle': 'வினாடி வினா விளையாட்டுக்கு வரவேற்கிறோம்!',
+                'sidebarTitle': 'வினாடி வினா விளையாட்டு',
+                'languageTitle': 'மொழி',
+                'modeTitle': 'முறை',
                 'classTitle': 'வகுப்பைத் தேர்ந்தெடுக்கவும்',
                 'lessonTitle': 'பாடத்தைத் தேர்ந்தெடுக்கவும்',
                 'nightMode': 'NIGHTMODE',
@@ -202,22 +253,53 @@
             const classButtons = document.querySelectorAll('.class-button');
             const lessonsContainer = document.getElementById('lessons-container');
             const lessonSelectionDiv = document.getElementById('lesson-selection');
-            
+            const sidebarMenu = document.getElementById('sidebar-menu');
+            const menuToggleBtn = document.getElementById('menu-toggle');
+            const closeMenuBtn = document.getElementById('close-menu');
+            const sidebarOverlay = document.getElementById('sidebar-overlay');
+            const body = document.body;
+
             // Set initial language button as selected
             document.querySelector(`[data-lang="${currentLang}"]`).classList.add('selected');
 
+            // Sidebar toggle functionality
+            menuToggleBtn.addEventListener('click', () => {
+                sidebarMenu.classList.add('open');
+                sidebarOverlay.classList.add('active');
+                body.style.overflow = 'hidden'; // Prevents scrolling on the main page
+                menuToggleBtn.classList.add('hidden'); // Hide the menu toggle button
+            });
+
+            closeMenuBtn.addEventListener('click', () => {
+                sidebarMenu.classList.remove('open');
+                sidebarOverlay.classList.remove('active');
+                body.style.overflow = ''; // Restores scrolling
+                menuToggleBtn.classList.remove('hidden'); // Show the menu toggle button
+            });
+
+            sidebarOverlay.addEventListener('click', () => {
+                sidebarMenu.classList.remove('open');
+                sidebarOverlay.classList.remove('active');
+                body.style.overflow = ''; // Restores scrolling
+                menuToggleBtn.classList.remove('hidden'); // Show the menu toggle button
+            });
+
             // Dark/Light Mode Toggle
             modeToggleBtn.addEventListener('click', () => {
-                document.body.classList.toggle('dark-mode');
-                document.body.classList.toggle('light-mode');
+                body.classList.toggle('dark-mode');
+                body.classList.toggle('light-mode');
                 
-                const isDarkMode = document.body.classList.contains('dark-mode');
+                const isDarkMode = body.classList.contains('dark-mode');
                 if (isDarkMode) {
+                    sidebarMenu.classList.add('dark-mode');
+                    sidebarMenu.classList.remove('light-mode');
                     modeTextSpan.textContent = translations[currentLang].lightMode;
                     modeIconSpan.textContent = '☀️';
                 } else {
+                    sidebarMenu.classList.add('light-mode');
+                    sidebarMenu.classList.remove('dark-mode');
                     modeTextSpan.textContent = translations[currentLang].nightMode;
-                    modeIconSpan.textContent = '🌙';
+                    modeIconSpan.textContent = '�';
                 }
             });
 
@@ -252,11 +334,15 @@
             // Function to update all text based on selected language
             function updateLanguage() {
                 const texts = translations[currentLang];
-                document.getElementById('header-title').textContent = texts.headerTitle;
+                // Update sidebar title and other static text
+                document.getElementById('sidebar-title').textContent = texts.sidebarTitle;
+                document.getElementById('language-title').textContent = texts.languageTitle;
+                document.getElementById('mode-title').textContent = texts.modeTitle;
                 document.getElementById('class-title').textContent = texts.classTitle;
                 document.getElementById('lesson-title').textContent = texts.lessonTitle;
-                
-                const isDarkMode = document.body.classList.contains('dark-mode');
+
+                // Mode toggle text update
+                const isDarkMode = body.classList.contains('dark-mode');
                 if (isDarkMode) {
                     modeTextSpan.textContent = translations[currentLang].lightMode;
                 } else {
@@ -281,18 +367,18 @@
                         lessonButton.textContent = `${index + 1}. ${lesson}`;
                         lessonButton.classList.add('lesson-button', 'bg-purple-600', 'hover:bg-purple-700', 'text-white', 'font-medium', 'py-3', 'px-6', 'rounded-xl', 'shadow-md', 'transition-transform', 'transform', 'hover:scale-105');
                         
-                        // පාඩම බොත්තම ක්ලික් කිරීම සඳහා නව Event Listener එක
+                        // Add new Event Listener for lesson buttons
                         lessonButton.addEventListener('click', () => {
-                            // සියලුම පන්ති බොත්තම්වලින් රතු පැහැය ඉවත් කරන්න
+                            // Remove red highlight from all class buttons
                             classButtons.forEach(btn => btn.classList.remove('bg-red-600', 'hover:bg-red-700'));
                             
-                            // සියලුම පාඩම් බොත්තම්වලින් රතු පැහැය ඉවත් කරන්න
+                            // Remove red highlight from all lesson buttons and reset to purple
                             document.querySelectorAll('.lesson-button').forEach(btn => {
                                 btn.classList.remove('bg-red-600', 'hover:bg-red-700');
                                 btn.classList.add('bg-purple-600', 'hover:bg-purple-700');
                             });
                             
-                            // ක්ලික් කළ පාඩම් බොත්තම රතු පැහැයට වෙනස් කරන්න
+                            // Highlight the clicked lesson button in red
                             lessonButton.classList.remove('bg-purple-600', 'hover:bg-purple-700');
                             lessonButton.classList.add('bg-red-600', 'hover:bg-red-700');
                         });
@@ -311,3 +397,4 @@
     </script>
 </body>
 </html>
+�
