@@ -213,7 +213,7 @@
             'grade10': {
                 'si': ['ගණිතය', 'විද්‍යාව', 'සිංහල', 'බුද්ධ ධර්මය', 'ඉතිහාසය'],
                 'en': ['Mathematics', 'Science', 'Sinhala', 'Buddhism', 'History'],
-                'ta': ['கணிதம்', 'விஞ்ஞானம்', 'සිංහල', 'පෞத்தம்', 'வரලාறு'],
+                'ta': ['கணிதம்', 'විஞ்ஞானം', 'සිංහල', 'පෞத்தம்', 'வரලාறு'],
             },
             'grade11': {
                 'si': ['ගණිතය', 'විද්‍යාව', 'කලා', 'වාණිජ', 'තාක්ෂණ'],
@@ -397,6 +397,12 @@
                             // Highlight the clicked lesson button in red
                             lessonButton.classList.remove('bg-purple-600', 'hover:bg-purple-700');
                             lessonButton.classList.add('bg-red-600', 'hover:bg-red-700');
+                            
+                            // 6 වන ශ්‍රේණියේ පළමු පාඩම සඳහා නිශ්චිත HTML පිටුවට යොමු කිරීම
+                            // Redirect to the specific HTML page for the first lesson of Grade 6
+                            if (classKey === 'grade6' && index === 0) {
+                                window.location.href = './game/grade_6/grade_6_lesson_1.html';
+                            }
                         });
                         
                         lessonsContainer.appendChild(lessonButton);
