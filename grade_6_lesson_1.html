@@ -172,16 +172,17 @@ h1 {
     color: #004d40;
 }
 
-/* Home Button Styles */
-.button-container {
-    text-align: center;
-    margin-top: 30px;
+/* Back Button Styles */
+.back-btn-container {
+    text-align: left;
+    margin-bottom: 20px;
 }
 
-.home-btn {
-    display: inline-block;
-    padding: 15px 30px;
-    font-size: 1.2em;
+.back-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 20px;
+    font-size: 1.1em;
     border: none;
     border-radius: 15px;
     text-decoration: none;
@@ -193,16 +194,28 @@ h1 {
     cursor: pointer;
 }
 
-.home-btn:hover {
+.back-btn:hover {
     transform: translateY(-5px) scale(1.05);
     box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+}
+
+.back-btn .arrow-icon {
+    font-size: 1.5em;
+    margin-right: 8px;
+    transition: transform 0.3s ease-in-out;
+}
+
+.back-btn:hover .arrow-icon {
+    transform: translateX(-5px);
 }
 </style>
 </head>
 <body>
 <div class="quiz-container">
-    <div class="button-container" style="text-align: left; margin-bottom: 20px;">
-        <a href="index.html" class="home-btn">Home</a>
+    <div class="back-btn-container">
+        <a href="index.html" class="back-btn">
+            <span class="arrow-icon">◀</span> Back
+        </a>
     </div>
     <h1>Lesson 1: සංඛ්‍යා රටා - Quiz</h1>
     <div class="progress-wrapper">
@@ -320,4 +333,3 @@ showQuestion(current);
 </script>
 </body>
 </html>
-
