@@ -8,6 +8,28 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, query, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        window.firebase = {
+            initializeApp,
+            getAuth,
+            signInAnonymously,
+            signInWithCustomToken,
+            onAuthStateChanged,
+            getFirestore,
+            doc,
+            getDoc,
+            setDoc,
+            onSnapshot,
+            collection,
+            query,
+            getDocs
+        };
+    </script>
     <style>
         /* General Body and Main Content Styling */
         body {
@@ -145,7 +167,7 @@
             border-radius: 25px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.25);
             padding: 40px;
-            max-width: 750px;
+            max-width: 900px;
             width: 90%; /* Responsive width */
             transform: scale(0.9);
             transition: transform 0.3s ease;
@@ -210,52 +232,6 @@
             font-size: 1.4em;
             color: #333;
             line-height: 1.5;
-        }
-
-        .answers {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .answer-btn {
-            padding: 15px;
-            font-size: 1.1em;
-            border: none;
-            border-radius: 15px;
-            cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            background: linear-gradient(145deg, #ff8a65, #ff7043);
-            color: #fff;
-            font-weight: bold;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-
-        .answer-btn:hover {
-            transform: translateY(-5px) scale(1.02);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-        }
-
-        .answer-btn.correct {
-            background: #4caf50 !important;
-            animation: pulseCorrect 0.5s ease;
-        }
-
-        .answer-btn.wrong {
-            background: #f44336 !important;
-            animation: shake 0.5s ease;
-        }
-
-        @keyframes pulseCorrect {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.03); }
-            100% { transform: scale(1); }
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-5px); }
-            40%, 80% { transform: translateX(5px); }
         }
 
         #result {
@@ -327,6 +303,196 @@
         .back-btn:hover .arrow-icon {
             transform: translateX(-5px);
         }
+
+        /* Drag and Drop Specific Styles */
+        #questions-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .question-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 1rem;
+            background-color: #f3f4f6;
+            border-radius: 12px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .dark-mode .question-item {
+            background-color: #374151;
+        }
+        
+        .question-text {
+            font-size: 1.1em;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .drop-zone {
+            width: 100%;
+            min-height: 3.5rem;
+            background-color: #e5e7eb;
+            border: 2px dashed #9ca3af;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem;
+            font-weight: bold;
+            color: #4b5563;
+            transition: border-color 0.2s, background-color 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+        .dark-mode .drop-zone {
+            background-color: #4b5563;
+            border-color: #6b7280;
+            color: #d1d5db;
+        }
+
+        .drop-zone.hover {
+            border-color: #3b82f6;
+            background-color: #bfdbfe;
+        }
+        .drop-zone.correct {
+            border-color: #16a34a;
+            background-color: #dcfce7;
+            color: #14532d;
+        }
+        .drop-zone.wrong {
+            border-color: #dc2626;
+            background-color: #fee2e2;
+            color: #7f1d1d;
+        }
+        
+        .answer-in-place {
+            position: relative;
+            z-index: 10;
+        }
+        
+        .answer-in-place, .draggable-answer {
+            background-color: #4f46e5;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: move;
+            font-weight: 600;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+        }
+        
+        .draggable-answer:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+        }
+
+        #answers-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding: 1rem;
+            background-color: #f3f4f6;
+            border-radius: 12px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .dark-mode #answers-container {
+            background-color: #374151;
+        }
+        
+        /* Animation for a wrong drop */
+        .wrong-animation {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+            transform: translate3d(0, 0, 0);
+        }
+        
+        @keyframes shake {
+            10%, 90% { transform: translateX(-1px); }
+            20%, 80% { transform: translateX(2px); }
+            30%, 50%, 70% { transform: translateX(-4px); }
+            40%, 60% { transform: translateX(4px); }
+        }
+
+        /* Result summary styling */
+        .result-summary {
+            margin-top: 2rem;
+        }
+
+        .result-summary h3 {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            color: #1e40af; /* Blue text */
+        }
+        .dark-mode .result-summary h3 {
+            color: #60a5fa;
+        }
+        
+        .result-item {
+            background-color: #f8fafc;
+            border-left: 5px solid;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            transition: box-shadow 0.3s;
+        }
+        .dark-mode .result-item {
+            background-color: #2d3748;
+        }
+
+        .result-item.correct {
+            border-color: #10b981; /* Green border */
+        }
+
+        .result-item.incorrect {
+            border-color: #ef4444; /* Red border */
+        }
+
+        .result-item p {
+            font-weight: 500;
+        }
+
+        .result-item .explanation {
+            font-size: 0.9em;
+            color: #6b7280; /* Gray text */
+            margin-top: 0.5rem;
+        }
+        .dark-mode .result-item .explanation {
+            color: #9ca3af;
+        }
+
+        .result-item .user-answer {
+            font-weight: bold;
+            color: #1e40af;
+        }
+        .dark-mode .result-item .user-answer {
+            color: #93c5fd;
+        }
+
+        .result-item .correct-answer {
+            font-weight: bold;
+            color: #059669;
+        }
+        .dark-mode .result-item .correct-answer {
+            color: #34d399;
+        }
+        
+        /* Hide the close button text on mobile */
+        @media (max-width: 640px) {
+            .back-btn-container span:not(.arrow-icon) {
+                display: none;
+            }
+        }
+
     </style>
 </head>
 <body class="light-mode">
@@ -374,6 +540,12 @@
         <div class="main-card rounded-3xl p-8 md:p-12 w-full max-w-2xl mt-8">
             <!-- Main Content Sections -->
             <div class="flex flex-col gap-8">
+                <!-- Total Score Display (NEW) -->
+                <div id="total-score-container" class="bg-blue-600 text-white font-bold p-6 rounded-2xl text-center shadow-lg transition-transform transform hover:scale-105">
+                    <h2 id="total-score-title" class="text-xl"></h2>
+                    <p id="total-score-value" class="text-3xl mt-2">0</p>
+                </div>
+
                 <!-- පන්තිය තෝරාගැනීම (Class Selection) -->
                 <div class="section-card p-6 rounded-2xl border border-gray-200 dark:border-gray-700">
                     <h2 id="class-title" class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Select Class</h2>
@@ -398,10 +570,10 @@
         </div>
     </div>
 
-    <!-- Pop-up Quiz Modal (NEW) -->
+    <!-- Pop-up Quiz Modal -->
     <div id="quiz-modal-overlay" class="quiz-modal-overlay">
         <div id="quiz-container" class="quiz-container light-mode">
-            <!-- Back Button to close the modal (Replaces the link) -->
+            <!-- Back Button to close the modal -->
             <div class="back-btn-container">
                 <button id="quiz-close-btn" class="back-btn">
                     <span class="arrow-icon">◀</span>
@@ -415,16 +587,20 @@
                 </div>
                 <div id="scoreDisplay"></div>
             </div>
-            <div id="questionRemaining"></div>
-            <div id="quiz">
-                <div class="question" id="questionText"></div>
-                <div class="answers" id="answerButtons"></div>
+            <div id="quiz-game-area">
+                <div id="questions-container"></div>
+                <div id="answers-container"></div>
+                <div id="result"></div>
             </div>
-            <div id="result"></div>
         </div>
     </div>
 
     <script>
+        let db, auth, userId;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
         // Data for Lessons and Grades
         const lessons = {
             'grade6': {
@@ -435,7 +611,7 @@
             'grade7': {
                 'si': ['ගණිතය', 'විද්‍යාව', 'සිංහල', 'භූගෝල විද්‍යාව'],
                 'en': ['Mathematics', 'Science', 'Sinhala', 'Geography'],
-                'ta': ['கணிதம்', 'விஞ்ஞானம்', 'සිංහල', 'புவியிල'],
+                'ta': ['கணிதம்', 'விஞ்ஞானம்', 'சிங்களம்', 'புவியிள'],
             },
             'grade8': {
                 'si': ['ගණිතය', 'විද්‍යාව', 'ඉංග්‍රීසි', 'සමාජ අධ්‍යයනය'],
@@ -443,19 +619,19 @@
                 'ta': ['கணிதம்', 'விஞ்ஞானம்', 'ஆங்கிலம்', 'சமூக ஆய்வு'],
             },
             'grade9': {
-                'si': ['ගණිතය', 'විද්‍යාව', 'ICT', 'සෞඛ්‍ය විද්‍යාව'],
-                'en': ['Mathematics', 'Science', 'ICT', 'Health Science'],
-                'ta': ['கணிதம்', 'விஞ்ஞானம்', 'ICT', 'சுகாதார விஞ்ஞானம்'],
+                'si': ['සංඛ්‍යා රටා', 'විද්‍යාව', 'ICT', 'සෞඛ්‍ය විද්‍යාව'],
+                'en': ['Number Patterns', 'Science', 'ICT', 'Health Science'],
+                'ta': ['எண் வடிவங்கள்', 'விஞ்ஞானம்', 'ICT', 'சுகாதார விஞ்ஞானம்'],
             },
             'grade10': {
                 'si': ['ගණිතය', 'විද්‍යාව', 'සිංහල', 'බුද්ධ ධර්මය', 'ඉතිහාසය'],
                 'en': ['Mathematics', 'Science', 'Sinhala', 'Buddhism', 'History'],
-                'ta': ['கணிதம்', 'විஞ்ஞானம்', 'සිංහල', 'පෞத்தம்', 'வரලාறு'],
+                'ta': ['கணிதம்', 'விஞ்ஞானம்', 'சிங்களம்', 'பௌத்தம்', 'வரலாறு'],
             },
             'grade11': {
                 'si': ['ගණිතය', 'විද්‍යාව', 'කලා', 'වාණිජ', 'තාක්ෂණ'],
                 'en': ['Mathematics', 'Science', 'Arts', 'Commerce', 'Technology'],
-                'ta': ['கணிதம்', 'விஞ்ஞானம்', 'கලා', 'வர்த்தகம்', 'தொழில்நுட்பය'],
+                'ta': ['கணிதம்', 'விஞ்ஞானம்', 'கலை', 'வர்த்தகம்', 'தொழில்நுட்பம்'],
             }
         };
 
@@ -479,15 +655,16 @@
                 'lessonTitle': 'පාඩම තෝරන්න',
                 'nightMode': 'NIGHTMODE',
                 'lightMode': 'LIGHTMODE',
-                'quizTitle': 'පාඩම 1: සංඛ්‍යා රටා - ප්‍රශ්න විචාරාත්මක',
+                'totalScoreTitle': 'මුළු ලකුණු',
+                'quizTitle9_1': 'පාඩම 1: සංඛ්‍යා රටා - ප්‍රශ්න විචාරාත්මක',
                 'scoreText': 'ලකුණු: ',
-                'questionText': 'ප්‍රශ්නය',
-                'ofText': 'න් ',
                 'backButton': 'ආපසු',
                 'resultTitle': 'ඔබේ ලකුණු:',
-                'correctText': ' නිවැරදි',
-                'wrongText': ' වැරදි',
-                'selectedText': ' (තෝරාගත්)'
+                'questionsLeft': 'සම්පූර්ණ කිරීමට ප්‍රශ්න: ',
+                'dragAndDropInstruction': 'පිළිතුරු ඇදගෙන අදාළ ප්‍රශ්නයට යොදන්න.',
+                'correctAnswer': 'නිවැරදි පිළිතුර',
+                'yourAnswer': 'ඔබගේ පිළිතුර',
+                'explanation': 'පැහැදිලි කිරීම'
             },
             'en': {
                 'sidebarTitle': 'Quiz Game',
@@ -497,15 +674,16 @@
                 'lessonTitle': 'Select Lesson',
                 'nightMode': 'NIGHTMODE',
                 'lightMode': 'LIGHTMODE',
-                'quizTitle': 'Lesson 1: Number Patterns - Quiz',
+                'totalScoreTitle': 'Total Score',
+                'quizTitle9_1': 'Lesson 1: Number Patterns - Quiz',
                 'scoreText': 'Score: ',
-                'questionText': 'Question',
-                'ofText': ' of ',
                 'backButton': 'Back',
                 'resultTitle': 'Your Score:',
-                'correctText': ' Correct',
-                'wrongText': ' Wrong',
-                'selectedText': ' (Selected)'
+                'questionsLeft': 'Questions left: ',
+                'dragAndDropInstruction': 'Drag and drop the answers to the correct questions.',
+                'correctAnswer': 'Correct Answer',
+                'yourAnswer': 'Your Answer',
+                'explanation': 'Explanation'
             },
             'ta': {
                 'sidebarTitle': 'வினாடி வினா விளையாட்டு',
@@ -515,110 +693,115 @@
                 'lessonTitle': 'பாடத்தைத் தேர்ந்தெடுக்கவும்',
                 'nightMode': 'NIGHTMODE',
                 'lightMode': 'LIGHTMODE',
-                'quizTitle': 'பாடம் 1: எண் வடிவங்கள் - வினாடி வினா',
+                'totalScoreTitle': 'மொத்த மதிப்பெண்கள்',
+                'quizTitle9_1': 'பாடம் 1: எண் வடிவங்கள் - வினாடி வினா',
                 'scoreText': 'புள்ளிகள்: ',
-                'questionText': 'கேள்வி',
-                'ofText': ' இல் ',
                 'backButton': 'பின்செல்க',
                 'resultTitle': 'உங்கள் மதிப்பெண்:',
-                'correctText': ' சரி',
-                'wrongText': ' தவறு',
-                'selectedText': ' (தேர்ந்தெடுக்கப்பட்டது)'
+                'questionsLeft': 'மீதமுள்ள கேள்விகள்: ',
+                'dragAndDropInstruction': 'பதில்களை இழுத்து சரியான கேள்விகளில் விடவும்.',
+                'correctAnswer': 'சரியான பதில்',
+                'yourAnswer': 'உங்கள் பதில்',
+                'explanation': 'விளக்கம்'
             }
         };
-
-        // Multi-language Quiz Data (NEW)
-        const quizDataMultiLang = {
-            'si': [
-                {q:"8, 12, 16, 20, ... ඊලග පදය කුමක්ද?", a:["22, 26","24, 28","25, 30","23, 27"], correct:1},
-                {q:"21, 28, 35, 42, ... පොදු අන්තරය කීයද?", a:["5","6","7","8"], correct:2},
-                {q:"100, 88, 76, 64, ... පොදු අන්තරය:", a:["-10","-12","-14","-8"], correct:1},
-                {q:"පොදු අන්තරය 5 සහ මුල් පදය 2 නම්, 6 වන පදය කීයද?", a:["27","25","22","30"], correct:1},
-                {q:"11 වන පදය 63 නම්, පොදු අන්තරය කීයද? (මුල් පදය 3)", a:["5","6","7","8"], correct:2},
-                {q:"7, 11, 17, 25, 30, ... යන්න arithmetic progression නොවන්නේ ඇයි?", a:["පොදු අන්තරය එකක් නොවීම","පද ගණන අඩු වීම","මුල් පදය 0 වීම","කුමක්ම නොවෙයි"], correct:0},
-                {q:"පොදු අන්තරය 4, මුල් පදය 5 නම්, 15 වන පදය කීයද?", a:["60","61","62","63"], correct:0},
-                {q:"15, 15, 15, 15,... පොදු අන්තරය කීයද?", a:["15","0","1","-15"], correct:1},
-                {q:"89, 70, 53, 38, ... පොදු අන්තරය කීයද?", a:["-15","-17","-18","-19"], correct:2},
-                {q:"Arithmetic progression එකක පොදු අන්තරය negative නම්, පද මාලාව:", a:["වැඩිවෙයි","අඩුවෙයි","එකේම පදය නැවත නැවත ලැබේ","අනියම්ව වෙනස් වේ"], correct:1},
-                {q:"61, 54, 47, 40,... පොදු අන්තරය කීයද?", a:["5","-6","-7","-8"], correct:2},
-                {q:"මුල් පදය 7 සහ පොදු අන්තරය 5 නම්, 10 වන පදය කීයද?", a:["52","54","55","56"], correct:2},
-                {q:"මුල් පදය 3 සහ පොදු අන්තරය 7 නම්, 8 වන පදය කීයද?", a:["49","52","53","54"], correct:2},
-                {q:"32, 28, 24, 20, ... පොදු අන්තරය කීයද?", a:["-2","-3","-4","-5"], correct:2},
-                {q:"5, 12, 19, 26, ... පොදු අන්තරය කීයද?", a:["6","7","8","9"], correct:1},
-                {q:"මුල් පදය 4 සහ පොදු අන්තරය 9 නම්, 12 වන පදය කීයද?", a:["101","102","103","104"], correct:1},
-                {q:"මුල් පදය 10 සහ පොදු අන්තරය 2 නම්, 25 වන පදය කීයද?", a:["58","59","60","61"], correct:2},
-                {q:"99, 93, 87, 81, ... පොදු අන්තරය කීයද?", a:["-4","-5","-6","-7"], correct:2},
-                {q:"මුල් පදය 1 සහ පොදු අන්තරය 4 නම්, 20 වන පදය කීයද?", a:["77","78","79","80"], correct:2},
-                {q:"මුල් පදය 6 සහ පොදු අන්තරය -3 නම්, 15 වන පදය කීයද?", a:["-37","-38","-39","-40"], correct:2}
-            ],
-            'en': [
-                {q:"8, 12, 16, 20, ... What is the next term?", a:["22, 26","24, 28","25, 30","23, 27"], correct:1},
-                {q:"21, 28, 35, 42, ... What is the common difference?", a:["5","6","7","8"], correct:2},
-                {q:"100, 88, 76, 64, ... What is the common difference?", a:["-10","-12","-14","-8"], correct:1},
-                {q:"If the common difference is 5 and the first term is 2, what is the 6th term?", a:["27","25","22","30"], correct:1},
-                {q:"If the 11th term is 63, what is the common difference? (first term is 3)", a:["5","6","7","8"], correct:2},
-                {q:"Why is 7, 11, 17, 25, 30, ... not an arithmetic progression?", a:["The common difference is not constant","The number of terms is small","The first term is 0","None of the above"], correct:0},
-                {q:"If the common difference is 4 and the first term is 5, what is the 15th term?", a:["60","61","62","63"], correct:0},
-                {q:"15, 15, 15, 15,... What is the common difference?", a:["15","0","1","-15"], correct:1},
-                {q:"89, 70, 53, 38, ... What is the common difference?", a:["-15","-17","-18","-19"], correct:2},
-                {q:"If the common difference of an arithmetic progression is negative, the sequence will:", a:["increase","decrease","repeat the same term","change randomly"], correct:1},
-                {q:"61, 54, 47, 40,... What is the common difference?", a:["5","-6","-7","-8"], correct:2},
-                {q:"If the first term is 7 and the common difference is 5, what is the 10th term?", a:["52","54","55","56"], correct:2},
-                {q:"If the first term is 3 and the common difference is 7, what is the 8th term?", a:["49","52","53","54"], correct:2},
-                {q:"32, 28, 24, 20, ... What is the common difference?", a:["-2","-3","-4","-5"], correct:2},
-                {q:"5, 12, 19, 26, ... What is the common difference?", a:["6","7","8","9"], correct:1},
-                {q:"If the first term is 4 and the common difference is 9, what is the 12th term?", a:["101","102","103","104"], correct:1},
-                {q:"If the first term is 10 and the common difference is 2, what is the 25th term?", a:["58","59","60","61"], correct:2},
-                {q:"99, 93, 87, 81, ... What is the common difference?", a:["-4","-5","-6","-7"], correct:2},
-                {q:"If the first term is 1 and the common difference is 4, what is the 20th term?", a:["77","78","79","80"], correct:2},
-                {q:"If the first term is 6 and the common difference is -3, what is the 15th term?", a:["-37","-38","-39","-40"], correct:2}
-            ],
-            'ta': [
-                {q:"8, 12, 16, 20, ... அடுத்த பதம் என்ன?", a:["22, 26","24, 28","25, 30","23, 27"], correct:1},
-                {q:"21, 28, 35, 42, ... பொது வித்தியாசம் என்ன?", a:["5","6","7","8"], correct:2},
-                {q:"100, 88, 76, 64, ... பொது வித்தியாசம்:", a:["-10","-12","-14","-8"], correct:1},
-                {q:"பொது வித்தியாசம் 5 மற்றும் முதல் பதம் 2 எனில், 6 வது பதம் என்ன?", a:["27","25","22","30"], correct:1},
-                {q:"11 வது பதம் 63 எனில், பொது வித்தியாசம் என்ன? (முதல் பதம் 3)", a:["5","6","7","8"], correct:2},
-                {q:"ஏன் 7, 11, 17, 25, 30, ... ஒரு எண்கணிதத் தொடர்முறை அல்ல?", a:["பொது வித்தியாசம் மாறாதது அல்ல","பதங்களின் எண்ணிக்கை குறைவு","முதல் பதம் 0 ஆகும்","மேற்கூறிய எதுவும் இல்லை"], correct:0},
-                {q:"பொது வித்தியாசம் 4 மற்றும் முதல் பதம் 5 எனில், 15 வது பதம் என்ன?", a:["60","61","62","63"], correct:0},
-                {q:"15, 15, 15, 15,... பொது வித்தியாசம் என்ன?", a:["15","0","1","-15"], correct:1},
-                {q:"89, 70, 53, 38, ... பொது வித்தியாசம் என்ன?", a:["-15","-17","-18","-19"], correct:2},
-                {q:"ஒரு எண்கணிதத் தொடர்முறையின் பொது வித்தியாசம் எதிர்மறையாக இருந்தால், தொடர்முறை:", a:["அதிகரிக்கும்","குறையும்","அதே பதம் மீண்டும் வரும்","மாற்றங்கள் இருக்கும்"], correct:1},
-                {q:"61, 54, 47, 40,... பொது வித்தியாசம் என்ன?", a:["5","-6","-7","-8"], correct:2},
-                {q:"முதல் பதம் 7 மற்றும் பொது வித்தியாசம் 5 எனில், 10 வது பதம் என்ன?", a:["52","54","55","56"], correct:2},
-                {q:"முதல் பதம் 3 மற்றும் பொது வித்தியாசம் 7 எனில், 8 வது பதம் என்ன?", a:["49","52","53","54"], correct:2},
-                {q:"32, 28, 24, 20, ... பொது வித்தியாசம் என்ன?", a:["-2","-3","-4","-5"], correct:2},
-                {q:"5, 12, 19, 26, ... பொது வித்தியாசம் என்ன?", a:["6","7","8","9"], correct:1},
-                {q:"முதல் பதம் 4 மற்றும் பொது வித்தியாசம் 9 எனில், 12 வது பதம் என்ன?", a:["101","102","103","104"], correct:1},
-                {q:"முதல் பதம் 10 மற்றும் பொது வித்தியாசம் 2 எனில், 25 வது பதம் என்ன?", a:["58","59","60","61"], correct:2},
-                {q:"99, 93, 87, 81, ... பொது வித்தியாசம் என்ன?", a:["-4","-5","-6","-7"], correct:2},
-                {q:"முதல் பதம் 1 மற்றும் பொது வித்தியாசம் 4 எனில், 20 வது பதம் என்ன?", a:["77","78","79","80"], correct:2},
-                {q:"முதல் பதம் 6 மற்றும் பொது வித்தியாசம் -3 எனில், 15 வது பதம் என்ன?", a:["-37","-38","-39","-40"], correct:2}
-            ]
+        
+        // Drag and Drop Quiz Data (New)
+        const quizDataDragDrop = {
+            'grade9_lesson1': {
+                'si': [
+                    { q: "3,7,11,15,… රටාවේ ඊළඟ පදය සොයන්න.", a: "19", e: "සෑම පදයකටම 4ක් එකතු වේ." },
+                    { q: "1,4,9,16,… රටාවේ ඊළඟ පදය කුමක්ද?", a: "25", e: "වර්ග සංඛ්‍යා: $1^2, 2^2, 3^2, 4^2, 5^2$" },
+                    { q: "10,8,6,4,… යන රටාවේ ඊළඟ පදය කීයද?", a: "2", e: "සෑම පදයකින්ම 2ක් අඩු වේ." },
+                    { q: "2,4,8,16,… යන රටාවේ ඊළඟ පදය සොයන්න.", a: "32", e: "සෑම පදයක්ම 2න් ගුණ කරයි." },
+                    { q: "1,3,6,10,… යන රටාවේ ඊළඟ ත්‍රිකෝණාකාර සංඛ්‍යාව සොයන්න.", a: "15", e: "ත්‍රිකෝණාකාර සංඛ්‍යා: 1+2=3, 3+3=6, 6+4=10, 10+5=15" },
+                    { q: "5,10,15,20,… යන රටාවේ 10 වැනි පදය සොයන්න.", a: "50", e: "$n$ වැනි පදය $5n$ වේ. $5 \\times 10 = 50$" },
+                    { q: "1,1,2,3,5,… යන ෆිබොනාච්චි (Fibonacci) රටාවේ ඊළඟ පදය කුමක්ද?", a: "8", e: "පෙර පද දෙකෙහි එකතුව: $3+5=8$" },
+                    { q: "100,95,90,85,… යන රටාවේ ඊළඟ පදය සොයන්න.", a: "80", e: "සෑම පදයකින්ම 5ක් අඩු වේ." },
+                    { q: "1,8,27,64,… යන රටාවේ ඊළඟ ඝන සංඛ්‍යාව කුමක්ද?", a: "125", e: "ඝන සංඛ්‍යා: $1^3, 2^3, 3^3, 4^3, 5^3$" },
+                    { q: "7,14,21,28,… යන රටාවේ 12 වැනි පදය කුමක්ද?", a: "84", e: "$n$ වැනි පදය $7n$ වේ. $7 \\times 12 = 84$" },
+                    { q: "2,5,8,11,… යන රටාවේ n වැනි පදය සඳහා සාධාරණ පදය (general term) ලියන්න.", a: "3n-1", e: "පොදු අන්තරය 3 යි." },
+                    { q: "5,7,9,11,… යන රටාවේ ඊළඟ පදය කුමක්ද?", a: "13", e: "සෑම පදයකටම 2ක් එකතු වේ." },
+                    { q: "3,6,9,12,… යන රටාවේ 15 වැනි පදය සොයන්න.", a: "45", e: "$n$ වැනි පදය $3n$ වේ. $3 \\times 15 = 45$" },
+                    { q: "2,4,6,8,… යන ඉරට්ටේ සංඛ්‍යා රටාවේ n වැනි පදය සඳහා සාධාරණ පදය ලියන්න.", a: "2n", e: "පොදු අන්තරය 2 යි." },
+                    { q: "1,3,5,7,… යන ඔත්තේ සංඛ්‍යා රටාවේ 100 වැනි පදය සොයන්න.", a: "199", e: "$n$ වැනි පදය $2n-1$ වේ. $2 \\times 100 - 1 = 199$" },
+                    { q: "10,20,30,40,… යන රටාවේ 20 වැනි පදය කුමක්ද?", a: "200", e: "$n$ වැනි පදය $10n$ වේ. $10 \\times 20 = 200$" },
+                    { q: "1,4,7,10,… යන රටාවේ ඊළඟ පදය සොයන්න.", a: "13", e: "සෑම පදයකටම 3ක් එකතු වේ." },
+                    { q: "1000,100,10,1,… යන රටාවේ ඊළඟ පදය කුමක්ද?", a: "0.1", e: "සෑම පදයක්ම 10න් බෙදයි." },
+                    { q: "11,22,33,44,… යන රටාවේ 10 වැනි පදය කුමක්ද?", a: "110", e: "$n$ වැනි පදය $11n$ වේ. $11 \\times 10 = 110$" },
+                    { q: "2,6,10,14,… යන රටාවේ n වැනි පදය සොයන්න.", a: "4n-2", e: "පොදු අන්තරය 4 යි." }
+                ],
+                'en': [
+                    { q: "Find the next term in the sequence 3,7,11,15,....", a: "19", e: "Adds 4 to each term." },
+                    { q: "What is the next term in the sequence 1,4,9,16,....?", a: "25", e: "Square numbers: $1^2, 2^2, 3^2, 4^2, 5^2$" },
+                    { q: "What is the next term in the sequence 10,8,6,4,....?", a: "2", e: "Subtracts 2 from each term." },
+                    { q: "Find the next term in the sequence 2,4,8,16,....", a: "32", e: "Multiplies each term by 2." },
+                    { q: "Find the next triangular number in the sequence 1,3,6,10,....", a: "15", e: "Triangular numbers: 1+2=3, 3+3=6, 6+4=10, 10+5=15" },
+                    { q: "Find the 10th term in the sequence 5,10,15,20,....", a: "50", e: "The nth term is $5n$. $5 \\times 10 = 50$" },
+                    { q: "What is the next term in the Fibonacci sequence 1,1,2,3,5,....?", a: "8", e: "Sum of the previous two terms: $3+5=8$" },
+                    { q: "Find the next term in the sequence 100,95,90,85,....", a: "80", e: "Subtracts 5 from each term." },
+                    { q: "What is the next cubic number in the sequence 1,8,27,64,....?", a: "125", e: "Cubic numbers: $1^3, 2^3, 3^3, 4^3, 5^3$" },
+                    { q: "What is the 12th term in the sequence 7,14,21,28,....?", a: "84", e: "The nth term is $7n$. $7 \\times 12 = 84$" },
+                    { q: "Write the general term for the nth term of the sequence 2,5,8,11,....", a: "3n-1", e: "Common difference is 3." },
+                    { q: "What is the next term in the sequence 5,7,9,11,....?", a: "13", e: "Adds 2 to each term." },
+                    { q: "Find the 15th term in the sequence 3,6,9,12,....", a: "45", e: "The nth term is $3n$. $3 \\times 15 = 45$" },
+                    { q: "Write the general term for the nth term of the even number sequence 2,4,6,8,....", a: "2n", e: "Common difference is 2." },
+                    { q: "Find the 100th term of the odd number sequence 1,3,5,7,....", a: "199", e: "The nth term is $2n-1$. $2 \\times 100 - 1 = 199$" },
+                    { q: "What is the 20th term in the sequence 10,20,30,40,....?", a: "200", e: "The nth term is $10n$. $10 \\times 20 = 200$" },
+                    { q: "Find the next term in the sequence 1,4,7,10,....", a: "13", e: "Adds 3 to each term." },
+                    { q: "What is the next term in the sequence 1000,100,10,1,....?", a: "0.1", e: "Divides each term by 10." },
+                    { q: "What is the 10th term in the sequence 11,22,33,44,....?", a: "110", e: "The nth term is $11n$. $11 \\times 10 = 110$" },
+                    { q: "Find the nth term of the sequence 2,6,10,14,....", a: "4n-2", e: "Common difference is 4." }
+                ],
+                'ta': [
+                    { q: "3,7,11,15,… என்ற தொடரின் அடுத்த பதம் என்ன?", a: "19", e: "ஒவ்வொரு பதத்திற்கும் 4 கூட்டப்படுகிறது." },
+                    { q: "1,4,9,16,… என்ற தொடரின் அடுத்த பதம் என்ன?", a: "25", e: "சதுர எண்கள்: $1^2, 2^2, 3^2, 4^2, 5^2$" },
+                    { q: "10,8,6,4,… என்ற தொடரின் அடுத்த பதம் என்ன?", a: "2", e: "ஒவ்வொரு பதத்திலிருந்தும் 2 கழிக்கப்படுகிறது." },
+                    { q: "2,4,8,16,… என்ற தொடரின் அடுத்த பதம் என்ன?", a: "32", e: "ஒவ்வொரு பதமும் 2 ஆல் பெருக்கப்படுகிறது." },
+                    { q: "1,3,6,10,… என்ற தொடரின் அடுத்த முக்கோண எண் என்ன?", a: "15", e: "முக்கோண எண்கள்: 1+2=3, 3+3=6, 6+4=10, 10+5=15" },
+                    { q: "5,10,15,20,… என்ற தொடரின் 10வது பதம் என்ன?", a: "50", e: "n-வது பதம் $5n$ ஆகும். $5 \\times 10 = 50$" },
+                    { q: "1,1,2,3,5,… என்ற ஃபிபனாச்சி (Fibonacci) தொடரின் அடுத்த பதம் என்ன?", a: "8", e: "முந்தைய இரண்டு பதங்களின் கூட்டுத்தொகை: $3+5=8$" },
+                    { q: "100,95,90,85,… என்ற தொடரின் அடுத்த பதம் என்ன?", a: "80", e: "ஒவ்வொரு பதத்திலிருந்தும் 5 கழிக்கப்படுகிறது." },
+                    { q: "1,8,27,64,… என்ற தொடரின் அடுத்த கன எண் என்ன?", a: "125", e: "கன எண்கள்: $1^3, 2^3, 3^3, 4^3, 5^3$" },
+                    { q: "7,14,21,28,… என்ற தொடரின் 12வது பதம் என்ன?", a: "84", e: "n-வது பதம் $7n$ ஆகும். $7 \\times 12 = 84$" },
+                    { q: "2,5,8,11,… என்ற தொடரின் n-வது பதத்திற்கான பொதுவான பதத்தை எழுதுங்கள்.", a: "3n-1", e: "பொது வித்தியாசம் 3 ஆகும்." },
+                    { q: "5,7,9,11,… என்ற தொடரின் அடுத்த பதம் என்ன?", a: "13", e: "ஒவ்வொரு பதத்திற்கும் 2 கூட்டப்படுகிறது." },
+                    { q: "3,6,9,12,… என்ற தொடரின் 15வது பதம் என்ன?", a: "45", e: "n-வது பதம் $3n$ ஆகும். $3 \\times 15 = 45$" },
+                    { q: "2,4,6,8,… என்ற இரட்டைப்படை எண்களின் தொடரின் n-வது பதத்திற்கான பொதுவான பதத்தை எழுதுங்கள்.", a: "2n", e: "பொது வித்தியாசம் 2 ஆகும்." },
+                    { q: "1,3,5,7,… என்ற ஒற்றைப்படை எண்களின் தொடரின் 100வது பதம் என்ன?", a: "199", e: "n-வது பதம் $2n-1$ ஆகும். $2 \\times 100 - 1 = 199$" },
+                    { q: "10,20,30,40,… என்ற தொடரின் 20வது பதம் என்ன?", a: "200", e: "n-வது பதம் $10n$ ஆகும். $10 \\times 20 = 200$" },
+                    { q: "1,4,7,10,… என்ற தொடரின் அடுத்த பதம் என்ன?", a: "13", e: "ஒவ்வொரு பதத்திற்கும் 3 கூட்டப்படுகிறது." },
+                    { q: "1000,100,10,1,… என்ற தொடரின் அடுத்த பதம் என்ன?", a: "0.1", e: "ஒவ்வொரு பதமும் 10 ஆல் வகுக்கப்படுகிறது." },
+                    { q: "11,22,33,44,… என்ற தொடரின் 10வது பதம் என்ன?", a: "110", e: "n-வது பதம் $11n$ ஆகும். $11 \\times 10 = 110$" },
+                    { q: "2,6,10,14,… என்ற தொடரின் n-வது பதத்தை எழுதுங்கள்.", a: "4n-2", e: "பொது வித்தியாசம் 4 ஆகும்." }
+                ]
+            }
         };
 
         let currentLang = 'si';
         let selectedClassKey = null;
 
         let quizData = [];
-        let current = 0;
+        let currentQuizId = null;
         let score = 0;
-        let selectedAnswers = [];
+        let questionsAnswered = 0;
+        let userAnswers = {};
 
-        // Element references for the quiz
+        // Element references
         const quizModalOverlay = document.getElementById("quiz-modal-overlay");
         const quizContainer = document.getElementById("quiz-container");
         const quizTitle = document.getElementById("quiz-title");
         const quizCloseBtn = document.getElementById("quiz-close-btn");
         const closeBtnText = document.getElementById("close-btn-text");
-        const questionText = document.getElementById("questionText");
-        const answerButtons = document.getElementById("answerButtons");
+        const questionsContainer = document.getElementById("questions-container");
+        const answersContainer = document.getElementById("answers-container");
         const resultDiv = document.getElementById("result");
         const progressBar = document.getElementById("progressBar");
-        const questionRemaining = document.getElementById("questionRemaining");
         const scoreDisplay = document.getElementById("scoreDisplay");
+        const totalScoreTitle = document.getElementById("total-score-title");
+        const totalScoreValue = document.getElementById("total-score-value");
 
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             const modeToggleBtn = document.getElementById('mode-toggle');
             const modeTextSpan = document.getElementById('mode-text');
             const modeIconSpan = document.getElementById('mode-icon');
@@ -631,7 +814,59 @@
             const closeMenuBtn = document.getElementById('close-menu');
             const sidebarOverlay = document.getElementById('sidebar-overlay');
             const body = document.body;
+            
+            // Initialize Firebase
+            if (Object.keys(firebaseConfig).length > 0) {
+                const app = firebase.initializeApp(firebaseConfig);
+                auth = firebase.getAuth(app);
+                db = firebase.getFirestore(app);
 
+                if (initialAuthToken) {
+                    await firebase.signInWithCustomToken(auth, initialAuthToken).catch(err => console.error("Firebase auth error:", err));
+                } else {
+                    await firebase.signInAnonymously(auth).catch(err => console.error("Firebase auth error:", err));
+                }
+            } else {
+                console.error("Firebase config is missing.");
+            }
+
+            firebase.onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    userId = user.uid;
+                    fetchTotalScore();
+                } else {
+                    console.log("No user signed in.");
+                }
+            });
+
+            // Function to fetch total score from Firestore
+            async function fetchTotalScore() {
+                if (!userId || !db) return;
+                try {
+                    const scoresCol = firebase.collection(db, `/artifacts/${appId}/users/${userId}/scores`);
+                    const scoreSnapshot = await firebase.getDocs(scoresCol);
+                    let totalScore = 0;
+                    scoreSnapshot.forEach(doc => {
+                        const data = doc.data();
+                        totalScore += data.score;
+                    });
+                    totalScoreValue.textContent = totalScore;
+                } catch (e) {
+                    console.error("Error fetching total score:", e);
+                }
+            }
+
+            // Function to save score to Firestore
+            async function saveScore(quizId, finalScore) {
+                if (!userId || !db) return;
+                try {
+                    const scoreDocRef = firebase.doc(db, `/artifacts/${appId}/users/${userId}/scores`, quizId);
+                    await firebase.setDoc(scoreDocRef, { score: finalScore });
+                } catch (e) {
+                    console.error("Error saving score:", e);
+                }
+            }
+            
             // Set initial language button as selected
             document.querySelector(`[data-lang="${currentLang}"]`).classList.add('selected');
 
@@ -712,6 +947,7 @@
                 document.getElementById('mode-title').textContent = texts.modeTitle;
                 document.getElementById('class-title').textContent = texts.classTitle;
                 document.getElementById('lesson-title').textContent = texts.lessonTitle;
+                totalScoreTitle.textContent = texts.totalScoreTitle;
                 closeBtnText.textContent = texts.backButton;
 
                 // Mode toggle text update
@@ -742,10 +978,8 @@
                         
                         // Add new Event Listener for lesson buttons
                         lessonButton.addEventListener('click', () => {
-                            // Remove red highlight from all class buttons
+                            // Remove red highlight from all class and lesson buttons
                             classButtons.forEach(btn => btn.classList.remove('bg-red-600', 'hover:bg-red-700'));
-                            
-                            // Remove red highlight from all lesson buttons and reset to purple
                             document.querySelectorAll('.lesson-button').forEach(btn => {
                                 btn.classList.remove('bg-red-600', 'hover:bg-red-700');
                                 btn.classList.add('bg-purple-600', 'hover:bg-purple-700');
@@ -755,10 +989,10 @@
                             lessonButton.classList.remove('bg-purple-600', 'hover:bg-purple-700');
                             lessonButton.classList.add('bg-red-600', 'hover:bg-red-700');
                             
-                            // Open the quiz modal instead of navigating
-                            // Check if it's the specific lesson to open the quiz
-                            if (classKey === 'grade6' && index === 0) {
-                                openQuizModal();
+                            let quizId = `${classKey}_lesson${index + 1}`;
+                            const quizData = quizDataDragDrop[quizId];
+                            if (quizData) {
+                                openQuizModal(quizId);
                             }
                         });
                         
@@ -770,102 +1004,168 @@
                 }
             }
 
-            // Function to open the pop-up quiz modal (NEW)
-            function openQuizModal() {
+            // Function to open the pop-up quiz modal
+            function openQuizModal(quizId) {
+                currentQuizId = quizId;
                 quizModalOverlay.classList.add('active');
                 startQuiz();
             }
 
-            // Function to close the pop-up quiz modal (NEW)
+            // Function to close the pop-up quiz modal
             function closeQuizModal() {
                 quizModalOverlay.classList.remove('active');
+                fetchTotalScore(); // Update total score on the home page
             }
 
             quizCloseBtn.addEventListener('click', closeQuizModal);
 
-            // QUIZ LOGIC FUNCTIONS (from user's code, now adapted for multi-language and modal)
+            // QUIZ LOGIC FUNCTIONS
             
             function startQuiz() {
-                // Get questions for the current language and shuffle them
-                quizData = [...quizDataMultiLang[currentLang]].sort(() => Math.random() - 0.5);
-                current = 0;
+                quizData = quizDataDragDrop[currentQuizId][currentLang];
                 score = 0;
-                selectedAnswers = [];
-                // Set the quiz title based on the current language
-                quizTitle.textContent = translations[currentLang].quizTitle;
+                questionsAnswered = 0;
+                userAnswers = {};
                 
-                showQuestion(current);
-            }
+                // Shuffle questions and answers
+                const shuffledQuestions = [...quizData].sort(() => Math.random() - 0.5);
+                const shuffledAnswers = [...quizData].map(q => q.a).sort(() => Math.random() - 0.5);
 
-            function showQuestion(index) {
-                // Reset display for new question
-                questionRemaining.style.display = "block";
-                scoreDisplay.style.display = "block";
-                questionText.style.display = "block";
-                answerButtons.style.display = "flex";
-                resultDiv.innerHTML = "";
+                questionsContainer.innerHTML = '';
+                answersContainer.innerHTML = '';
+                resultDiv.innerHTML = '';
+                progressBar.style.width = '0%';
+                scoreDisplay.textContent = translations[currentLang].dragAndDropInstruction;
 
-                const q = quizData[index];
-                questionText.textContent = q.q;
-                answerButtons.innerHTML = "";
-                q.a.forEach((answer, i) => {
-                    const btn = document.createElement("button");
-                    btn.textContent = answer;
-                    btn.classList.add("answer-btn");
-                    btn.addEventListener("click", () => selectAnswer(i, btn));
-                    answerButtons.appendChild(btn);
+                // Create and populate question drop zones
+                shuffledQuestions.forEach((item, index) => {
+                    const questionItem = document.createElement('div');
+                    questionItem.className = 'question-item';
+                    
+                    const questionNumber = document.createElement('span');
+                    questionNumber.className = 'question-text';
+                    questionNumber.innerHTML = `${index + 1}. ${item.q}`;
+
+                    const dropZone = document.createElement('div');
+                    dropZone.className = 'drop-zone';
+                    dropZone.dataset.correctAnswer = item.a;
+                    dropZone.dataset.questionId = index;
+                    dropZone.innerHTML = 'Drop Answer Here';
+
+                    questionItem.appendChild(questionNumber);
+                    questionItem.appendChild(dropZone);
+                    questionsContainer.appendChild(questionItem);
                 });
-                questionRemaining.textContent = `${translations[currentLang].questionText} ${current + 1} ${translations[currentLang].ofText} ${quizData.length}`;
-                progressBar.style.width = `${((current) / quizData.length) * 100}%`;
-                scoreDisplay.textContent = `${translations[currentLang].scoreText} ${score}`;
-            }
 
-            function selectAnswer(i, btn) {
-                const correctIndex = quizData[current].correct;
-                selectedAnswers.push(i);
-                Array.from(answerButtons.children).forEach((b, idx) => {
-                    b.disabled = true;
-                    if (idx === correctIndex) b.classList.add("correct");
-                    if (idx === i && i !== correctIndex) b.classList.add("wrong");
+                // Create and populate draggable answers
+                shuffledAnswers.forEach((answer, index) => {
+                    const draggableAnswer = document.createElement('div');
+                    draggableAnswer.className = 'draggable-answer';
+                    draggableAnswer.innerHTML = answer;
+                    draggableAnswer.draggable = true;
+                    draggableAnswer.dataset.answer = answer;
+                    draggableAnswer.id = `draggable-answer-${index}`;
+                    answersContainer.appendChild(draggableAnswer);
                 });
-                if (i === correctIndex) score++;
-                scoreDisplay.textContent = `${translations[currentLang].scoreText} ${score}`;
-                setTimeout(() => {
-                    current++;
-                    if (current < quizData.length) {
-                        showQuestion(current);
-                    } else {
-                        showResult();
-                    }
-                }, 500);
+
+                // Add drag and drop event listeners
+                setupDragAndDropListeners();
             }
 
-            function showResult() {
-                questionText.style.display = "none";
-                answerButtons.style.display = "none";
-                questionRemaining.style.display = "none";
-                progressBar.style.width = "100%";
-            
-                let html = `<h2>${translations[currentLang].resultTitle} ${score} / ${quizData.length}</h2>`;
-                html += `<ul>`;
-                quizData.forEach((q, idx) => {
-                    html += `<li>${idx + 1}. ${q.q} <br>`;
-                    q.a.forEach((ans, i) => {
-                        let clickText = '';
-                        if (selectedAnswers[idx] === i && i !== q.correct) clickText = translations[currentLang].selectedText;
-            
-                        if (i === q.correct) {
-                            html += `<span style="color:green;">✔ ${ans} ${translations[currentLang].correctText}${clickText}</span> `;
-                        } else if (selectedAnswers[idx] === i) {
-                            html += `<span style="color:red;">✖ ${ans} ${translations[currentLang].wrongText}${clickText}</span> `;
-                        } else {
-                            html += `${ans} `;
+            function setupDragAndDropListeners() {
+                const draggables = document.querySelectorAll('.draggable-answer');
+                const dropZones = document.querySelectorAll('.drop-zone');
+
+                draggables.forEach(draggable => {
+                    draggable.addEventListener('dragstart', e => {
+                        e.dataTransfer.setData('text/plain', draggable.dataset.answer);
+                        e.dataTransfer.effectAllowed = 'move';
+                        draggable.classList.add('dragging');
+                    });
+                    draggable.addEventListener('dragend', () => {
+                        draggable.classList.remove('dragging');
+                    });
+                });
+
+                dropZones.forEach(dropZone => {
+                    dropZone.addEventListener('dragover', e => {
+                        e.preventDefault();
+                        e.dataTransfer.dropEffect = 'move';
+                        dropZone.classList.add('hover');
+                    });
+                    dropZone.addEventListener('dragleave', () => {
+                        dropZone.classList.remove('hover');
+                    });
+                    dropZone.addEventListener('drop', e => {
+                        e.preventDefault();
+                        dropZone.classList.remove('hover');
+                        
+                        if (dropZone.children.length === 0) {
+                            const droppedAnswer = e.dataTransfer.getData('text/plain');
+                            const droppedElement = document.querySelector(`[data-answer="${droppedAnswer}"]`);
+                            const questionId = dropZone.dataset.questionId;
+                            const correctAnswer = dropZone.dataset.correctAnswer;
+                            
+                            // Check if the dropped answer is correct
+                            if (droppedAnswer === correctAnswer) {
+                                score++;
+                                dropZone.classList.add('correct');
+                                droppedElement.draggable = false;
+                            } else {
+                                dropZone.classList.add('wrong');
+                                dropZone.classList.add('wrong-animation');
+                            }
+                            
+                            // Log the user's answer
+                            userAnswers[questionId] = droppedAnswer;
+                            questionsAnswered++;
+                            
+                            // Move the dropped element to the drop zone
+                            droppedElement.classList.add('answer-in-place');
+                            dropZone.appendChild(droppedElement);
+
+                            updateProgress();
+                            
+                            if (questionsAnswered === quizData.length) {
+                                setTimeout(showResult, 1000);
+                            }
                         }
                     });
-                    html += `</li><br>`;
                 });
-                html += `</ul>`;
+            }
+
+            function updateProgress() {
+                progressBar.style.width = `${(questionsAnswered / quizData.length) * 100}%`;
+                scoreDisplay.textContent = `${translations[currentLang].scoreText} ${score} / ${quizData.length}`;
+            }
+
+            async function showResult() {
+                questionsContainer.innerHTML = '';
+                answersContainer.innerHTML = '';
+                scoreDisplay.textContent = "";
+                
+                let html = `<h2>${translations[currentLang].resultTitle} ${score} / ${quizData.length}</h2>`;
+                html += `<div class="result-summary">`;
+                
+                const originalOrderQuestions = quizDataDragDrop[currentQuizId][currentLang];
+                
+                originalOrderQuestions.forEach((q, idx) => {
+                    const userAnswer = userAnswers[idx];
+                    const isCorrect = userAnswer === q.a;
+                    
+                    html += `<div class="result-item ${isCorrect ? 'correct' : 'incorrect'}">`;
+                    html += `<p class="font-bold">${idx + 1}. ${q.q}</p>`;
+                    html += `<p class="mt-2 text-sm">${translations[currentLang].yourAnswer}: <span class="user-answer">${userAnswer || 'Not answered'}</span></p>`;
+                    html += `<p class="text-sm">${translations[currentLang].correctAnswer}: <span class="correct-answer">${q.a}</span></p>`;
+                    html += `<p class="text-sm explanation">${translations[currentLang].explanation}: ${q.e}</p>`;
+                    html += `</div>`;
+                });
+                
+                html += `</div>`;
                 resultDiv.innerHTML = html;
+
+                // Save score to Firestore after quiz completion
+                await saveScore(currentQuizId, score);
             }
 
             // Initial language update to set correct text on load
