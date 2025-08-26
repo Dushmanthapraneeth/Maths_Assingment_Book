@@ -108,7 +108,7 @@
         .dropzone.correct { border-color: var(--ok); background: #ecfbf4; transform: scale(1.02); }
         .dropzone.wrong { border-color: var(--bad); background: #ffefef; animation: shake .5s; }
 
-        /* The answers sidebar container */
+        /* The answers sidebar container - Desktop view */
         .answers-sidebar {
             position: fixed;
             top: 0;
@@ -143,8 +143,8 @@
             flex-direction: column;
             gap: 10px;
         }
-
-        /* The new sidebar toggle button */
+        
+        /* The new sidebar toggle button - Desktop view */
         .sidebar-toggle {
             position: absolute;
             top: 50%;
@@ -159,6 +159,7 @@
             box-shadow: -2px 0 8px rgba(10,60,120,.08);
             z-index: 1001;
             border: 1px solid #e2eefc;
+            cursor: pointer;
         }
         .sidebar-toggle svg {
             transition: transform .3s ease;
@@ -170,6 +171,60 @@
         /* Adjust main app padding for larger screens to avoid content being hidden by the sidebar */
         @media (min-width: 900px) {
             .app { padding-right: 270px; }
+        }
+
+        /* Media queries for Mobile optimization */
+        @media (max-width: 899px) {
+            .app {
+                grid-template-rows: 1fr auto; /* Ensure quiz area and answers are separate rows */
+                padding-bottom: 80px; /* Leave space for the answers bank at the bottom */
+                place-items: start;
+            }
+            .grid { padding-bottom: 24px; }
+            .answers-sidebar {
+                top: auto;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                width: 100%;
+                height: 250px;
+                max-height: 90%;
+                border-left: none;
+                border-top: 1px solid #e2eefc;
+                box-shadow: 0 -6px 20px rgba(10,60,120,.08);
+                padding: 16px;
+                transform: translateY(0);
+                transition: transform .3s ease-in-out;
+            }
+            .answers-sidebar.hidden {
+                transform: translateY(100%);
+            }
+            .answers-sidebar .bank {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 8px;
+                border: none;
+                padding: 0;
+            }
+            .answers-sidebar h3 {
+                display: none; /* Hide the title to save space on mobile */
+            }
+            .sidebar-toggle {
+                top: -40px; /* Position the toggle button on top of the sidebar */
+                left: 50%;
+                transform: translateX(-50%);
+                border-bottom-left-radius: 0;
+                border-bottom-right-radius: 0;
+                border: none;
+                box-shadow: 0 -2px 8px rgba(10,60,120,.08);
+            }
+            .sidebar-toggle svg {
+                transform: rotate(90deg);
+            }
+            .answers-sidebar.hidden .sidebar-toggle svg {
+                transform: rotate(-90deg);
+            }
         }
 
         /* Draggable answer tiles */
@@ -275,12 +330,13 @@
         </footer>
     </div>
 
-    <!-- Answers bank as a fixed sidebar -->
+    <!-- Answers bank as a responsive sidebar/bottom drawer -->
     <div class="answers-sidebar" id="answersSidebar">
         <h3>පිළිතුරු බැංකුව</h3>
         <div class="bank" id="answersBank" aria-label="පිළිතුරු බැංකුව"></div>
         <button id="sidebarToggle" class="sidebar-toggle" aria-label="පිළිතුරු බැංකුව සැඟවීම/පෙන්වීම">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg id="toggleIcon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <!-- SVG path for the left arrow '>' -->
                 <polyline points="9 18 15 12 9 6"></polyline>
             </svg>
         </button>
@@ -319,6 +375,7 @@
         const answersBank = $('#answersBank');
         const sidebarToggle = $('#sidebarToggle');
         const answersSidebar = $('#answersSidebar');
+        const toggleIcon = $('#toggleIcon');
 
         // Game state variables
         let state = { answered:0, correct:0 };
@@ -447,7 +504,7 @@
                     ? '🎉 සුපර්! සියල්ල නිවැරදි. ඔබ ඉතාමත් නියමයි!'
                     : state.correct >= 3
                         ? `👏 වඩාත් හොඳයි! ලකුණු ${state.correct}/${DATA.length}. තව ටිකක් පුහුණු වුනොත් ඉතාමත් හොඳයි.`
-                        : `💪 හරි! ලකුණු ${state.correct}/${DATA.length}. නැවත උත්සාහ කරමු.`;
+                        : `� හරි! ලකුණු ${state.correct}/${DATA.length}. නැවත උත්සාහ කරමු.`;
                 finalMsg.textContent = msg;
             }
         }
@@ -510,7 +567,33 @@
         sidebarToggle.addEventListener('click', ()=>{
             isBankVisible = !isBankVisible;
             answersSidebar.classList.toggle('hidden', !isBankVisible);
+            
+            // Change the SVG icon based on visibility
+            const isDesktop = window.matchMedia("(min-width: 900px)").matches;
+            if(isDesktop){
+                toggleIcon.innerHTML = isBankVisible
+                    ? `<polyline points="9 18 15 12 9 6"></polyline>`
+                    : `<polyline points="15 18 9 12 15 6"></polyline>`;
+            } else { // Mobile view
+                 toggleIcon.innerHTML = isBankVisible
+                    ? `<polyline points="18 15 12 9 6 15"></polyline>`
+                    : `<polyline points="6 9 12 15 18 9"></polyline>`;
+            }
             announce(isBankVisible ? 'පිළිතුරු බැංකුව පෙන්වයි.' : 'පිළිතුරු බැංකුව සැඟවී ඇත.');
+        });
+        
+        // Listen for window resize to adjust the toggle icon
+        window.addEventListener('resize', () => {
+             const isDesktop = window.matchMedia("(min-width: 900px)").matches;
+             if(isDesktop){
+                toggleIcon.innerHTML = isBankVisible
+                    ? `<polyline points="9 18 15 12 9 6"></polyline>`
+                    : `<polyline points="15 18 9 12 15 6"></polyline>`;
+            } else { // Mobile view
+                 toggleIcon.innerHTML = isBankVisible
+                    ? `<polyline points="18 15 12 9 6 15"></polyline>`
+                    : `<polyline points="6 9 12 15 18 9"></polyline>`;
+            }
         });
 
         // Initialize the game when the page loads
@@ -518,3 +601,4 @@
     </script>
 </body>
 </html>
+�
