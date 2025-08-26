@@ -1,1176 +1,455 @@
 <!DOCTYPE html>
 <html lang="si">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz Game Home Page</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Firebase SDKs -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, query, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        
-        window.firebase = {
-            initializeApp,
-            getAuth,
-            signInAnonymously,
-            signInWithCustomToken,
-            onAuthStateChanged,
-            getFirestore,
-            doc,
-            getDoc,
-            setDoc,
-            onSnapshot,
-            collection,
-            query,
-            getDocs
-        };
-    </script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ගණිත Drag & Drop කුඩුක්කා</title>
     <style>
-        /* General Body and Main Content Styling */
-        body {
-            font-family: 'Inter', sans-serif;
-            transition: background-color 0.3s, color 0.3s;
-            overflow-x: hidden; /* Prevents horizontal scroll bar */
-        }
-        body.light-mode {
-            background-color: #f0f4f8; /* Light gray background */
-            color: #1a202c; /* Dark text */
-        }
-        body.dark-mode {
-            background-color: #1a202c; /* Dark background */
-            color: #e2e8f0; /* Light text */
-        }
-        .main-content-wrapper {
-            transition: transform 0.3s ease-in-out;
-            width: 100%;
-            padding: 1rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        body.sidebar-open .main-content-wrapper {
-            transform: translateX(280px); /* Pushes content to the right by the sidebar's width */
-        }
-        /* Hide the menu toggle button when the sidebar is open */
-        body.sidebar-open #menu-toggle {
-            display: none;
-        }
-        .main-card {
-            transition: background-color 0.3s, box-shadow 0.3s;
-            max-width: 2xl;
-        }
-        .light-mode .main-card {
-            background-color: #ffffff;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        .dark-mode .main-card {
-            background-color: #2d3748; /* Dark gray for the main card */
-            box-shadow: 0 4-5px 8px rgba(0, 0, 0, 0.3);
-        }
-        .section-card {
-            transition: background-color 0.3s, border-color 0.3s;
-        }
-        .light-mode .section-card {
-            background-color: #f8fafc; /* Lighter gray for sections */
-            border-color: #e2e8f0;
-        }
-        .dark-mode .section-card {
-            background-color: #1f2937; /* Even darker gray for sections */
-            border-color: #4b5563;
-        }
-        .lang-button.selected {
-            background-color: #dc2626; /* Red color for selected language button */
-        }
-        .lang-button:hover.selected {
-            background-color: #b91c1c; /* Darker red on hover */
-        }
-        /* Sidebar styles */
-        .sidebar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100%;
-            width: 280px;
-            z-index: 1001;
-            transform: translateX(-100%);
-            transition: transform 0.3s ease-in-out;
-            box-shadow: 2px 0 5px rgba(0,0,0,0.2);
-            padding: 1.5rem;
-            display: flex;
-            flex-direction: column;
-            gap: 2rem;
-        }
-        .sidebar.open {
-            transform: translateX(0);
-        }
-        .sidebar-header {
-            display: flex;
-            justify-content: space-between; /* Space between title and close button */
-            align-items: center;
-        }
-        .sidebar-header h1 {
-            font-size: 1.5rem;
-            font-weight: bold;
-        }
-        .sidebar-header button {
-            background: none;
-            border: none;
-            font-size: 2rem;
-            line-height: 1;
-        }
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            display: none;
-            transition: opacity 0.3s ease-in-out;
-            opacity: 0;
-        }
-        .overlay.active {
-            display: block;
-            opacity: 1;
-        }
-
-        /* Pop-up Quiz Styling (NEW) */
-        .quiz-modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 2000; /* Above everything else */
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s, visibility 0.3s;
-        }
-
-        .quiz-modal-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .quiz-container {
-            background: #ffffff;
-            border-radius: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
-            padding: 40px;
-            max-width: 900px;
-            width: 90%; /* Responsive width */
-            transform: scale(0.9);
-            transition: transform 0.3s ease;
-        }
-
-        .quiz-modal-overlay.active .quiz-container {
-            transform: scale(1);
+        /* CSS Variables for a clean, animated theme */
+        :root {
+            --bg: #dbe9f4; /* soft pastel blue */
+            --card: #ffffff;
+            --accent: #4f86c6; /* calm blue */
+            --accent-2: #6ab7ff; /* light blue */
+            --ok: #22a06b; /* green */
+            --bad: #d64545; /* red */
+            --text: #0f172a; /* slate-900 */
         }
         
-        /* The rest of the quiz CSS from the user's provided code */
-        h1 {
-            text-align: center;
-            color: #4a148c;
-            margin-bottom: 25px;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        /* Basic styles, removing default margins/paddings and using a modern font stack */
+        *{box-sizing:border-box}
+        body {
+            margin: 0; 
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Noto Sans", "Sinhala Sangam MN", "Iskoola Pota", sans-serif;
+            background: radial-gradient(1200px 600px at 10% -10%, #eef6ff 0, transparent 60%),
+                        radial-gradient(900px 500px at 110% 10%, #eaf4ff 0, transparent 60%), var(--bg);
+            color: var(--text);
+            min-height: 100dvh;
+            display: grid; 
+            place-items: center; 
+            padding: 24px;
         }
 
-        .progress-wrapper {
-            display: flex;
-            justify-content: space-between;
+        /* Main app container */
+        .app {
+            width: min(1100px, 100%); 
+            max-width: 1100px;
+            display: grid; 
+            gap: 18px;
+        }
+
+        /* Header section with score and controls */
+        header {
+            display: grid; 
+            gap: 10px; 
+            padding: 16px 18px; 
+            border-radius: 16px; 
+            background: var(--card);
+            box-shadow: 0 6px 20px rgba(10,60,120,.08);
+        }
+        h1 { margin: 0; font-size: clamp(20px, 2.8vw, 28px) }
+        .meta { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; justify-content: space-between }
+        .score {
+            font-weight: 700; padding: 8px 12px; border-radius: 999px; 
+            background: linear-gradient(90deg, var(--accent), var(--accent-2));
+            color: white; letter-spacing: .2px; 
+            box-shadow: 0 4px 12px rgba(79,134,198,.35);
+        }
+
+        /* Progress bar */
+        .bar { height: 10px; width: 100%; background: #e6eef6; border-radius: 999px; overflow: hidden; }
+        .bar > div { height: 100%; width: 0; background: linear-gradient(90deg, var(--accent), var(--accent-2)); transition: width .35s ease; }
+        
+        /* Buttons */
+        .controls { display: flex; gap: 10px; flex-wrap: wrap }
+        button {
+            appearance: none; border: none; cursor: pointer; font-weight: 600; letter-spacing: .2px;
+            padding: 10px 14px; background: var(--text); color: white; border-radius: 12px;
+            box-shadow: 0 6px 16px rgba(15,23,42,.2); 
+            transition: transform .15s ease, box-shadow .2s ease;
+        }
+        button:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(15,23,42,.25); }
+        button:active { transform: translateY(0); box-shadow: 0 6px 16px rgba(15,23,42,.2); }
+        button.secondary { background: #1e293b }
+        
+        /* Quiz grid */
+        .grid {
+            display: grid; 
+            gap: 16px; 
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        }
+
+        /* Question card */
+        .card {
+            background: var(--card); 
+            border-radius: 18px; 
+            padding: 16px; 
+            display: grid; 
+            gap: 12px;
+            box-shadow: 0 6px 20px rgba(10,60,120,.08);
+            position: relative;
+        }
+        .q-title { font-weight: 700; font-size: 18px; }
+
+        /* Drop zone */
+        .dropzone {
+            display: grid; 
+            place-items: center; 
+            border: 2px dashed #b4c9e9; 
+            border-radius: 14px; 
+            padding: 16px; 
+            min-height: 64px;
+            transition: all .2s ease;
+            background: linear-gradient(0deg, #f6fbff 0, #fff 100%);
+            position: relative;
+        }
+        /* Drop zone animations and states */
+        .dropzone.hover { border-color: var(--accent); background: #f0f7ff; transform: scale(1.01); }
+        .dropzone.correct { border-color: var(--ok); background: #ecfbf4; transform: scale(1.02); }
+        .dropzone.wrong { border-color: var(--bad); background: #ffefef; animation: shake .5s; }
+
+        /* The answer bank container */
+        .bank {
+            display: flex; 
+            gap: 10px; 
+            flex-wrap: wrap; 
+            padding: 12px; 
             align-items: center;
-            margin-bottom: 25px;
+            background: linear-gradient(180deg, #fff 0, #f7fbff 100%); 
+            border-radius: 12px; 
+            border: 1px solid #e2eefc;
+            box-shadow: 0 6px 20px rgba(10,60,120,.08);
+            margin-top: 18px;
         }
 
-        .progress-container {
-            background: #b2dfdb;
-            height: 30px;
-            border-radius: 20px;
-            overflow: hidden;
-            flex: 1;
-            margin-right: 15px;
-            box-shadow: inset 0 2px 5px rgba(0,0,0,0.1), 0 5px 15px rgba(0,0,0,0.1);
+        /* Draggable answer tiles */
+        .tile {
+            user-select: none; 
+            -webkit-user-drag: element; 
+            -webkit-user-select: none;
+            padding: 10px 14px; 
+            border-radius: 12px; 
+            background: white; 
+            border: 1.5px solid #c9dbf3;
+            box-shadow: 0 4px 10px rgba(10,60,120,.08);
+            font-weight: 700; 
+            cursor: grab; 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center; 
+            min-width: 56px;
+            transition: transform .15s ease, box-shadow .15s ease, opacity .2s ease;
+        }
+        /* Tile animation on drag */
+        .tile:active { cursor: grabbing; transform: scale(1.05); box-shadow: 0 6px 12px rgba(10,60,120,.15); }
+        .tile.dragging { opacity: 0; transform: scale(0.8); }
+        .tile.lock { opacity: .55; cursor: not-allowed; }
+        .tile.selected { outline: 3px solid rgba(79,134,198,.25); }
+
+        /* Result messages */
+        .result { font-weight: 700; animation: fadeIn .5s; }
+        .result.ok { color: var(--ok); }
+        .result.bad { color: var(--bad); }
+
+        /* Footer */
+        footer {
+            text-align: center; 
+            font-size: 14px; 
+            color: #334155; 
+            opacity: .9;
         }
 
-        .progress-bar {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(270deg, #00796b, #26a69a, #004d40, #26a69a);
-            background-size: 800% 100%;
-            border-radius: 20px;
-            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            animation: flow 4s linear infinite;
+        /* Toast message for quick feedback */
+        .toast {
+            position: fixed; 
+            inset: auto 16px 16px auto; 
+            background: var(--text); 
+            color: #fff; 
+            padding: 10px 14px; 
+            border-radius: 12px; 
+            box-shadow: 0 10px 24px rgba(15,23,42,.35);
+            transform: translateY(12px); 
+            opacity: 0; 
+            pointer-events: none; 
+            transition: all .25s ease;
         }
+        .toast.show { transform: translateY(0); opacity: 1; }
 
-        @keyframes flow {
-            0% { background-position: 0% 0; }
-            50% { background-position: 100% 0; }
-            100% { background-position: 0% 0; }
+        /* Icon styling (for correct/incorrect marks) */
+        .icon {
+            font-size: 1.5em; 
+            margin-right: 8px; 
+            display: inline-block;
+            animation: popIn .3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
         }
+        .icon.ok { color: var(--ok); }
+        .icon.bad { color: var(--bad); }
 
-        #scoreDisplay {
-            font-weight: bold;
-            color: #004d40;
-            min-width: 70px;
-            text-align: right;
-            font-size: 1.2em;
+        /* Animation keyframes */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-5px); }
+            40%, 80% { transform: translateX(5px); }
         }
-
-        .question {
-            margin-bottom: 30px;
-            font-size: 1.4em;
-            color: #333;
-            line-height: 1.5;
-        }
-
-        #result {
-            font-size: 1.4em;
-            font-weight: bold;
-            margin-top: 30px;
-            text-align: center;
-            color: #311b92;
-            animation: scaleIn 0.5s ease-in-out;
-        }
-
-        @keyframes scaleIn {
-            from { transform: scale(0.8); opacity: 0; }
+        @keyframes popIn {
+            from { transform: scale(0); opacity: 0; }
             to { transform: scale(1); opacity: 1; }
         }
-
-        #result ul {
-            list-style: none;
-            padding: 0;
-            margin-top: 20px;
-        }
-
-        #result li {
-            margin-bottom: 15px;
-            font-size: 1.1em;
-            line-height: 1.5;
-            border-bottom: 1px dashed #ccc;
-            padding-bottom: 10px;
-        }
-
-        #questionRemaining {
-            margin-bottom: 15px;
-            font-weight: bold;
-            color: #004d40;
-        }
-
-        .back-btn-container {
-            text-align: left;
-            margin-bottom: 20px;
-        }
-
-        .back-btn {
-            display: inline-flex;
-            align-items: center;
-            padding: 10px 20px;
-            font-size: 1.1em;
-            border: none;
-            border-radius: 15px;
-            text-decoration: none;
-            color: #fff;
-            background: linear-gradient(145deg, #42a5f5, #1976d2);
-            font-weight: bold;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-            transition: transform 0.2s, box-shadow 0.2s;
-            cursor: pointer;
-        }
-
-        .back-btn:hover {
-            transform: translateY(-5px) scale(1.05);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
-        }
-
-        .back-btn .arrow-icon {
-            font-size: 1.5em;
-            margin-right: 8px;
-            transition: transform 0.3s ease-in-out;
-        }
-
-        .back-btn:hover .arrow-icon {
-            transform: translateX(-5px);
-        }
-
-        /* Drag and Drop Specific Styles */
-        #questions-container {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .question-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            padding: 1rem;
-            background-color: #f3f4f6;
-            border-radius: 12px;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .dark-mode .question-item {
-            background-color: #374151;
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
-        .question-text {
-            font-size: 1.1em;
-            font-weight: 500;
-            margin-bottom: 0.5rem;
-        }
-
-        .drop-zone {
-            width: 100%;
-            min-height: 3.5rem;
-            background-color: #e5e7eb;
-            border: 2px dashed #9ca3af;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0.5rem;
-            font-weight: bold;
-            color: #4b5563;
-            transition: border-color 0.2s, background-color 0.2s;
-            position: relative;
-            overflow: hidden;
-        }
-        .dark-mode .drop-zone {
-            background-color: #4b5563;
-            border-color: #6b7280;
-            color: #d1d5db;
-        }
-
-        .drop-zone.hover {
-            border-color: #3b82f6;
-            background-color: #bfdbfe;
-        }
-        .drop-zone.correct {
-            border-color: #16a34a;
-            background-color: #dcfce7;
-            color: #14532d;
-        }
-        .drop-zone.wrong {
-            border-color: #dc2626;
-            background-color: #fee2e2;
-            color: #7f1d1d;
-        }
-        
-        .answer-in-place {
-            position: relative;
-            z-index: 10;
-        }
-        
-        .answer-in-place, .draggable-answer {
-            background-color: #4f46e5;
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            cursor: move;
-            font-weight: 600;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            white-space: nowrap;
-        }
-        
-        .draggable-answer:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 8px rgba(0,0,0,0.15);
-        }
-
-        #answers-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 1rem;
-            margin-top: 2rem;
-            padding: 1rem;
-            background-color: #f3f4f6;
-            border-radius: 12px;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .dark-mode #answers-container {
-            background-color: #374151;
-        }
-        
-        /* Animation for a wrong drop */
-        .wrong-animation {
-            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
-            transform: translate3d(0, 0, 0);
-        }
-        
-        @keyframes shake {
-            10%, 90% { transform: translateX(-1px); }
-            20%, 80% { transform: translateX(2px); }
-            30%, 50%, 70% { transform: translateX(-4px); }
-            40%, 60% { transform: translateX(4px); }
-        }
-
-        /* Result summary styling */
-        .result-summary {
-            margin-top: 2rem;
-        }
-
-        .result-summary h3 {
-            font-size: 1.5em;
-            font-weight: bold;
-            margin-bottom: 1rem;
-            color: #1e40af; /* Blue text */
-        }
-        .dark-mode .result-summary h3 {
-            color: #60a5fa;
-        }
-        
-        .result-item {
-            background-color: #f8fafc;
-            border-left: 5px solid;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            border-radius: 8px;
-            transition: box-shadow 0.3s;
-        }
-        .dark-mode .result-item {
-            background-color: #2d3748;
-        }
-
-        .result-item.correct {
-            border-color: #10b981; /* Green border */
-        }
-
-        .result-item.incorrect {
-            border-color: #ef4444; /* Red border */
-        }
-
-        .result-item p {
-            font-weight: 500;
-        }
-
-        .result-item .explanation {
-            font-size: 0.9em;
-            color: #6b7280; /* Gray text */
-            margin-top: 0.5rem;
-        }
-        .dark-mode .result-item .explanation {
-            color: #9ca3af;
-        }
-
-        .result-item .user-answer {
-            font-weight: bold;
-            color: #1e40af;
-        }
-        .dark-mode .result-item .user-answer {
-            color: #93c5fd;
-        }
-
-        .result-item .correct-answer {
-            font-weight: bold;
-            color: #059669;
-        }
-        .dark-mode .result-item .correct-answer {
-            color: #34d399;
-        }
-        
-        /* Hide the close button text on mobile */
-        @media (max-width: 640px) {
-            .back-btn-container span:not(.arrow-icon) {
-                display: none;
-            }
-        }
-
+        /* Small helper for accessibility */
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0 }
     </style>
 </head>
-<body class="light-mode">
-
-    <!-- Menu Toggle Button, always visible on the main page until the sidebar is open -->
-    <button id="menu-toggle" class="fixed top-4 left-4 z-2000 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white font-medium p-2 rounded-full shadow-lg transition-colors">
-        ☰
-    </button>
-
-    <!-- Sidebar Menu -->
-    <div id="sidebar-menu" class="sidebar light-mode">
-        <div class="sidebar-header">
-            <h1 id="sidebar-title">Quiz Game</h1>
-            <!-- Close button for the sidebar -->
-            <button id="close-menu" class="text-gray-800 dark:text-white">
-                &times;
-            </button>
-        </div>
-
-        <!-- Language Buttons -->
-        <div class="flex flex-col gap-4">
-            <h2 class="text-lg font-semibold" id="language-title">භාෂාව</h2>
-            <div class="flex flex-col gap-2">
-                <button class="lang-button bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white font-medium py-2 px-4 rounded-md shadow-inner transition-colors selected" data-lang="si">සිංහල</button>
-                <button class="lang-button bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white font-medium py-2 px-4 rounded-md shadow-inner transition-colors" data-lang="ta">தமிழ்</button>
-                <button class="lang-button bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white font-medium py-2 px-4 rounded-md shadow-inner transition-colors" data-lang="en">English</button>
-            </div>
-        </div>
-
-        <!-- Mode Toggle Button -->
-        <div class="flex flex-col gap-4">
-            <h2 class="text-lg font-semibold" id="mode-title">මාදිලිය</h2>
-            <button id="mode-toggle" class="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white font-medium py-2 px-4 rounded-full shadow-inner transition-colors">
-                <span id="mode-icon" class="mr-2">🌙</span>
-                <span id="mode-text">NIGHTMODE</span>
-            </button>
-        </div>
-    </div>
-    
-    <!-- Overlay for the sidebar -->
-    <div id="sidebar-overlay" class="overlay"></div>
-
-    <!-- Wrapper for the main content to enable sliding -->
-    <div id="main-content-wrapper" class="main-content-wrapper flex flex-col items-center justify-start min-h-screen">
-        <div class="main-card rounded-3xl p-8 md:p-12 w-full max-w-2xl mt-8">
-            <!-- Main Content Sections -->
-            <div class="flex flex-col gap-8">
-                <!-- Total Score Display (NEW) -->
-                <div id="total-score-container" class="bg-blue-600 text-white font-bold p-6 rounded-2xl text-center shadow-lg transition-transform transform hover:scale-105">
-                    <h2 id="total-score-title" class="text-xl"></h2>
-                    <p id="total-score-value" class="text-3xl mt-2">0</p>
-                </div>
-
-                <!-- පන්තිය තෝරාගැනීම (Class Selection) -->
-                <div class="section-card p-6 rounded-2xl border border-gray-200 dark:border-gray-700">
-                    <h2 id="class-title" class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Select Class</h2>
-                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 justify-center">
-                        <button class="class-button bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-xl shadow-md transition-transform transform hover:scale-105" data-class="grade6">6 වන ශ්‍රේණිය</button>
-                        <button class="class-button bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-xl shadow-md transition-transform transform hover:scale-105" data-class="grade7">7 වන ශ්‍රේණිය</button>
-                        <button class="class-button bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-xl shadow-md transition-transform transform hover:scale-105" data-class="grade8">8 වන ශ්‍රේණිය</button>
-                        <button class="class-button bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-xl shadow-md transition-transform transform hover:scale-105" data-class="grade9">9 වන ශ්‍රේණිය</button>
-                        <button class="class-button bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-xl shadow-md transition-transform transform hover:scale-105" data-class="grade10">10 වන ශ්‍රේණිය</button>
-                        <button class="class-button bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-xl shadow-md transition-transform transform hover:scale-105" data-class="grade11">11 වන ශ්‍රේණිය</button>
-                    </div>
-                </div>
-
-                <!-- පාඩම තෝරාගැනීම (Lesson Selection - Initially hidden) -->
-                <div id="lesson-selection" class="section-card p-6 rounded-2xl border border-gray-200 dark:border-gray-700 hidden">
-                    <h2 id="lesson-title" class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">පාඩම තෝරන්න</h2>
-                    <div id="lessons-container" class="flex flex-wrap justify-center gap-4">
-                        <!-- Lessons buttons will be dynamically added here -->
-                    </div>
+<body>
+    <div class="app" id="app">
+        <header>
+            <h1>🧠 ගණිත Drag & Drop — ප්‍රශ්න 5ක්</h1>
+            <div class="meta">
+                <div class="score" id="score">ලකුණු: 0 / 5</div>
+                <div class="controls">
+                    <button id="btnCheck">පරික්ෂා කරන්න</button>
+                    <button id="btnReset" class="secondary">නව ගේම්</button>
                 </div>
             </div>
+            <div class="bar" aria-label="ප්‍රගති පටිය"><div id="progress"></div></div>
+        </header>
+
+        <section class="grid" id="quiz"></section>
+
+        <!-- Answers bank moved to the bottom -->
+        <div class="answers-container">
+            <h3>පිළිතුරු බැංකුව</h3>
+            <div class="bank" id="answersBank" aria-label="පිළිතුරු බැංකුව"></div>
         </div>
+
+        <footer>
+            <p id="finalMsg">පිළිතුරු බැංකුවෙන් නිවැරදි අගය ගෙන්වා ඇද එවන්න.</p>
+        </footer>
     </div>
 
-    <!-- Pop-up Quiz Modal -->
-    <div id="quiz-modal-overlay" class="quiz-modal-overlay">
-        <div id="quiz-container" class="quiz-container light-mode">
-            <!-- Back Button to close the modal -->
-            <div class="back-btn-container">
-                <button id="quiz-close-btn" class="back-btn">
-                    <span class="arrow-icon">◀</span>
-                    <span id="close-btn-text">Back</span>
-                </button>
-            </div>
-            <h1 id="quiz-title"></h1>
-            <div class="progress-wrapper">
-                <div class="progress-container">
-                    <div class="progress-bar" id="progressBar"></div>
-                </div>
-                <div id="scoreDisplay"></div>
-            </div>
-            <div id="quiz-game-area">
-                <div id="questions-container"></div>
-                <div id="answers-container"></div>
-                <div id="result"></div>
-            </div>
-        </div>
-    </div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <template id="cardTpl">
+        <article class="card" data-qid="">
+            <div class="q-title"></div>
+            <div class="dropzone" tabindex="0" role="button" aria-label="මෙතැනට පිළිතුර දාන්න"></div>
+            <div class="result" aria-live="polite"></div>
+        </article>
+    </template>
 
     <script>
-        let db, auth, userId;
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        // Game data: questions and their correct answers
+        const DATA = [
+            { id: 1, q: "7 + 8 = ?", correct: "15" },
+            { id: 2, q: "6 × 7 = ?", correct: "42" },
+            { id: 3, q: "9 − 4 = ?", correct: "5" },
+            { id: 4, q: "5² = ?", correct: "25" },
+            { id: 5, q: "24 හි අර්ධය = ?", correct: "12" },
+        ];
 
-        // Data for Lessons and Grades
-        const lessons = {
-            'grade6': {
-                'si': ['වාණිජ', 'ස්ථානීය අගය', 'පූර්ණ සංඛ්‍යා මත ගණිත කර්ම', 'කාලය', 'සංඛ්‍යා රේඛාව', 'නිමානයක සභා වටුවීම', 'කෝණ', 'දිශා'],
-                'en': ['Commerce', 'Place Value', 'Arithmetic Operations on Integers', 'Time', 'Number Line', 'Rounding Off', 'Angles', 'Directions'],
-                'ta': ['வணிகம்', 'இட மதிப்பு', 'முழு எண்களில் கணித செயல்பாடுகள்', 'நேரம்', 'எண் கோடு', 'வட்டமிடல்', 'கோணங்கள்', 'திசைகள்'],
-            },
-            'grade7': {
-                'si': ['ගණිතය', 'විද්‍යාව', 'සිංහල', 'භූගෝල විද්‍යාව'],
-                'en': ['Mathematics', 'Science', 'Sinhala', 'Geography'],
-                'ta': ['கணிதம்', 'விஞ்ஞானம்', 'சிங்களம்', 'புவியிள'],
-            },
-            'grade8': {
-                'si': ['ගණිතය', 'විද්‍යාව', 'ඉංග්‍රීසි', 'සමාජ අධ්‍යයනය'],
-                'en': ['Mathematics', 'Science', 'English', 'Social Studies'],
-                'ta': ['கணிதம்', 'விஞ்ஞானம்', 'ஆங்கிலம்', 'சமூக ஆய்வு'],
-            },
-            'grade9': {
-                'si': ['සංඛ්‍යා රටා', 'විද්‍යාව', 'ICT', 'සෞඛ්‍ය විද්‍යාව'],
-                'en': ['Number Patterns', 'Science', 'ICT', 'Health Science'],
-                'ta': ['எண் வடிவங்கள்', 'விஞ்ஞானம்', 'ICT', 'சுகாதார விஞ்ஞானம்'],
-            },
-            'grade10': {
-                'si': ['ගණිතය', 'විද්‍යාව', 'සිංහල', 'බුද්ධ ධර්මය', 'ඉතිහාසය'],
-                'en': ['Mathematics', 'Science', 'Sinhala', 'Buddhism', 'History'],
-                'ta': ['கணிதம்', 'விஞ்ஞானம்', 'சிங்களம்', 'பௌத்தம்', 'வரலாறு'],
-            },
-            'grade11': {
-                'si': ['ගණිතය', 'විද්‍යාව', 'කලා', 'වාණිජ', 'තාක්ෂණ'],
-                'en': ['Mathematics', 'Science', 'Arts', 'Commerce', 'Technology'],
-                'ta': ['கணிதம்', 'விஞ்ஞானம்', 'கலை', 'வர்த்தகம்', 'தொழில்நுட்பம்'],
+        // Helper functions for selecting DOM elements
+        const $ = (sel,el=document) => el.querySelector(sel);
+        const $$ = (sel,el=document) => [...el.querySelectorAll(sel)];
+
+        // Get main game elements
+        const quiz = $('#quiz');
+        const scoreEl = $('#score');
+        const progressEl = $('#progress');
+        const finalMsg = $('#finalMsg');
+        const toast = $('#toast');
+        const answersBank = $('#answersBank');
+
+        // Game state variables
+        let state = { answered:0, correct:0 };
+        let selectedTile = null; // for click-to-place functionality
+
+        // Function to shuffle an array
+        function shuffle(arr){
+            const a = [...arr];
+            for(let i=a.length-1;i>0;i--){
+                const j = Math.floor(Math.random()*(i+1));
+                [a[i],a[j]]=[a[j],a[i]];
             }
-        };
+            return a;
+        }
 
-        // Grade Name Translations
-        const classTranslations = {
-            'grade6': {'si': '6 වන ශ්‍රේණිය', 'en': 'Grade 6', 'ta': '6 ஆம் வகுப்பு'},
-            'grade7': {'si': '7 වන ශ්‍රේණිය', 'en': 'Grade 7', 'ta': '7 ஆம் வகுப்பு'},
-            'grade8': {'si': '8 වන ශ්‍රේණිය', 'en': 'Grade 8', 'ta': '8 ஆம் வகுப்பு'},
-            'grade9': {'si': '9 වන ශ්‍රේණිය', 'en': 'Grade 9', 'ta': '9 ஆம் வகுப்பு'},
-            'grade10': {'si': '10 වන ශ්‍රේණිය', 'en': 'Grade 10', 'ta': '10 ஆம் வகுப்பு'},
-            'grade11': {'si': '11 වන ශ්‍රේණිය', 'en': 'Grade 11', 'ta': '11 ஆம் வகுப்பு'},
-        };
+        // Creates a new draggable tile element
+        function makeTile(text){
+            const t = document.createElement('div');
+            t.className = 'tile';
+            t.textContent = text;
+            t.setAttribute('draggable','true');
+            t.dataset.value = text;
+            t.tabIndex = 0;
 
-        // Translations for UI text
-        const translations = {
-            'si': {
-                'sidebarTitle': 'Quiz Game',
-                'languageTitle': 'භාෂාව',
-                'modeTitle': 'මාදිලිය',
-                'classTitle': 'පන්තිය තෝරන්න',
-                'lessonTitle': 'පාඩම තෝරන්න',
-                'nightMode': 'NIGHTMODE',
-                'lightMode': 'LIGHTMODE',
-                'totalScoreTitle': 'මුළු ලකුණු',
-                'quizTitle9_1': 'පාඩම 1: සංඛ්‍යා රටා - ප්‍රශ්න විචාරාත්මක',
-                'scoreText': 'ලකුණු: ',
-                'backButton': 'ආපසු',
-                'resultTitle': 'ඔබේ ලකුණු:',
-                'questionsLeft': 'සම්පූර්ණ කිරීමට ප්‍රශ්න: ',
-                'dragAndDropInstruction': 'පිළිතුරු ඇදගෙන අදාළ ප්‍රශ්නයට යොදන්න.',
-                'correctAnswer': 'නිවැරදි පිළිතුර',
-                'yourAnswer': 'ඔබගේ පිළිතුර',
-                'explanation': 'පැහැදිලි කිරීම'
-            },
-            'en': {
-                'sidebarTitle': 'Quiz Game',
-                'languageTitle': 'Language',
-                'modeTitle': 'Mode',
-                'classTitle': 'Select Class',
-                'lessonTitle': 'Select Lesson',
-                'nightMode': 'NIGHTMODE',
-                'lightMode': 'LIGHTMODE',
-                'totalScoreTitle': 'Total Score',
-                'quizTitle9_1': 'Lesson 1: Number Patterns - Quiz',
-                'scoreText': 'Score: ',
-                'backButton': 'Back',
-                'resultTitle': 'Your Score:',
-                'questionsLeft': 'Questions left: ',
-                'dragAndDropInstruction': 'Drag and drop the answers to the correct questions.',
-                'correctAnswer': 'Correct Answer',
-                'yourAnswer': 'Your Answer',
-                'explanation': 'Explanation'
-            },
-            'ta': {
-                'sidebarTitle': 'வினாடி வினா விளையாட்டு',
-                'languageTitle': 'மொழி',
-                'modeTitle': 'முறை',
-                'classTitle': 'வகுப்பைத் தேர்ந்தெடுக்கவும்',
-                'lessonTitle': 'பாடத்தைத் தேர்ந்தெடுக்கவும்',
-                'nightMode': 'NIGHTMODE',
-                'lightMode': 'LIGHTMODE',
-                'totalScoreTitle': 'மொத்த மதிப்பெண்கள்',
-                'quizTitle9_1': 'பாடம் 1: எண் வடிவங்கள் - வினாடி வினா',
-                'scoreText': 'புள்ளிகள்: ',
-                'backButton': 'பின்செல்க',
-                'resultTitle': 'உங்கள் மதிப்பெண்:',
-                'questionsLeft': 'மீதமுள்ள கேள்விகள்: ',
-                'dragAndDropInstruction': 'பதில்களை இழுத்து சரியான கேள்விகளில் விடவும்.',
-                'correctAnswer': 'சரியான பதில்',
-                'yourAnswer': 'உங்கள் பதில்',
-                'explanation': 'விளக்கம்'
+            // Drag and drop event listeners
+            t.addEventListener('dragstart', (e)=>{
+                e.dataTransfer.setData('text/plain', text);
+                setTimeout(()=>t.classList.add('dragging'), 0); // Hide the original element slightly after drag starts
+            });
+            t.addEventListener('dragend', ()=> t.classList.remove('dragging'));
+
+            // Click-to-select functionality
+            t.addEventListener('click', (e)=>{
+                if(t.classList.contains('lock')) return;
+                if(selectedTile) selectedTile.classList.remove('selected');
+                selectedTile = t;
+                t.classList.add('selected');
+                announce(`තෝරාගත් පිළිතුර ${text}`);
+            });
+
+            return t;
+        }
+
+        // Creates a new question card element
+        function makeCard(item){
+            const tpl = $('#cardTpl').content.firstElementChild.cloneNode(true);
+            tpl.dataset.qid = item.id;
+            $('.q-title', tpl).textContent = item.q;
+            const drop = $('.dropzone', tpl);
+            drop.dataset.accept = item.correct;
+
+            // Drag and Drop (DnD) event listeners
+            drop.addEventListener('dragover', e=>{ e.preventDefault(); drop.classList.add('hover'); });
+            drop.addEventListener('dragleave', ()=> drop.classList.remove('hover'));
+            drop.addEventListener('drop', e=>{
+                e.preventDefault(); 
+                drop.classList.remove('hover');
+                const value = e.dataTransfer.getData('text/plain');
+                placeAnswer(drop, value);
+            });
+
+            // Click-to-place functionality
+            drop.addEventListener('click', ()=>{
+                if(selectedTile){
+                    placeAnswer(drop, selectedTile.dataset.value, selectedTile);
+                }
+            });
+
+            return tpl;
+        }
+
+        // Places an answer tile into a drop zone
+        function placeAnswer(drop, value, tileElem=null){
+            // Prevent placing if already answered
+            if(drop.classList.contains('correct') || drop.classList.contains('wrong')) return; 
+
+            // Find the tile element if not provided (was dragged)
+            if(!tileElem){
+                tileElem = [...answersBank.children].find(t=> t.dataset.value === value && !t.classList.contains('lock')) || null;
             }
-        };
-        
-        // Drag and Drop Quiz Data (New)
-        const quizDataDragDrop = {
-            'grade9_lesson1': {
-                'si': [
-                    { q: "3,7,11,15,… රටාවේ ඊළඟ පදය සොයන්න.", a: "19", e: "සෑම පදයකටම 4ක් එකතු වේ." },
-                    { q: "1,4,9,16,… රටාවේ ඊළඟ පදය කුමක්ද?", a: "25", e: "වර්ග සංඛ්‍යා: $1^2, 2^2, 3^2, 4^2, 5^2$" },
-                    { q: "10,8,6,4,… යන රටාවේ ඊළඟ පදය කීයද?", a: "2", e: "සෑම පදයකින්ම 2ක් අඩු වේ." },
-                    { q: "2,4,8,16,… යන රටාවේ ඊළඟ පදය සොයන්න.", a: "32", e: "සෑම පදයක්ම 2න් ගුණ කරයි." },
-                    { q: "1,3,6,10,… යන රටාවේ ඊළඟ ත්‍රිකෝණාකාර සංඛ්‍යාව සොයන්න.", a: "15", e: "ත්‍රිකෝණාකාර සංඛ්‍යා: 1+2=3, 3+3=6, 6+4=10, 10+5=15" },
-                    { q: "5,10,15,20,… යන රටාවේ 10 වැනි පදය සොයන්න.", a: "50", e: "$n$ වැනි පදය $5n$ වේ. $5 \\times 10 = 50$" },
-                    { q: "1,1,2,3,5,… යන ෆිබොනාච්චි (Fibonacci) රටාවේ ඊළඟ පදය කුමක්ද?", a: "8", e: "පෙර පද දෙකෙහි එකතුව: $3+5=8$" },
-                    { q: "100,95,90,85,… යන රටාවේ ඊළඟ පදය සොයන්න.", a: "80", e: "සෑම පදයකින්ම 5ක් අඩු වේ." },
-                    { q: "1,8,27,64,… යන රටාවේ ඊළඟ ඝන සංඛ්‍යාව කුමක්ද?", a: "125", e: "ඝන සංඛ්‍යා: $1^3, 2^3, 3^3, 4^3, 5^3$" },
-                    { q: "7,14,21,28,… යන රටාවේ 12 වැනි පදය කුමක්ද?", a: "84", e: "$n$ වැනි පදය $7n$ වේ. $7 \\times 12 = 84$" },
-                    { q: "2,5,8,11,… යන රටාවේ n වැනි පදය සඳහා සාධාරණ පදය (general term) ලියන්න.", a: "3n-1", e: "පොදු අන්තරය 3 යි." },
-                    { q: "5,7,9,11,… යන රටාවේ ඊළඟ පදය කුමක්ද?", a: "13", e: "සෑම පදයකටම 2ක් එකතු වේ." },
-                    { q: "3,6,9,12,… යන රටාවේ 15 වැනි පදය සොයන්න.", a: "45", e: "$n$ වැනි පදය $3n$ වේ. $3 \\times 15 = 45$" },
-                    { q: "2,4,6,8,… යන ඉරට්ටේ සංඛ්‍යා රටාවේ n වැනි පදය සඳහා සාධාරණ පදය ලියන්න.", a: "2n", e: "පොදු අන්තරය 2 යි." },
-                    { q: "1,3,5,7,… යන ඔත්තේ සංඛ්‍යා රටාවේ 100 වැනි පදය සොයන්න.", a: "199", e: "$n$ වැනි පදය $2n-1$ වේ. $2 \\times 100 - 1 = 199$" },
-                    { q: "10,20,30,40,… යන රටාවේ 20 වැනි පදය කුමක්ද?", a: "200", e: "$n$ වැනි පදය $10n$ වේ. $10 \\times 20 = 200$" },
-                    { q: "1,4,7,10,… යන රටාවේ ඊළඟ පදය සොයන්න.", a: "13", e: "සෑම පදයකටම 3ක් එකතු වේ." },
-                    { q: "1000,100,10,1,… යන රටාවේ ඊළඟ පදය කුමක්ද?", a: "0.1", e: "සෑම පදයක්ම 10න් බෙදයි." },
-                    { q: "11,22,33,44,… යන රටාවේ 10 වැනි පදය කුමක්ද?", a: "110", e: "$n$ වැනි පදය $11n$ වේ. $11 \\times 10 = 110$" },
-                    { q: "2,6,10,14,… යන රටාවේ n වැනි පදය සොයන්න.", a: "4n-2", e: "පොදු අන්තරය 4 යි." }
-                ],
-                'en': [
-                    { q: "Find the next term in the sequence 3,7,11,15,....", a: "19", e: "Adds 4 to each term." },
-                    { q: "What is the next term in the sequence 1,4,9,16,....?", a: "25", e: "Square numbers: $1^2, 2^2, 3^2, 4^2, 5^2$" },
-                    { q: "What is the next term in the sequence 10,8,6,4,....?", a: "2", e: "Subtracts 2 from each term." },
-                    { q: "Find the next term in the sequence 2,4,8,16,....", a: "32", e: "Multiplies each term by 2." },
-                    { q: "Find the next triangular number in the sequence 1,3,6,10,....", a: "15", e: "Triangular numbers: 1+2=3, 3+3=6, 6+4=10, 10+5=15" },
-                    { q: "Find the 10th term in the sequence 5,10,15,20,....", a: "50", e: "The nth term is $5n$. $5 \\times 10 = 50$" },
-                    { q: "What is the next term in the Fibonacci sequence 1,1,2,3,5,....?", a: "8", e: "Sum of the previous two terms: $3+5=8$" },
-                    { q: "Find the next term in the sequence 100,95,90,85,....", a: "80", e: "Subtracts 5 from each term." },
-                    { q: "What is the next cubic number in the sequence 1,8,27,64,....?", a: "125", e: "Cubic numbers: $1^3, 2^3, 3^3, 4^3, 5^3$" },
-                    { q: "What is the 12th term in the sequence 7,14,21,28,....?", a: "84", e: "The nth term is $7n$. $7 \\times 12 = 84$" },
-                    { q: "Write the general term for the nth term of the sequence 2,5,8,11,....", a: "3n-1", e: "Common difference is 3." },
-                    { q: "What is the next term in the sequence 5,7,9,11,....?", a: "13", e: "Adds 2 to each term." },
-                    { q: "Find the 15th term in the sequence 3,6,9,12,....", a: "45", e: "The nth term is $3n$. $3 \\times 15 = 45$" },
-                    { q: "Write the general term for the nth term of the even number sequence 2,4,6,8,....", a: "2n", e: "Common difference is 2." },
-                    { q: "Find the 100th term of the odd number sequence 1,3,5,7,....", a: "199", e: "The nth term is $2n-1$. $2 \\times 100 - 1 = 199$" },
-                    { q: "What is the 20th term in the sequence 10,20,30,40,....?", a: "200", e: "The nth term is $10n$. $10 \\times 20 = 200$" },
-                    { q: "Find the next term in the sequence 1,4,7,10,....", a: "13", e: "Adds 3 to each term." },
-                    { q: "What is the next term in the sequence 1000,100,10,1,....?", a: "0.1", e: "Divides each term by 10." },
-                    { q: "What is the 10th term in the sequence 11,22,33,44,....?", a: "110", e: "The nth term is $11n$. $11 \\times 10 = 110$" },
-                    { q: "Find the nth term of the sequence 2,6,10,14,....", a: "4n-2", e: "Common difference is 4." }
-                ],
-                'ta': [
-                    { q: "3,7,11,15,… என்ற தொடரின் அடுத்த பதம் என்ன?", a: "19", e: "ஒவ்வொரு பதத்திற்கும் 4 கூட்டப்படுகிறது." },
-                    { q: "1,4,9,16,… என்ற தொடரின் அடுத்த பதம் என்ன?", a: "25", e: "சதுர எண்கள்: $1^2, 2^2, 3^2, 4^2, 5^2$" },
-                    { q: "10,8,6,4,… என்ற தொடரின் அடுத்த பதம் என்ன?", a: "2", e: "ஒவ்வொரு பதத்திலிருந்தும் 2 கழிக்கப்படுகிறது." },
-                    { q: "2,4,8,16,… என்ற தொடரின் அடுத்த பதம் என்ன?", a: "32", e: "ஒவ்வொரு பதமும் 2 ஆல் பெருக்கப்படுகிறது." },
-                    { q: "1,3,6,10,… என்ற தொடரின் அடுத்த முக்கோண எண் என்ன?", a: "15", e: "முக்கோண எண்கள்: 1+2=3, 3+3=6, 6+4=10, 10+5=15" },
-                    { q: "5,10,15,20,… என்ற தொடரின் 10வது பதம் என்ன?", a: "50", e: "n-வது பதம் $5n$ ஆகும். $5 \\times 10 = 50$" },
-                    { q: "1,1,2,3,5,… என்ற ஃபிபனாச்சி (Fibonacci) தொடரின் அடுத்த பதம் என்ன?", a: "8", e: "முந்தைய இரண்டு பதங்களின் கூட்டுத்தொகை: $3+5=8$" },
-                    { q: "100,95,90,85,… என்ற தொடரின் அடுத்த பதம் என்ன?", a: "80", e: "ஒவ்வொரு பதத்திலிருந்தும் 5 கழிக்கப்படுகிறது." },
-                    { q: "1,8,27,64,… என்ற தொடரின் அடுத்த கன எண் என்ன?", a: "125", e: "கன எண்கள்: $1^3, 2^3, 3^3, 4^3, 5^3$" },
-                    { q: "7,14,21,28,… என்ற தொடரின் 12வது பதம் என்ன?", a: "84", e: "n-வது பதம் $7n$ ஆகும். $7 \\times 12 = 84$" },
-                    { q: "2,5,8,11,… என்ற தொடரின் n-வது பதத்திற்கான பொதுவான பதத்தை எழுதுங்கள்.", a: "3n-1", e: "பொது வித்தியாசம் 3 ஆகும்." },
-                    { q: "5,7,9,11,… என்ற தொடரின் அடுத்த பதம் என்ன?", a: "13", e: "ஒவ்வொரு பதத்திற்கும் 2 கூட்டப்படுகிறது." },
-                    { q: "3,6,9,12,… என்ற தொடரின் 15வது பதம் என்ன?", a: "45", e: "n-வது பதம் $3n$ ஆகும். $3 \\times 15 = 45$" },
-                    { q: "2,4,6,8,… என்ற இரட்டைப்படை எண்களின் தொடரின் n-வது பதத்திற்கான பொதுவான பதத்தை எழுதுங்கள்.", a: "2n", e: "பொது வித்தியாசம் 2 ஆகும்." },
-                    { q: "1,3,5,7,… என்ற ஒற்றைப்படை எண்களின் தொடரின் 100வது பதம் என்ன?", a: "199", e: "n-வது பதம் $2n-1$ ஆகும். $2 \\times 100 - 1 = 199$" },
-                    { q: "10,20,30,40,… என்ற தொடரின் 20வது பதம் என்ன?", a: "200", e: "n-வது பதம் $10n$ ஆகும். $10 \\times 20 = 200$" },
-                    { q: "1,4,7,10,… என்ற தொடரின் அடுத்த பதம் என்ன?", a: "13", e: "ஒவ்வொரு பதத்திற்கும் 3 கூட்டப்படுகிறது." },
-                    { q: "1000,100,10,1,… என்ற தொடரின் அடுத்த பதம் என்ன?", a: "0.1", e: "ஒவ்வொரு பதமும் 10 ஆல் வகுக்கப்படுகிறது." },
-                    { q: "11,22,33,44,… என்ற தொடரின் 10வது பதம் என்ன?", a: "110", e: "n-வது பதம் $11n$ ஆகும். $11 \\times 10 = 110$" },
-                    { q: "2,6,10,14,… என்ற தொடரின் n-வது பதத்தை எழுதுங்கள்.", a: "4n-2", e: "பொது வித்தியாசம் 4 ஆகும்." }
-                ]
-            }
-        };
 
-        let currentLang = 'si';
-        let selectedClassKey = null;
-
-        let quizData = [];
-        let currentQuizId = null;
-        let score = 0;
-        let questionsAnswered = 0;
-        let userAnswers = {};
-
-        // Element references
-        const quizModalOverlay = document.getElementById("quiz-modal-overlay");
-        const quizContainer = document.getElementById("quiz-container");
-        const quizTitle = document.getElementById("quiz-title");
-        const quizCloseBtn = document.getElementById("quiz-close-btn");
-        const closeBtnText = document.getElementById("close-btn-text");
-        const questionsContainer = document.getElementById("questions-container");
-        const answersContainer = document.getElementById("answers-container");
-        const resultDiv = document.getElementById("result");
-        const progressBar = document.getElementById("progressBar");
-        const scoreDisplay = document.getElementById("scoreDisplay");
-        const totalScoreTitle = document.getElementById("total-score-title");
-        const totalScoreValue = document.getElementById("total-score-value");
-
-        document.addEventListener('DOMContentLoaded', async () => {
-            const modeToggleBtn = document.getElementById('mode-toggle');
-            const modeTextSpan = document.getElementById('mode-text');
-            const modeIconSpan = document.getElementById('mode-icon');
-            const langButtons = document.querySelectorAll('.lang-button');
-            const classButtons = document.querySelectorAll('.class-button');
-            const lessonsContainer = document.getElementById('lessons-container');
-            const lessonSelectionDiv = document.getElementById('lesson-selection');
-            const sidebarMenu = document.getElementById('sidebar-menu');
-            const menuToggleBtn = document.getElementById('menu-toggle');
-            const closeMenuBtn = document.getElementById('close-menu');
-            const sidebarOverlay = document.getElementById('sidebar-overlay');
-            const body = document.body;
+            // Set displayed value and check correctness
+            drop.textContent = value;
+            const isCorrect = value === drop.dataset.accept;
+            drop.classList.add(isCorrect ? 'correct' : 'wrong');
             
-            // Initialize Firebase
-            if (Object.keys(firebaseConfig).length > 0) {
-                const app = firebase.initializeApp(firebaseConfig);
-                auth = firebase.getAuth(app);
-                db = firebase.getFirestore(app);
+            // Update UI for result
+            const card = drop.closest('.card');
+            const res = $('.result', card);
+            const icon = isCorrect ? '✔️' : '✖️';
+            res.innerHTML = `<span class="icon">${icon}</span> ${isCorrect ? 'නිවැරදි!' : 'වැරදි.'}`;
+            res.className = 'result ' + (isCorrect ? 'ok' : 'bad');
 
-                if (initialAuthToken) {
-                    await firebase.signInWithCustomToken(auth, initialAuthToken).catch(err => console.error("Firebase auth error:", err));
-                } else {
-                    await firebase.signInAnonymously(auth).catch(err => console.error("Firebase auth error:", err));
-                }
-            } else {
-                console.error("Firebase config is missing.");
-            }
-
-            firebase.onAuthStateChanged(auth, async (user) => {
-                if (user) {
-                    userId = user.uid;
-                    fetchTotalScore();
-                } else {
-                    console.log("No user signed in.");
-                }
-            });
-
-            // Function to fetch total score from Firestore
-            async function fetchTotalScore() {
-                if (!userId || !db) return;
-                try {
-                    const scoresCol = firebase.collection(db, `/artifacts/${appId}/users/${userId}/scores`);
-                    const scoreSnapshot = await firebase.getDocs(scoresCol);
-                    let totalScore = 0;
-                    scoreSnapshot.forEach(doc => {
-                        const data = doc.data();
-                        totalScore += data.score;
-                    });
-                    totalScoreValue.textContent = totalScore;
-                } catch (e) {
-                    console.error("Error fetching total score:", e);
-                }
-            }
-
-            // Function to save score to Firestore
-            async function saveScore(quizId, finalScore) {
-                if (!userId || !db) return;
-                try {
-                    const scoreDocRef = firebase.doc(db, `/artifacts/${appId}/users/${userId}/scores`, quizId);
-                    await firebase.setDoc(scoreDocRef, { score: finalScore });
-                } catch (e) {
-                    console.error("Error saving score:", e);
-                }
-            }
-            
-            // Set initial language button as selected
-            document.querySelector(`[data-lang="${currentLang}"]`).classList.add('selected');
-
-            // Open sidebar functionality
-            menuToggleBtn.addEventListener('click', () => {
-                sidebarMenu.classList.add('open');
-                sidebarOverlay.classList.add('active');
-                body.classList.add('sidebar-open');
-            });
-
-            // Close sidebar functionality
-            const closeSidebar = () => {
-                sidebarMenu.classList.remove('open');
-                sidebarOverlay.classList.remove('active');
-                body.classList.remove('sidebar-open');
-            };
-
-            closeMenuBtn.addEventListener('click', closeSidebar);
-            sidebarOverlay.addEventListener('click', closeSidebar);
-
-            // Dark/Light Mode Toggle
-            modeToggleBtn.addEventListener('click', () => {
-                body.classList.toggle('dark-mode');
-                body.classList.toggle('light-mode');
-                
-                const isDarkMode = body.classList.contains('dark-mode');
-                if (isDarkMode) {
-                    sidebarMenu.classList.add('dark-mode');
-                    sidebarMenu.classList.remove('light-mode');
-                    quizContainer.classList.add('dark-mode');
-                    quizContainer.classList.remove('light-mode');
-                    modeTextSpan.textContent = translations[currentLang].lightMode;
-                    modeIconSpan.textContent = '☀️';
-                } else {
-                    sidebarMenu.classList.add('light-mode');
-                    sidebarMenu.classList.remove('dark-mode');
-                    quizContainer.classList.add('light-mode');
-                    quizContainer.classList.remove('dark-mode');
-                    modeTextSpan.textContent = translations[currentLang].nightMode;
-                    modeIconSpan.textContent = '🌙';
-                }
-            });
-
-            // Language Selection
-            langButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    langButtons.forEach(btn => btn.classList.remove('selected'));
-                    button.classList.add('selected');
-                    currentLang = button.dataset.lang;
-                    updateLanguage();
-                    if (selectedClassKey) {
-                        displayLessons(selectedClassKey);
+            // Remove or lock the tile from the bank
+            if(tileElem){
+                tileElem.classList.add('lock');
+                tileElem.classList.remove('selected');
+                setTimeout(()=> {
+                    if (tileElem.parentNode === answersBank) {
+                       tileElem.remove();
                     }
-                });
-            });
+                }, 150);
+                if(selectedTile === tileElem) selectedTile = null;
+            }
 
-            // Class Selection
-            classButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    // Remove the red highlight from any previously selected class button
-                    classButtons.forEach(btn => btn.classList.remove('bg-red-600', 'hover:bg-red-700'));
-                    // Add the red highlight to the clicked class button
-                    button.classList.add('bg-red-600', 'hover:bg-red-700');
-                    // Remove any highlight from previously selected lesson buttons
-                    document.querySelectorAll('.lesson-button').forEach(btn => btn.classList.remove('bg-red-600', 'hover:bg-red-700'));
+            // Update game state and UI
+            state.answered++;
+            if(isCorrect) state.correct++;
+            updateUI();
 
-                    selectedClassKey = button.dataset.class;
-                    displayLessons(selectedClassKey);
-                });
-            });
+            // Show a quick toast message
+            toast.textContent = isCorrect ? 'නිවැරදි පිළිතුර!' : 'වැරදි පිළිතුර. නැවත උත්සාහ කරන්න.';
+            toast.classList.add('show');
+            setTimeout(()=>toast.classList.remove('show'), 1000);
+        }
 
-            // Function to update all text based on selected language
-            function updateLanguage() {
-                const texts = translations[currentLang];
-                // Update sidebar title and other static text
-                document.getElementById('sidebar-title').textContent = texts.sidebarTitle;
-                document.getElementById('language-title').textContent = texts.languageTitle;
-                document.getElementById('mode-title').textContent = texts.modeTitle;
-                document.getElementById('class-title').textContent = texts.classTitle;
-                document.getElementById('lesson-title').textContent = texts.lessonTitle;
-                totalScoreTitle.textContent = texts.totalScoreTitle;
-                closeBtnText.textContent = texts.backButton;
+        // Updates the score, progress bar, and final message
+        function updateUI(){
+            scoreEl.textContent = `ලකුණු: ${state.correct} / ${DATA.length}`;
+            const pct = Math.round((state.answered/DATA.length)*100);
+            progressEl.style.width = pct + '%';
 
-                // Mode toggle text update
-                const isDarkMode = body.classList.contains('dark-mode');
-                if (isDarkMode) {
-                    modeTextSpan.textContent = translations[currentLang].lightMode;
-                } else {
-                    modeTextSpan.textContent = translations[currentLang].nightMode;
+            if(state.answered === DATA.length){
+                const msg = state.correct === DATA.length
+                    ? '🎉 සුපර්! සියල්ල නිවැරදි. ඔබ ඉතාමත් නියමයි!'
+                    : state.correct >= 3
+                        ? `👏 වඩාත් හොඳයි! ලකුණු ${state.correct}/${DATA.length}. තව ටිකක් පුහුණු වුනොත් ඉතාමත් හොඳයි.`
+                        : `💪 හරි! ලකුණු ${state.correct}/${DATA.length}. නැවත උත්සාහ කරමු.`;
+                finalMsg.textContent = msg;
+            }
+        }
+
+        // Renders the initial game state
+        function render(){
+            quiz.innerHTML = '';
+            answersBank.innerHTML = '';
+            state = {answered:0, correct:0};
+            selectedTile = null;
+            updateUI();
+            finalMsg.textContent = 'පිළිතුරු බැංකුවෙන් නිවැරදි අගය ගෙන්වා ඇද එවන්න.';
+
+            // Render cards in a shuffled order
+            const order = shuffle(DATA);
+            order.forEach(item=> quiz.appendChild(makeCard(item)));
+
+            // Create and shuffle the answer tiles in the bank
+            const answers = shuffle(DATA.map(d=> d.correct));
+            answers.forEach(a=> answersBank.appendChild(makeTile(a)));
+
+            // Allow clicking outside to deselect a tile
+            document.addEventListener('click', (e)=>{
+                if(!e.target.closest('.tile') && selectedTile){
+                    selectedTile.classList.remove('selected');
+                    selectedTile = null;
                 }
+            });
+        }
 
-                // Update class button texts
-                classButtons.forEach(button => {
-                    const classKey = button.dataset.class;
-                    button.textContent = classTranslations[classKey][currentLang];
-                });
-            }
-
-            // Function to display lessons based on the selected class
-            function displayLessons(classKey) {
-                lessonsContainer.innerHTML = ''; // Clear existing lesson buttons
-                const selectedLessons = lessons[classKey][currentLang];
-                
-                if (selectedLessons) {
-                    selectedLessons.forEach((lesson, index) => {
-                        const lessonButton = document.createElement('button');
-                        lessonButton.textContent = `${index + 1}. ${lesson}`;
-                        lessonButton.classList.add('lesson-button', 'bg-purple-600', 'hover:bg-purple-700', 'text-white', 'font-medium', 'py-3', 'px-6', 'rounded-xl', 'shadow-md', 'transition-transform', 'transform', 'hover:scale-105');
-                        
-                        // Add new Event Listener for lesson buttons
-                        lessonButton.addEventListener('click', () => {
-                            // Remove red highlight from all class and lesson buttons
-                            classButtons.forEach(btn => btn.classList.remove('bg-red-600', 'hover:bg-red-700'));
-                            document.querySelectorAll('.lesson-button').forEach(btn => {
-                                btn.classList.remove('bg-red-600', 'hover:bg-red-700');
-                                btn.classList.add('bg-purple-600', 'hover:bg-purple-700');
-                            });
-                            
-                            // Highlight the clicked lesson button in red
-                            lessonButton.classList.remove('bg-purple-600', 'hover:bg-purple-700');
-                            lessonButton.classList.add('bg-red-600', 'hover:bg-red-700');
-                            
-                            let quizId = `${classKey}_lesson${index + 1}`;
-                            const quizData = quizDataDragDrop[quizId];
-                            if (quizData) {
-                                openQuizModal(quizId);
-                            }
-                        });
-                        
-                        lessonsContainer.appendChild(lessonButton);
-                    });
-                    lessonSelectionDiv.classList.remove('hidden'); // Show the lesson section
-                } else {
-                    lessonSelectionDiv.classList.add('hidden'); // Hide the lesson section
+        // Checks all answers and provides feedback for unanswered questions
+        function checkAll(){
+            $$('.card').forEach(card=>{
+                const drop = $('.dropzone', card);
+                if(!(drop.classList.contains('correct') || drop.classList.contains('wrong'))){
+                    drop.classList.add('wrong');
+                    $('.result', card).innerHTML = `<span class="icon">⚠️</span> පිළිතුරක් තෝරාගන්න.`;
+                    $('.result', card).className = 'result bad';
                 }
-            }
+            });
+            // Update UI after checking all
+            updateUI();
+        }
 
-            // Function to open the pop-up quiz modal
-            function openQuizModal(quizId) {
-                currentQuizId = quizId;
-                quizModalOverlay.classList.add('active');
-                startQuiz();
-            }
+        // Announce text for screen readers (accessibility)
+        function announce(text){
+            const live = document.createElement('div');
+            live.className = 'sr-only';
+            live.setAttribute('aria-live','assertive');
+            live.textContent = text;
+            document.body.appendChild(live);
+            setTimeout(()=>document.body.removeChild(live), 500);
+        }
 
-            // Function to close the pop-up quiz modal
-            function closeQuizModal() {
-                quizModalOverlay.classList.remove('active');
-                fetchTotalScore(); // Update total score on the home page
-            }
+        // Attach event listeners to control buttons
+        $('#btnReset').addEventListener('click', render);
+        $('#btnCheck').addEventListener('click', checkAll);
 
-            quizCloseBtn.addEventListener('click', closeQuizModal);
-
-            // QUIZ LOGIC FUNCTIONS
-            
-            function startQuiz() {
-                quizData = quizDataDragDrop[currentQuizId][currentLang];
-                score = 0;
-                questionsAnswered = 0;
-                userAnswers = {};
-                
-                // Shuffle questions and answers
-                const shuffledQuestions = [...quizData].sort(() => Math.random() - 0.5);
-                const shuffledAnswers = [...quizData].map(q => q.a).sort(() => Math.random() - 0.5);
-
-                questionsContainer.innerHTML = '';
-                answersContainer.innerHTML = '';
-                resultDiv.innerHTML = '';
-                progressBar.style.width = '0%';
-                scoreDisplay.textContent = translations[currentLang].dragAndDropInstruction;
-
-                // Create and populate question drop zones
-                shuffledQuestions.forEach((item, index) => {
-                    const questionItem = document.createElement('div');
-                    questionItem.className = 'question-item';
-                    
-                    const questionNumber = document.createElement('span');
-                    questionNumber.className = 'question-text';
-                    questionNumber.innerHTML = `${index + 1}. ${item.q}`;
-
-                    const dropZone = document.createElement('div');
-                    dropZone.className = 'drop-zone';
-                    dropZone.dataset.correctAnswer = item.a;
-                    dropZone.dataset.questionId = index;
-                    dropZone.innerHTML = 'Drop Answer Here';
-
-                    questionItem.appendChild(questionNumber);
-                    questionItem.appendChild(dropZone);
-                    questionsContainer.appendChild(questionItem);
-                });
-
-                // Create and populate draggable answers
-                shuffledAnswers.forEach((answer, index) => {
-                    const draggableAnswer = document.createElement('div');
-                    draggableAnswer.className = 'draggable-answer';
-                    draggableAnswer.innerHTML = answer;
-                    draggableAnswer.draggable = true;
-                    draggableAnswer.dataset.answer = answer;
-                    draggableAnswer.id = `draggable-answer-${index}`;
-                    answersContainer.appendChild(draggableAnswer);
-                });
-
-                // Add drag and drop event listeners
-                setupDragAndDropListeners();
-            }
-
-            function setupDragAndDropListeners() {
-                const draggables = document.querySelectorAll('.draggable-answer');
-                const dropZones = document.querySelectorAll('.drop-zone');
-
-                draggables.forEach(draggable => {
-                    draggable.addEventListener('dragstart', e => {
-                        e.dataTransfer.setData('text/plain', draggable.dataset.answer);
-                        e.dataTransfer.effectAllowed = 'move';
-                        draggable.classList.add('dragging');
-                    });
-                    draggable.addEventListener('dragend', () => {
-                        draggable.classList.remove('dragging');
-                    });
-                });
-
-                dropZones.forEach(dropZone => {
-                    dropZone.addEventListener('dragover', e => {
-                        e.preventDefault();
-                        e.dataTransfer.dropEffect = 'move';
-                        dropZone.classList.add('hover');
-                    });
-                    dropZone.addEventListener('dragleave', () => {
-                        dropZone.classList.remove('hover');
-                    });
-                    dropZone.addEventListener('drop', e => {
-                        e.preventDefault();
-                        dropZone.classList.remove('hover');
-                        
-                        if (dropZone.children.length === 0) {
-                            const droppedAnswer = e.dataTransfer.getData('text/plain');
-                            const droppedElement = document.querySelector(`[data-answer="${droppedAnswer}"]`);
-                            const questionId = dropZone.dataset.questionId;
-                            const correctAnswer = dropZone.dataset.correctAnswer;
-                            
-                            // Check if the dropped answer is correct
-                            if (droppedAnswer === correctAnswer) {
-                                score++;
-                                dropZone.classList.add('correct');
-                                droppedElement.draggable = false;
-                            } else {
-                                dropZone.classList.add('wrong');
-                                dropZone.classList.add('wrong-animation');
-                            }
-                            
-                            // Log the user's answer
-                            userAnswers[questionId] = droppedAnswer;
-                            questionsAnswered++;
-                            
-                            // Move the dropped element to the drop zone
-                            droppedElement.classList.add('answer-in-place');
-                            dropZone.appendChild(droppedElement);
-
-                            updateProgress();
-                            
-                            if (questionsAnswered === quizData.length) {
-                                setTimeout(showResult, 1000);
-                            }
-                        }
-                    });
-                });
-            }
-
-            function updateProgress() {
-                progressBar.style.width = `${(questionsAnswered / quizData.length) * 100}%`;
-                scoreDisplay.textContent = `${translations[currentLang].scoreText} ${score} / ${quizData.length}`;
-            }
-
-            async function showResult() {
-                questionsContainer.innerHTML = '';
-                answersContainer.innerHTML = '';
-                scoreDisplay.textContent = "";
-                
-                let html = `<h2>${translations[currentLang].resultTitle} ${score} / ${quizData.length}</h2>`;
-                html += `<div class="result-summary">`;
-                
-                const originalOrderQuestions = quizDataDragDrop[currentQuizId][currentLang];
-                
-                originalOrderQuestions.forEach((q, idx) => {
-                    const userAnswer = userAnswers[idx];
-                    const isCorrect = userAnswer === q.a;
-                    
-                    html += `<div class="result-item ${isCorrect ? 'correct' : 'incorrect'}">`;
-                    html += `<p class="font-bold">${idx + 1}. ${q.q}</p>`;
-                    html += `<p class="mt-2 text-sm">${translations[currentLang].yourAnswer}: <span class="user-answer">${userAnswer || 'Not answered'}</span></p>`;
-                    html += `<p class="text-sm">${translations[currentLang].correctAnswer}: <span class="correct-answer">${q.a}</span></p>`;
-                    html += `<p class="text-sm explanation">${translations[currentLang].explanation}: ${q.e}</p>`;
-                    html += `</div>`;
-                });
-                
-                html += `</div>`;
-                resultDiv.innerHTML = html;
-
-                // Save score to Firestore after quiz completion
-                await saveScore(currentQuizId, score);
-            }
-
-            // Initial language update to set correct text on load
-            updateLanguage();
-        });
+        // Initialize the game when the page loads
+        window.onload = render;
     </script>
 </body>
 </html>
