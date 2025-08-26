@@ -251,6 +251,15 @@
         .tile.lock { opacity: .55; cursor: not-allowed; }
         .tile.selected { outline: 3px solid rgba(79,134,198,.25); }
 
+        /* Style for the temporary clone created during touch drag */
+        .tile.clone {
+            position: fixed;
+            z-index: 9999;
+            pointer-events: none; /* Make sure it doesn't interfere with finding the dropzone */
+            opacity: 0.8;
+            transition: none; /* Disable transitions on the clone for smooth movement */
+        }
+
         /* Result messages */
         .result { font-weight: 700; animation: fadeIn .5s; }
         .result.ok { color: var(--ok); }
@@ -381,8 +390,7 @@
         let state = { answered:0, correct:0 };
         let selectedTile = null; // for click-to-place functionality
         let isBankVisible = true;
-        let draggedTile = null; // For touch-based dragging
-        let dragOriginalPos = { x: 0, y: 0 };
+        let touchDragClone = null; // For the visual clone during touch-based dragging
 
         // Function to shuffle an array
         function shuffle(arr){
@@ -410,55 +418,57 @@
             });
             t.addEventListener('dragend', ()=> t.classList.remove('dragging'));
 
-            // Touch event listeners for mobile
+            // Touch event listeners for mobile (creating a visual clone)
             t.addEventListener('touchstart', (e)=>{
                 if(t.classList.contains('lock')) return;
                 e.preventDefault(); // Prevent default browser behavior (scrolling, etc.)
                 
-                draggedTile = t;
-                t.classList.add('touch-dragging');
+                // Create a visual clone of the tile for dragging feedback
+                touchDragClone = t.cloneNode(true);
+                touchDragClone.classList.add('clone');
+                document.body.appendChild(touchDragClone);
+                
+                // Hide the original tile while dragging
+                t.classList.add('dragging'); 
 
                 const touch = e.touches[0];
                 const rect = t.getBoundingClientRect();
-                dragOriginalPos = {
-                    x: rect.left,
-                    y: rect.top
-                };
-
-                // Move the element to follow the touch
-                t.style.position = 'fixed';
-                t.style.left = `${touch.clientX - rect.width / 2}px`;
-                t.style.top = `${touch.clientY - rect.height / 2}px`;
-
-                // Add a temporary class to visually hide the tile from the answers bank
-                t.classList.add('dragging'); 
+                
+                // Position the clone to the initial touch point
+                touchDragClone.style.left = `${touch.clientX - (rect.width / 2)}px`;
+                touchDragClone.style.top = `${touch.clientY - (rect.height / 2)}px`;
             });
 
             t.addEventListener('touchmove', (e)=>{
-                if(!draggedTile) return;
+                if(!touchDragClone) return;
                 e.preventDefault();
                 const touch = e.touches[0];
-                draggedTile.style.left = `${touch.clientX - draggedTile.offsetWidth / 2}px`;
-                draggedTile.style.top = `${touch.clientY - draggedTile.offsetHeight / 2}px`;
+                touchDragClone.style.left = `${touch.clientX - (touchDragClone.offsetWidth / 2)}px`;
+                touchDragClone.style.top = `${touch.clientY - (touchDragClone.offsetHeight / 2)}px`;
             });
 
             t.addEventListener('touchend', (e)=>{
-                if(!draggedTile) return;
+                if(!touchDragClone) return;
                 
                 const touch = e.changedTouches[0];
                 // Find the dropzone element at the touch coordinates
                 const dropzone = document.elementFromPoint(touch.clientX, touch.clientY);
 
                 if(dropzone && dropzone.classList.contains('dropzone')){
-                    placeAnswer(dropzone, draggedTile.dataset.value);
+                    // The original tile's value is in its dataset
+                    placeAnswer(dropzone, t.dataset.value, t);
+                } else {
+                    // If not dropped on a valid zone, animate clone back to original position
+                    // For simplicity, we just remove it here.
+                    // A more advanced version could have a return animation
                 }
 
-                // Reset the tile's styles and state
-                draggedTile.classList.remove('touch-dragging', 'dragging');
-                draggedTile.style.position = '';
-                draggedTile.style.left = '';
-                draggedTile.style.top = '';
-                draggedTile = null;
+                // Remove the clone and reset original tile styles
+                if(touchDragClone){
+                    touchDragClone.remove();
+                    touchDragClone = null;
+                }
+                t.classList.remove('dragging');
             });
 
             // Click-to-select functionality
@@ -527,6 +537,7 @@
             if(tileElem){
                 tileElem.classList.add('lock');
                 tileElem.classList.remove('selected');
+                // Use a slight delay to allow for visual feedback before removing
                 setTimeout(()=> {
                     if (tileElem.parentNode === answersBank) {
                        tileElem.remove();
