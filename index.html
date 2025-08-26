@@ -246,7 +246,7 @@
             transition: transform .15s ease, box-shadow .15s ease, opacity .2s ease;
         }
         /* Tile animation on drag */
-        .tile:active { cursor: grabbing; transform: scale(1.05); box-shadow: 0 6px 12px rgba(10,60,120,.15); }
+        .tile:active, .tile.touch-dragging { cursor: grabbing; transform: scale(1.05); box-shadow: 0 6px 12px rgba(10,60,120,.15); }
         .tile.dragging { opacity: 0; transform: scale(0.8); }
         .tile.lock { opacity: .55; cursor: not-allowed; }
         .tile.selected { outline: 3px solid rgba(79,134,198,.25); }
@@ -381,6 +381,8 @@
         let state = { answered:0, correct:0 };
         let selectedTile = null; // for click-to-place functionality
         let isBankVisible = true;
+        let draggedTile = null; // For touch-based dragging
+        let dragOriginalPos = { x: 0, y: 0 };
 
         // Function to shuffle an array
         function shuffle(arr){
@@ -401,12 +403,63 @@
             t.dataset.value = text;
             t.tabIndex = 0;
 
-            // Drag and drop event listeners
+            // Drag and drop event listeners for desktop
             t.addEventListener('dragstart', (e)=>{
                 e.dataTransfer.setData('text/plain', text);
                 setTimeout(()=>t.classList.add('dragging'), 0); // Hide the original element slightly after drag starts
             });
             t.addEventListener('dragend', ()=> t.classList.remove('dragging'));
+
+            // Touch event listeners for mobile
+            t.addEventListener('touchstart', (e)=>{
+                if(t.classList.contains('lock')) return;
+                e.preventDefault(); // Prevent default browser behavior (scrolling, etc.)
+                
+                draggedTile = t;
+                t.classList.add('touch-dragging');
+
+                const touch = e.touches[0];
+                const rect = t.getBoundingClientRect();
+                dragOriginalPos = {
+                    x: rect.left,
+                    y: rect.top
+                };
+
+                // Move the element to follow the touch
+                t.style.position = 'fixed';
+                t.style.left = `${touch.clientX - rect.width / 2}px`;
+                t.style.top = `${touch.clientY - rect.height / 2}px`;
+
+                // Add a temporary class to visually hide the tile from the answers bank
+                t.classList.add('dragging'); 
+            });
+
+            t.addEventListener('touchmove', (e)=>{
+                if(!draggedTile) return;
+                e.preventDefault();
+                const touch = e.touches[0];
+                draggedTile.style.left = `${touch.clientX - draggedTile.offsetWidth / 2}px`;
+                draggedTile.style.top = `${touch.clientY - draggedTile.offsetHeight / 2}px`;
+            });
+
+            t.addEventListener('touchend', (e)=>{
+                if(!draggedTile) return;
+                
+                const touch = e.changedTouches[0];
+                // Find the dropzone element at the touch coordinates
+                const dropzone = document.elementFromPoint(touch.clientX, touch.clientY);
+
+                if(dropzone && dropzone.classList.contains('dropzone')){
+                    placeAnswer(dropzone, draggedTile.dataset.value);
+                }
+
+                // Reset the tile's styles and state
+                draggedTile.classList.remove('touch-dragging', 'dragging');
+                draggedTile.style.position = '';
+                draggedTile.style.left = '';
+                draggedTile.style.top = '';
+                draggedTile = null;
+            });
 
             // Click-to-select functionality
             t.addEventListener('click', (e)=>{
@@ -428,7 +481,7 @@
             const drop = $('.dropzone', tpl);
             drop.dataset.accept = item.correct;
 
-            // Drag and Drop (DnD) event listeners
+            // Drag and Drop (DnD) event listeners for desktop
             drop.addEventListener('dragover', e=>{ e.preventDefault(); drop.classList.add('hover'); });
             drop.addEventListener('dragleave', ()=> drop.classList.remove('hover'));
             drop.addEventListener('drop', e=>{
@@ -504,7 +557,7 @@
                     ? '🎉 සුපර්! සියල්ල නිවැරදි. ඔබ ඉතාමත් නියමයි!'
                     : state.correct >= 3
                         ? `👏 වඩාත් හොඳයි! ලකුණු ${state.correct}/${DATA.length}. තව ටිකක් පුහුණු වුනොත් ඉතාමත් හොඳයි.`
-                        : `� හරි! ලකුණු ${state.correct}/${DATA.length}. නැවත උත්සාහ කරමු.`;
+                        : `💪 හරි! ලකුණු ${state.correct}/${DATA.length}. නැවත උත්සාහ කරමු.`;
                 finalMsg.textContent = msg;
             }
         }
@@ -601,4 +654,3 @@
     </script>
 </body>
 </html>
-�
