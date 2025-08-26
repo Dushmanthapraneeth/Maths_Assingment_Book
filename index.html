@@ -89,7 +89,10 @@
             box-shadow: 0 6px 20px rgba(10,60,120,.08);
             position: relative;
         }
-        .q-title { font-weight: 700; font-size: 18px; }
+        .q-title { 
+            font-weight: 700; 
+            font-size: clamp(16px, 4vw, 24px); /* Responsive font size */
+        }
 
         /* Drop zone */
         .dropzone {
