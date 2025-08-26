@@ -114,7 +114,7 @@
             top: 0;
             right: 0;
             bottom: 0;
-            width: 320px;
+            width: 250px;
             max-width: 90%;
             background: linear-gradient(180deg, #fff 0, #f7fbff 100%); 
             border-left: 1px solid #e2eefc;
@@ -139,14 +139,37 @@
             overflow-y: auto;
             margin-top: 10px;
             padding: 10px;
-            display: flex; /* Changed from previous version */
-            flex-direction: column; /* Changed from previous version */
-            gap: 10px; /* Added for spacing */
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* The new sidebar toggle button */
+        .sidebar-toggle {
+            position: absolute;
+            top: 50%;
+            left: -24px; /* Positioned outside the sidebar */
+            transform: translateY(-50%);
+            width: 48px;
+            height: 48px;
+            background: var(--card);
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            box-shadow: -2px 0 8px rgba(10,60,120,.08);
+            z-index: 1001;
+            border: 1px solid #e2eefc;
+        }
+        .sidebar-toggle svg {
+            transition: transform .3s ease;
+        }
+        .answers-sidebar.hidden .sidebar-toggle svg {
+            transform: rotate(180deg);
         }
 
         /* Adjust main app padding for larger screens to avoid content being hidden by the sidebar */
         @media (min-width: 900px) {
-            .app { padding-right: 340px; }
+            .app { padding-right: 270px; }
         }
 
         /* Draggable answer tiles */
@@ -240,7 +263,6 @@
                 <div class="controls">
                     <button id="btnCheck">පරික්ෂා කරන්න</button>
                     <button id="btnReset" class="secondary">නව ගේම්</button>
-                    <button id="btnToggleBank" class="secondary">සැඟවීම</button>
                 </div>
             </div>
             <div class="bar" aria-label="ප්‍රගති පටිය"><div id="progress"></div></div>
@@ -257,6 +279,11 @@
     <div class="answers-sidebar" id="answersSidebar">
         <h3>පිළිතුරු බැංකුව</h3>
         <div class="bank" id="answersBank" aria-label="පිළිතුරු බැංකුව"></div>
+        <button id="sidebarToggle" class="sidebar-toggle" aria-label="පිළිතුරු බැංකුව සැඟවීම/පෙන්වීම">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+        </button>
     </div>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -290,7 +317,7 @@
         const finalMsg = $('#finalMsg');
         const toast = $('#toast');
         const answersBank = $('#answersBank');
-        const toggleBtn = $('#btnToggleBank');
+        const sidebarToggle = $('#sidebarToggle');
         const answersSidebar = $('#answersSidebar');
 
         // Game state variables
@@ -480,10 +507,9 @@
         $('#btnCheck').addEventListener('click', checkAll);
         
         // Toggle the visibility of the answers sidebar
-        toggleBtn.addEventListener('click', ()=>{
+        sidebarToggle.addEventListener('click', ()=>{
             isBankVisible = !isBankVisible;
             answersSidebar.classList.toggle('hidden', !isBankVisible);
-            toggleBtn.textContent = isBankVisible ? 'සැඟවීම' : 'පෙන්වන්න';
             announce(isBankVisible ? 'පිළිතුරු බැංකුව පෙන්වයි.' : 'පිළිතුරු බැංකුව සැඟවී ඇත.');
         });
 
