@@ -1,333 +1,452 @@
-import React, { useState, useEffect } from 'react';
-import { createRoot } from 'react-dom/client';
-
-// ප්‍රධාන App component එක, පිටු අතර සංචාලනය සහ තත්ත්වය කළමනාකරණය කරයි.
-const App = () => {
-  const [currentPage, setCurrentPage] = useState('home');
-  const [finalScore, setFinalScore] = useState(0);
-
-  // පිටු අතර සංචාලනය සඳහා ශ්‍රිතයකි.
-  const navigate = (page, score = 0) => {
-    setCurrentPage(page);
-    if (page === 'scoreboard') {
-      setFinalScore(score);
-    }
-  };
-
-  const renderPage = () => {
-    switch (currentPage) {
-      case 'home':
-        return <HomePage navigate={navigate} />;
-      case 'game':
-        return <GamePage navigate={navigate} />;
-      case 'scoreboard':
-        return <ScoreboardPage score={finalScore} navigate={navigate} />;
-      default:
-        return <HomePage navigate={navigate} />;
-    }
-  };
-
-  return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gray-100 font-sans">
-      <div className="w-full max-w-4xl bg-white rounded-xl shadow-2xl p-8 flex flex-col items-center">
-        <nav className="w-full flex justify-center mb-8">
-          <ul className="flex space-x-4 sm:space-x-8">
-            <li>
-              <button
-                className={`text-lg sm:text-xl font-bold rounded-full px-4 sm:px-6 py-2 transition-all duration-300 ${
-                  currentPage === 'home'
-                    ? 'bg-blue-600 text-white shadow-md'
-                    : 'text-gray-600 hover:bg-blue-100'
-                }`}
-                onClick={() => navigate('home')}
-              >
-                මුල් පිටුව
-              </button>
-            </li>
-            <li>
-              <button
-                className={`text-lg sm:text-xl font-bold rounded-full px-4 sm:px-6 py-2 transition-all duration-300 ${
-                  currentPage === 'game'
-                    ? 'bg-blue-600 text-white shadow-md'
-                    : 'text-gray-600 hover:bg-blue-100'
-                }`}
-                onClick={() => navigate('game')}
-              >
-                ක්‍රීඩාව
-              </button>
-            </li>
-            <li>
-              <button
-                className={`text-lg sm:text-xl font-bold rounded-full px-4 sm:px-6 py-2 transition-all duration-300 ${
-                  currentPage === 'scoreboard'
-                    ? 'bg-blue-600 text-white shadow-md'
-                    : 'text-gray-600 hover:bg-blue-100'
-                }`}
-                onClick={() => navigate('scoreboard')}
-              >
-                ලකුණු පුවරුව
-              </button>
-            </li>
-          </ul>
-        </nav>
-        <div className="w-full">
-          {renderPage()}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// මුල් පිටුව component එක
-const HomePage = ({ navigate }) => {
-  return (
-    <div className="text-center p-6 sm:p-10">
-      <h1 className="text-4xl sm:text-5xl font-extrabold text-blue-800 mb-4">ගණිත ක්‍රීඩාවට සාදරයෙන් පිළිගනිමු</h1>
-      <p className="text-md sm:text-xl text-gray-700 mb-8">
-        ඔබට දුන් අංක සහ ගණිත කර්ම භාවිතයෙන් නිවැරදි ප්‍රකාශනයක් සාදා ඉලක්කගත අගය ලබා ගත හැකිදැයි බලමු.
-      </p>
-      <button
-        className="bg-green-500 text-white text-lg sm:text-2xl font-bold py-3 px-8 rounded-full shadow-lg hover:bg-green-600 transform hover:scale-105 transition-transform duration-300"
-        onClick={() => navigate('game')}
-      >
-        ක්‍රීඩාව ආරම්භ කරන්න
-      </button>
-    </div>
-  );
-};
-
-// ක්‍රීඩා පිටුව component එක
-const GamePage = ({ navigate }) => {
-  const [showGameModal, setShowGameModal] = useState(null);
-
-  const startLevel = (gameType) => {
-    setShowGameModal(gameType);
-  };
-
-  const handleGameEnd = (score) => {
-    setShowGameModal(null);
-    navigate('scoreboard', score);
-  };
-
-  return (
-    <div className="text-center p-6 sm:p-10">
-      <h2 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-6">ක්‍රීඩා මට්ටම්</h2>
-      <p className="text-md sm:text-lg text-gray-600 mb-8">ඔබට කැමති මට්ටමක් තෝරා ක්‍රීඩා කළ හැක.</p>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6">
-        {[1, 2, 3, 4, 5, 6].map((level) => (
-          <button
-            key={`math-${level}`}
-            className="bg-blue-500 text-white text-xl sm:text-2xl font-bold py-4 rounded-xl shadow-lg hover:bg-blue-600 transform hover:scale-105 transition-transform duration-300"
-            onClick={() => startLevel('math')}
-          >
-            ගණිත ක්‍රීඩාව {level}
-          </button>
-        ))}
-      </div>
-      {showGameModal === 'math' && <GameModal onGameEnd={handleGameEnd} />}
-    </div>
-  );
-};
-
-// ගණිත ක්‍රීඩාව සඳහා Modal component එක
-const GameModal = ({ onGameEnd }) => {
-  const [score, setScore] = useState(0);
-  const [problemsPlayed, setProblemsPlayed] = useState(0);
-  const totalProblems = 5;
-  const [currentProblem, setCurrentProblem] = useState(null);
-  const [expressionItems, setExpressionItems] = useState([]);
-  const [history, setHistory] = useState([]);
-  const [resultMessage, setResultMessage] = useState('');
-  const [isCorrect, setIsCorrect] = useState(null);
-
-  // ගැටළු දත්ත
-  const problems = [
-    { target: 10, items: [8, 2, "+", 5, 3] },
-    { target: 12, items: [5, 7, "+", 6, 2, "×"] },
-    { target: 20, items: [4, 5, "×", 10, 2, "+"] },
-    { target: 8, items: [16, 2, "÷", 4, 2, "-"] },
-    { target: 15, items: [18, 3, "-", 10, 5, "÷"] },
-    { target: 6, items: [12, 2, "÷", 3, 3, "+"] },
-    { target: 25, items: [5, 5, "×", 20, 5, "-"] },
-    { target: 9, items: [1, 8, "+", 10, 1, "-"] },
-    { target: 100, items: [10, 10, "×", 5, 2, "×"] },
-    { target: 3, items: [9, 3, "÷", 6, 2, "÷"] },
-    { target: 7, items: [15, 8, "-", 10, 3, "-"] },
-    { target: 18, items: [9, 9, "+", 20, 2, "-"] },
-    { target: 30, items: [6, 5, "×", 25, 5, "+"] },
-    { target: 2, items: [10, 8, "-", 5, 3, "×"] },
-    { target: 7, items: [10, 9, 8, 2, "-", "-", 4, 3, "×"] }
-  ];
-
-  // component එක mount වන විට හෝ නව මට්ටමක් ආරම්භ වන විට නව ක්‍රීඩාවක් උත්පාදනය කිරීමට useEffect භාවිතා කරයි.
-  useEffect(() => {
-    generateNewGame();
-  }, []);
-
-  // array එකක් මාරු කිරීමට උපකාරී වන ශ්‍රිතයකි.
-  const shuffleArray = (array) => {
-    for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [array[i], array[j]] = [array[j], array[i]];
-    }
-    return array;
-  };
-
-  // නව ගැටළුවක් උත්පාදනය කිරීමේ ශ්‍රිතයකි.
-  const generateNewGame = () => {
-    if (problemsPlayed >= totalProblems) {
-      onGameEnd(score);
-      return;
-    }
-
-    const shuffledProblems = shuffleArray([...problems]);
-    const newProblem = shuffledProblems[Math.floor(Math.random() * shuffledProblems.length)];
-    setCurrentProblem(newProblem);
-    setExpressionItems(shuffleArray([...newProblem.items]));
-    setHistory([]);
-    setResultMessage('');
-    setIsCorrect(null);
-  };
-
-  // අයිතමයක් මත click කිරීම හැසිරවීම
-  const handleItemClick = (item) => {
-    setHistory((prevHistory) => [...prevHistory, item]);
-    setExpressionItems((prevItems) => prevItems.filter((i) => i !== item));
-  };
-
-  // අවසාන පියවර ආපසු ගැනීම
-  const handleUndo = () => {
-    if (history.length > 0) {
-      const lastItem = history[history.length - 1];
-      setHistory((prevHistory) => prevHistory.slice(0, -1));
-      setExpressionItems((prevItems) => [...prevItems, lastItem]);
-    }
-  };
-
-  // ආරක්ෂිත ඇගයීමේ ශ්‍රිතයකි.
-  const evaluateExpression = (expression) => {
-    try {
-      const sanitizedExpression = expression.replace(/[^0-9+\-*/().]/g, '');
-      const evalExpression = sanitizedExpression.replace(/÷/g, '/').replace(/×/g, '*');
-      const safeEvaluator = new Function(`return (${evalExpression});`);
-      return safeEvaluator();
-    } catch (e) {
-      return NaN;
-    }
-  };
-
-  // පරිශීලකයාගේ ප්‍රකාශනය පරීක්ෂා කිරීම
-  const handleCheck = () => {
-    const expression = history.join('');
-    const result = evaluateExpression(expression);
-
-    if (result === currentProblem.target) {
-      setIsCorrect(true);
-      setResultMessage('නිවැරදියි!');
-      setScore(score + 10);
-    } else {
-      setIsCorrect(false);
-      setResultMessage('වැරදියි.');
-      setScore(Math.max(0, score - 2));
-    }
-
-    setTimeout(() => {
-      setProblemsPlayed(problemsPlayed + 1);
-      generateNewGame();
-    }, 1500);
-  };
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className={`bg-white rounded-xl shadow-2xl p-6 sm:p-10 w-full max-w-2xl transform transition-all duration-500 ${isCorrect === true ? 'scale-105 shadow-green-500/50' : isCorrect === false ? 'shake-animation' : ''}`}>
-        <h2 className="text-2xl sm:text-3xl font-bold text-blue-800 mb-4 text-center">ගණිත ක්‍රීඩාව</h2>
-        <div className="text-center mb-6">
-          <p className="text-xl sm:text-2xl font-bold text-gray-700">ලකුණු: {score}</p>
-        </div>
-        {currentProblem && (
-          <>
-            <p className="text-lg sm:text-xl font-bold text-gray-700 mb-4 text-center">
-              දුන් අංක සහ සංකේත භාවිතයෙන් {currentProblem.target} ට සමාන ප්‍රකාශනයක් සාදන්න.
-            </p>
-            <div className="flex justify-center flex-wrap gap-2 sm:gap-4 mb-6 p-4 bg-gray-200 rounded-lg border-2 border-dashed border-gray-400">
-              {expressionItems.map((item, index) => (
-                <button
-                  key={`item-${index}`}
-                  className="bg-blue-100 text-blue-800 font-bold px-4 py-2 rounded-lg shadow hover:bg-blue-200 transition-colors"
-                  onClick={() => handleItemClick(item)}
-                >
-                  {item}
-                </button>
-              ))}
-            </div>
-            <div className="flex justify-center flex-wrap gap-2 sm:gap-4 mb-6 p-4 bg-blue-100 rounded-lg border-2 border-solid border-blue-400">
-              {history.map((item, index) => (
-                <span key={`history-${index}`} className="bg-white text-blue-800 font-bold px-4 py-2 rounded-lg shadow">
-                  {item}
-                </span>
-              ))}
-            </div>
-          </>
-        )}
-        <div className="flex justify-center gap-4">
-          <button
-            className="bg-gray-500 text-white font-bold py-2 px-6 rounded-full shadow-md hover:bg-gray-600 transition-colors"
-            onClick={handleUndo}
-            disabled={history.length === 0}
-          >
-            ආපසු ගන්න
-          </button>
-          <button
-            className="bg-green-500 text-white font-bold py-2 px-6 rounded-full shadow-md hover:bg-green-600 transition-colors"
-            onClick={handleCheck}
-          >
-            පරීක්ෂා කරන්න
-          </button>
-          <button
-            className="bg-red-500 text-white font-bold py-2 px-6 rounded-full shadow-md hover:bg-red-600 transition-colors"
-            onClick={() => onGameEnd(0)}
-          >
-            ක්‍රීඩාවෙන් ඉවත් වන්න
-          </button>
-        </div>
-        {resultMessage && (
-          <p className={`text-center font-bold text-lg mt-4 ${isCorrect ? 'text-green-600' : 'text-red-600'}`}>
-            {resultMessage}
-          </p>
-        )}
-      </div>
-      <style>{`
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ගණිත ක්‍රීඩා වෙබ් අඩවිය</title>
+    <!-- Tailwind CSS CDN ඇතුළත් කිරීම -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* විශේෂ සජීවිකරණ (animations) සඳහා අමතර CSS */
         .shake-animation {
-          animation: shake 0.5s ease-in-out;
+            animation: shake 0.5s ease-in-out;
         }
         @keyframes shake {
-          0% { transform: translateX(0); }
-          20% { transform: translateX(-5px); }
-          40% { transform: translateX(5px); }
-          60% { transform: translateX(-5px); }
-          80% { transform: translateX(5px); }
-          100% { transform: translateX(0); }
+            0% { transform: translateX(0); }
+            20% { transform: translateX(-5px); }
+            40% { transform: translateX(5px); }
+            60% { transform: translateX(-5px); }
+            80% { transform: translateX(5px); }
+            100% { transform: translateX(0); }
         }
-      `}</style>
-    </div>
-  );
-};
 
-// ලකුණු පුවරුව component එක
-const ScoreboardPage = ({ score, navigate }) => {
-  return (
-    <div className="text-center p-6 sm:p-10">
-      <h2 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-6">ලකුණු පුවරුව</h2>
-      <p className="text-xl sm:text-2xl text-gray-600 mb-4">ඔබගේ අවසන් ලකුණු:</p>
-      <div className="text-5xl sm:text-7xl font-extrabold text-blue-600 mb-8">{score}</div>
-      <button
-        className="bg-purple-500 text-white text-lg sm:text-xl font-bold py-3 px-8 rounded-full shadow-lg hover:bg-purple-600 transform hover:scale-105 transition-transform duration-300"
-        onClick={() => navigate('game')}
-      >
-        නැවත ක්‍රීඩා කරන්න
-      </button>
-    </div>
-  );
-};
+        .fade-in {
+            animation: fadeIn 1s ease-in-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
-export default App;
+        .pop-in {
+            animation: popIn 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        }
+        @keyframes popIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .fly-out {
+            animation: flyOut 0.4s ease-in forwards;
+        }
+        @keyframes flyOut {
+            from { transform: scale(1); opacity: 1; }
+            to { transform: scale(0.5); opacity: 0; filter: blur(2px); }
+        }
+
+        /* සංචාලන බොත්තම් වල ක්‍රියාකාරී පෙනුම සඳහා පන්තිය */
+        .nav-btn-active {
+            @apply text-purple-600 font-bold;
+        }
+        
+        /* සංචාලන බාර් එක සඳහා CSS */
+        .nav-bar {
+            @apply h-1 bg-purple-600 rounded-full mt-2;
+            transform: scaleX(0);
+            transform-origin: center;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .nav-bar-active {
+            transform: scaleX(1);
+        }
+
+        /* නව පසුබිම් සජීවිකරණය සඳහා CSS */
+        .animated-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -10;
+        }
+
+        .blob {
+            position: absolute;
+            /* පසුබිම වඩාත් සියුම් කිරීමට opacity අඩු කරන ලදී */
+            border-radius: 50%;
+            opacity: 0.3; 
+            filter: blur(80px); 
+            will-change: transform, opacity;
+        }
+
+        @keyframes blob-animation {
+            0% {
+                transform: translate(0, 0) scale(1);
+            }
+            25% {
+                transform: translate(20vw, 30vh) scale(1.2);
+            }
+            50% {
+                transform: translate(-50vw, 10vh) scale(0.8);
+            }
+            75% {
+                transform: translate(30vw, -40vh) scale(1.1);
+            }
+            100% {
+                transform: translate(0, 0) scale(1);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans relative">
+    <!-- වර්ණවත් බුබුළු වැනි සජීවිකරණ පසුබිම (Colorful bubble-like animated background) -->
+    <div class="animated-background">
+        <!-- විවිධ වර්ණ සහ සජීවිකරණ ප්‍රමාදයන් සහිත බුබුළු (Blobs with different colors and animation delays) -->
+        <div class="blob w-96 h-96 -top-40 left-1/4 animate-[blob-animation_20s_ease-in-out_infinite_alternate] bg-blue-500"></div>
+        <div class="blob w-72 h-72 -bottom-20 right-1/4 animate-[blob-animation_18s_ease-in-out_infinite_reverse] bg-purple-500"></div>
+        <div class="blob w-64 h-64 top-1/2 -left-20 animate-[blob-animation_22s_ease-in-out_infinite_alternate] bg-pink-500"></div>
+        <div class="blob w-80 h-80 bottom-1/4 left-1/2 -translate-x-1/2 animate-[blob-animation_15s_ease-in-out_infinite] bg-green-500"></div>
+        <div class="blob w-56 h-56 top-10 right-10 animate-[blob-animation_25s_ease-in-out_infinite] bg-red-500"></div>
+        <div class="blob w-60 h-60 bottom-0 left-0 animate-[blob-animation_17s_ease-in-out_infinite_reverse] bg-yellow-500"></div>
+    </div>
+    
+    <div id="app-container" class="min-h-screen flex flex-col items-center justify-center p-4">
+        <!-- වත්මන් div එකට පසුබිම වෙනුවට විනිවිද පෙනෙන bg-opacity-50 එකතු කිරීම -->
+        <div class="w-full max-w-4xl bg-white bg-opacity-50 rounded-xl shadow-2xl p-8 flex flex-col items-center relative z-10">
+            
+            <!-- පිටු සංචාලන බොත්තම් -->
+            <nav class="w-full flex justify-center mb-8">
+                <ul class="flex space-x-4 sm:space-x-8">
+                    <li class="flex flex-col items-center">
+                        <button id="nav-home" class="nav-btn px-4 py-2 font-semibold text-lg rounded-xl transition-all duration-300">මුල් පිටුව</button>
+                        <div id="bar-home" class="nav-bar w-full"></div>
+                    </li>
+                    <li class="flex flex-col items-center">
+                        <button id="nav-game" class="nav-btn px-4 py-2 font-semibold text-lg rounded-xl transition-all duration-300">ක්‍රීඩාව</button>
+                        <div id="bar-game" class="nav-bar w-full"></div>
+                    </li>
+                    <li class="flex flex-col items-center">
+                        <button id="nav-scoreboard" class="nav-btn px-4 py-2 font-semibold text-lg rounded-xl transition-all duration-300">ලකුණු පුවරුව</button>
+                        <div id="bar-scoreboard" class="nav-bar w-full"></div>
+                    </li>
+                </ul>
+            </nav>
+            
+            <!-- අන්තර්ගතය ප්‍රදර්ශනය කරන ප්‍රධාන කොටස -->
+            <div id="content" class="w-full fade-in">
+                <!-- JavaScript මගින් අන්තර්ගතය මෙහිදී ජනනය කරයි. -->
+            </div>
+            
+        </div>
+    </div>
+
+    <script>
+        // ක්‍රීඩාවේ තත්ත්වය කළමනාකරණය කරන ගෝලීය විචල්‍යයන්
+        let currentPage = 'home';
+        let finalScore = 0;
+        let showGameModal = false;
+        let score = 0;
+        let problemsPlayed = 0;
+        const totalProblems = 5;
+        let currentProblem = null;
+        let expressionItems = [];
+        let history = [];
+        let resultMessage = '';
+        let isCorrect = null;
+
+        // ගැටළු දත්ත
+        const problems = [
+            { target: 10, items: [8, 2, "+", 5, 3] },
+            { target: 12, items: [5, 7, "+", 6, 2, "×"] },
+            { target: 20, items: [4, 5, "×", 10, 2, "+"] },
+            { target: 8, items: [16, 2, "÷", 4, 2, "-"] },
+            { target: 15, items: [18, 3, "-", 10, 5, "÷"] },
+            { target: 6, items: [12, 2, "÷", 3, 3, "+"] },
+            { target: 25, items: [5, 5, "×", 20, 5, "-"] },
+            { target: 9, items: [1, 8, "+", 10, 1, "-"] },
+            { target: 100, items: [10, 10, "×", 5, 2, "×"] },
+            { target: 3, items: [9, 3, "÷", 6, 2, "÷"] },
+            { target: 7, items: [15, 8, "-", 10, 3, "-"] },
+            { target: 18, items: [9, 9, "+", 20, 2, "-"] },
+            { target: 30, items: [6, 5, "×", 25, 5, "+"] },
+            { target: 2, items: [10, 8, "-", 5, 3, "×"] },
+            { target: 7, items: [10, 9, 8, 2, "-", "-", 4, 3, "×"] }
+        ];
+
+        // පිටු අතර සංචාලනය සඳහා ශ්‍රිතයකි.
+        const navigate = (page, finalScoreValue = 0) => {
+            currentPage = page;
+            if (page === 'scoreboard') {
+                finalScore = finalScoreValue;
+            }
+            renderPage();
+            updateNavButtons();
+        };
+
+        // සංචාලන බොත්තම් වල පෙනුම යාවත්කාලීන කිරීම
+        const updateNavButtons = () => {
+            // සියලුම බොත්තම් වල ක්‍රියාකාරී පන්තිය ඉවත් කිරීම
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('nav-btn-active');
+            });
+            // සියලුම බාර් වල ක්‍රියාකාරී පන්තිය ඉවත් කිරීම
+            document.querySelectorAll('.nav-bar').forEach(bar => {
+                bar.classList.remove('nav-bar-active');
+            });
+
+            // වත්මන් බොත්තම සහ අදාළ බාර් එක ක්‍රියාකාරී කිරීම
+            const activeBtn = document.getElementById(`nav-${currentPage}`);
+            const activeBar = document.getElementById(`bar-${currentPage}`);
+            if (activeBtn) {
+                activeBtn.classList.add('nav-btn-active');
+            }
+            if (activeBar) {
+                activeBar.classList.add('nav-bar-active');
+            }
+        };
+
+        // ගණිත ප්‍රකාශනයක් ආරක්ෂිතව ඇගයීමේ ශ්‍රිතයකි.
+        const evaluateExpression = (expression) => {
+            try {
+                const sanitizedExpression = expression.replace(/[^0-9+\-*/().]/g, '');
+                const evalExpression = sanitizedExpression.replace(/÷/g, '/').replace(/×/g, '*');
+                const safeEvaluator = new Function(`return (${evalExpression});`);
+                return safeEvaluator();
+            } catch (e) {
+                return NaN;
+            }
+        };
+
+        // array එකක් මාරු කිරීමට උපකාරී වන ශ්‍රිතයකි.
+        const shuffleArray = (array) => {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        };
+
+        // නව ගැටළුවක් උත්පාදනය කිරීමේ ශ්‍රිතයකි.
+        const generateNewGame = () => {
+            if (problemsPlayed >= totalProblems) {
+                handleGameEnd(score);
+                return;
+            }
+            
+            const shuffledProblems = shuffleArray([...problems]);
+            currentProblem = shuffledProblems[Math.floor(Math.random() * shuffledProblems.length)];
+            expressionItems = shuffleArray([...currentProblem.items]);
+            history = [];
+            resultMessage = '';
+            isCorrect = null;
+            renderGameModal();
+        };
+
+        // ක්‍රීඩාව අවසන් වූ විට ක්‍රියාත්මක වන ශ්‍රිතය
+        const handleGameEnd = (finalScoreValue) => {
+            showGameModal = false;
+            navigate('scoreboard', finalScoreValue);
+        };
+
+        // අයිතමයක් මත click කිරීම හැසිරවීම
+        const handleItemClick = (item, clickedIndex) => {
+            history.push(item);
+            expressionItems = expressionItems.filter((_, i) => i !== clickedIndex);
+            renderGameModal();
+        };
+
+        // අවසාන පියවර ආපසු ගැනීම
+        const handleUndo = () => {
+            if (history.length > 0) {
+                const lastItem = history.pop();
+                expressionItems.push(lastItem);
+                renderGameModal();
+            }
+        };
+
+        // පරිශීලකයාගේ ප්‍රකාශනය පරීක්ෂා කිරීම
+        const handleCheck = () => {
+            const expression = history.join('');
+            const result = evaluateExpression(expression);
+
+            if (result === currentProblem.target) {
+                isCorrect = true;
+                resultMessage = 'නිවැරදියි!';
+                score += 10;
+            } else {
+                isCorrect = false;
+                resultMessage = 'වැරදියි.';
+                score = Math.max(0, score - 2);
+            }
+
+            // පරීක්ෂා කිරීමේ ප්‍රතිඵලය පෙන්වීමට කේතය නැවත යොමු කරන්න
+            renderGameModal();
+
+            setTimeout(() => {
+                problemsPlayed++;
+                generateNewGame();
+            }, 1500);
+        };
+
+        // Home Page එකේ HTML කේතය
+        const renderHomePage = () => {
+            return `
+                <div class="text-center p-6 sm:p-10 fade-in">
+                    <h1 class="text-4xl sm:text-5xl font-extrabold text-blue-800 mb-4">ගණිත ක්‍රීඩාවට සාදරයෙන් පිළිගනිමු</h1>
+                    <p class="text-md sm:text-xl text-gray-700 mb-8">
+                        ඔබට දුන් අංක සහ ගණිත කර්ම භාවිතයෙන් නිවැරදි ප්‍රකාශනයක් සාදා ඉලක්කගත අගය ලබා ගත හැකිදැයි බලමු.
+                    </p>
+                    <button id="start-game-btn" class="bg-gradient-to-r from-green-400 to-green-600 text-white text-lg sm:text-2xl font-bold py-3 px-8 rounded-full shadow-lg hover:from-green-500 hover:to-green-700 transform hover:scale-105 transition-transform duration-300">
+                        ක්‍රීඩාව ආරම්භ කරන්න
+                    </button>
+                </div>
+            `;
+        };
+
+        // Game Page එකේ HTML කේතය
+        const renderGamePage = () => {
+            const levelButtons = [1, 2, 3, 4, 5, 6].map(level => `
+                <button
+                    class="start-math-btn bg-blue-500 text-white text-xl sm:text-2xl font-bold py-4 rounded-xl shadow-lg hover:bg-blue-600 transform hover:scale-105 transition-transform duration-300"
+                >
+                    ගණිත ක්‍රීඩාව ${level}
+                </button>
+            `).join('');
+
+            return `
+                <div class="text-center p-6 sm:p-10 fade-in">
+                    <h2 class="text-3xl sm:text-4xl font-bold text-gray-800 mb-6">ක්‍රීඩා මට්ටම්</h2>
+                    <p class="text-md sm:text-lg text-gray-600 mb-8">ඔබට කැමති මට්ටමක් තෝරා ක්‍රීඩා කළ හැක.</p>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6">
+                        ${levelButtons}
+                    </div>
+                </div>
+            `;
+        };
+
+        // Scoreboard Page එකේ HTML කේතය
+        const renderScoreboardPage = () => {
+            return `
+                <div class="text-center p-6 sm:p-10 fade-in">
+                    <h2 class="text-3xl sm:text-4xl font-bold text-gray-800 mb-6">ලකුණු පුවරුව</h2>
+                    <p class="text-xl sm:text-2xl text-gray-600 mb-4">ඔබගේ අවසන් ලකුණු:</p>
+                    <div class="text-5xl sm:text-7xl font-extrabold text-blue-600 mb-8">${finalScore}</div>
+                    <button id="play-again-btn" class="bg-purple-500 text-white text-lg sm:text-xl font-bold py-3 px-8 rounded-full shadow-lg hover:bg-purple-600 transform hover:scale-105 transition-transform duration-300">
+                        නැවත ක්‍රීඩා කරන්න
+                    </button>
+                </div>
+            `;
+        };
+        
+        // Game Modal එකේ HTML කේතය
+        const renderGameModal = () => {
+            const modalClass = `bg-white rounded-xl shadow-2xl p-6 sm:p-10 w-full max-w-2xl transform transition-all duration-500 relative ${isCorrect === true ? 'scale-105 shadow-green-500/50' : isCorrect === false ? 'shake-animation' : ''}`;
+            
+            const expressionItemButtons = expressionItems.map((item, index) => `
+                <button
+                    class="bg-blue-100 text-blue-800 font-bold px-4 py-2 rounded-lg shadow hover:bg-blue-200 transition-colors pop-in"
+                    onclick="handleItemClick('${item}', ${index})"
+                >
+                    ${item}
+                </button>
+            `).join('');
+
+            const historySpans = history.map((item, index) => `
+                <span class="bg-white text-blue-800 font-bold px-4 py-2 rounded-lg shadow pop-in">
+                    ${item}
+                </span>
+            `).join('');
+
+            const resultMessageClass = `text-center font-bold text-lg mt-4 ${isCorrect ? 'text-green-600' : 'text-red-600'} pop-in`;
+
+            const modalHtml = `
+                <div id="game-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                    <div class="${modalClass}">
+                        <!-- ආපසු යාමේ බොත්තම -->
+                        <button
+                            class="absolute top-4 right-4 bg-gray-200 text-gray-600 text-sm font-bold py-2 px-4 rounded-full shadow-md hover:bg-gray-300 transition-colors transform hover:scale-105 duration-300"
+                            onclick="handleGameEnd(0)"
+                        >
+                            ආපසු යන්න
+                        </button>
+                        
+                        <h2 class="text-2xl sm:text-3xl font-bold text-blue-800 mb-4 text-center">ගණිත ක්‍රීඩාව</h2>
+                        <div class="text-center mb-6">
+                            <p class="text-xl sm:text-2xl font-bold text-gray-700">ලකුණු: ${score}</p>
+                        </div>
+                        <p class="text-lg sm:text-xl font-bold text-gray-700 mb-4 text-center">
+                            දුන් අංක සහ සංකේත භාවිතයෙන් ${currentProblem.target} ට සමාන ප්‍රකාශනයක් සාදන්න.
+                        </p>
+                        <div class="flex justify-center flex-wrap gap-2 sm:gap-4 mb-6 p-4 bg-gray-200 rounded-lg border-2 border-dashed border-gray-400">
+                            ${expressionItemButtons}
+                        </div>
+                        <div class="flex justify-center flex-wrap gap-2 sm:gap-4 mb-6 p-4 bg-blue-100 rounded-lg border-2 border-solid border-blue-400">
+                            ${historySpans}
+                        </div>
+                        <div class="flex justify-center gap-4">
+                            <button
+                                class="bg-gray-500 text-white font-bold py-2 px-6 rounded-full shadow-md hover:bg-gray-600 transition-colors transform hover:scale-105 duration-300"
+                                onclick="handleUndo()"
+                                ${history.length === 0 ? 'disabled' : ''}
+                            >
+                                ආපසු ගන්න
+                            </button>
+                            <button
+                                class="bg-green-500 text-white font-bold py-2 px-6 rounded-full shadow-md hover:bg-green-600 transition-colors transform hover:scale-105 duration-300"
+                                onclick="handleCheck()"
+                            >
+                                පරීක්ෂා කරන්න
+                            </button>
+                        </div>
+                        ${resultMessage ? `<p class="${resultMessageClass}">${resultMessage}</p>` : ''}
+                    </div>
+                </div>
+            `;
+            
+            // Modal එක render කිරීම
+            document.getElementById('content').innerHTML = modalHtml;
+        };
+
+        // පිටුව render කරන ප්‍රධාන ශ්‍රිතය
+        const renderPage = () => {
+            const contentDiv = document.getElementById('content');
+            switch(currentPage) {
+                case 'home':
+                    contentDiv.innerHTML = renderHomePage();
+                    // බොත්තම් වලට event listeners එකතු කිරීම
+                    document.getElementById('start-game-btn').addEventListener('click', () => navigate('game'));
+                    break;
+                case 'game':
+                    contentDiv.innerHTML = renderGamePage();
+                    // 'onclick' හැර JavaScript මගින් Event Listener එකතු කිරීම
+                    document.querySelectorAll('.start-math-btn').forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            score = 0;
+                            problemsPlayed = 0;
+                            showGameModal = true;
+                            generateNewGame();
+                        });
+                    });
+                    break;
+                case 'scoreboard':
+                    contentDiv.innerHTML = renderScoreboardPage();
+                    document.getElementById('play-again-btn').addEventListener('click', () => navigate('game'));
+                    break;
+            }
+        };
+
+        // වෙබ් අඩවිය load වූ විට ආරම්භ කරන ශ්‍රිතය
+        window.onload = function() {
+            // සංචාලන බොත්තම් වලට event listeners එකතු කිරීම
+            document.getElementById('nav-home').addEventListener('click', () => navigate('home'));
+            document.getElementById('nav-game').addEventListener('click', () => navigate('game'));
+            document.getElementById('nav-scoreboard').addEventListener('click', () => navigate('scoreboard'));
+            
+            // මුල් පිටුව render කිරීම
+            navigate('home');
+        };
+    </script>
+</body>
+</html>
