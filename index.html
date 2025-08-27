@@ -1,565 +1,204 @@
 <!DOCTYPE html>
 <html lang="si">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>ගණිත Drag & Drop කුඩුක්කා</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ගණිත ක්‍රීඩාව</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* CSS Variables for a clean, animated theme */
-        :root {
-            --bg: #dbe9f4; /* soft pastel blue */
-            --card: #ffffff;
-            --accent: #4f86c6; /* calm blue */
-            --accent-2: #6ab7ff; /* light blue */
-            --ok: #22a06b; /* green */
-            --bad: #d64545; /* red */
-            --text: #0f172a; /* slate-900 */
-        }
-        
-        /* Basic styles, removing default margins/paddings and using a modern font stack */
-        *{box-sizing:border-box}
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
         body {
-            margin: 0; 
-            font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Noto Sans", "Sinhala Sangam MN", "Iskoola Pota", sans-serif;
-            background: radial-gradient(1200px 600px at 10% -10%, #eef6ff 0, transparent 60%),
-                        radial-gradient(900px 500px at 110% 10%, #eaf4ff 0, transparent 60%), var(--bg);
-            color: var(--text);
-            min-height: 100dvh;
-            display: grid; 
-            place-items: center; 
-            padding: 24px;
+            font-family: 'Inter', sans-serif;
         }
 
-        /* Main app container */
-        .app {
-            width: min(1100px, 100%); 
-            max-width: 1100px;
-            display: grid; 
-            gap: 18px;
+        /* Animation for wrong answer (shake effect) */
+        @keyframes wrong-answer {
+            0% { transform: translateX(0); }
+            20% { transform: translateX(-5px); }
+            40% { transform: translateX(5px); }
+            60% { transform: translateX(-5px); }
+            80% { transform: translateX(5px); }
+            100% { transform: translateX(0); }
         }
 
-        /* Header section with score and controls */
-        header {
-            display: grid; 
-            gap: 10px; 
-            padding: 16px 18px; 
-            border-radius: 16px; 
-            background: var(--card);
-            box-shadow: 0 6px 20px rgba(10,60,120,.08);
+        /* Animation for a smooth transition of the puzzle grid */
+        @keyframes slide-in-right {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
-        h1 { margin: 0; font-size: clamp(20px, 2.8vw, 28px) }
-        .meta { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; justify-content: space-between }
-        .score {
-            font-weight: 700; padding: 8px 12px; border-radius: 999px; 
-            background: linear-gradient(90deg, var(--accent), var(--accent-2));
-            color: white; letter-spacing: .2px; 
-            box-shadow: 0 4px 12px rgba(79,134,198,.35);
-        }
-
-        /* Progress bar */
-        .bar { height: 10px; width: 100%; background: #e6eef6; border-radius: 999px; overflow: hidden; }
-        .bar > div { height: 100%; width: 0; background: linear-gradient(90deg, var(--accent), var(--accent-2)); transition: width .35s ease; }
         
-        /* Buttons */
-        .controls { display: flex; gap: 10px; flex-wrap: wrap }
-        button {
-            appearance: none; border: none; cursor: pointer; font-weight: 600; letter-spacing: .2px;
-            padding: 10px 14px; background: var(--text); color: white; border-radius: 12px;
-            box-shadow: 0 6px 16px rgba(15,23,42,.2); 
-            transition: transform .15s ease, box-shadow .2s ease;
-        }
-        button:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(15,23,42,.25); }
-        button:active { transform: translateY(0); box-shadow: 0 6px 16px rgba(15,23,42,.2); }
-        button.secondary { background: #1e293b }
-        
-        /* Quiz grid */
-        .grid {
-            display: grid; 
-            gap: 16px; 
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        .selected-button {
+            background-color: #2196F3 !important;
+            color: white !important;
         }
 
-        /* Question card */
-        .card {
-            background: var(--card); 
-            border-radius: 18px; 
-            padding: 16px; 
-            display: grid; 
-            gap: 12px;
-            box-shadow: 0 6px 20px rgba(10,60,120,.08);
-            position: relative;
-        }
-        .q-title { 
-            font-weight: 700; 
-            font-size: clamp(16px, 4vw, 24px); /* Responsive font size */
+        .wrong-animation {
+            animation: wrong-answer 0.5s ease-in-out;
         }
 
-        /* Drop zone */
-        .dropzone {
-            display: grid; 
-            place-items: center; 
-            border: 2px dashed #b4c9e9; 
-            border-radius: 14px; 
-            padding: 16px; 
-            min-height: 64px;
-            transition: all .2s ease;
-            background: linear-gradient(0deg, #f6fbff 0, #fff 100%);
-            position: relative;
-        }
-        /* Drop zone animations and states */
-        .dropzone.hover { border-color: var(--accent); background: #f0f7ff; transform: scale(1.01); }
-        .dropzone.correct { border-color: var(--ok); background: #ecfbf4; transform: scale(1.02); }
-        .dropzone.wrong { border-color: var(--bad); background: #ffefef; animation: shake .5s; }
-
-        /* The answers sidebar container - Desktop view */
-        .answers-sidebar {
-            position: fixed;
-            top: 0;
-            right: 0;
-            bottom: 0;
-            width: 250px;
-            max-width: 90%;
-            background: linear-gradient(180deg, #fff 0, #f7fbff 100%); 
-            border-left: 1px solid #e2eefc;
-            box-shadow: -6px 0 20px rgba(10,60,120,.08);
-            padding: 24px;
-            display: flex;
-            flex-direction: column;
-            z-index: 1000;
+        .slide-in-animation {
+            animation: slide-in-right 0.8s ease-in-out forwards;
         }
 
-        /* Adjust main app padding for larger screens to avoid content being hidden by the sidebar */
-        @media (min-width: 900px) {
-            .app { padding-right: 270px; }
+        .fade-in {
+            animation: fadeIn 1s ease-in-out;
         }
 
-        /* Media queries for Mobile optimization */
-        @media (max-width: 899px) {
-            .app {
-                grid-template-rows: 1fr auto; /* Ensure quiz area and answers are separate rows */
-                padding-bottom: 270px; /* Leave space for the answers bank at the bottom */
-                place-items: start;
-            }
-            .grid { padding-bottom: 24px; }
-            .answers-sidebar {
-                top: auto;
-                bottom: 0;
-                left: 0;
-                right: 0;
-                width: 100%;
-                height: 250px;
-                max-height: 90%;
-                border-left: none;
-                border-top: 1px solid #e2eefc;
-                box-shadow: 0 -6px 20px rgba(10,60,120,.08);
-                padding: 16px;
-            }
-            .answers-sidebar .bank {
-                flex-direction: row;
-                flex-wrap: wrap;
-                justify-content: center;
-                gap: 8px;
-                border: none;
-                padding: 0;
-            }
-            .answers-sidebar h3 {
-                display: none; /* Hide the title to save space on mobile */
-            }
-        }
-
-        /* Draggable answer tiles */
-        .tile {
-            user-select: none; 
-            -webkit-user-drag: element; 
-            -webkit-user-select: none;
-            padding: 10px 14px; 
-            border-radius: 12px; 
-            background: white; 
-            border: 1.5px solid #c9dbf3;
-            box-shadow: 0 4px 10px rgba(10,60,120,.08);
-            font-weight: 700; 
-            cursor: grab; 
-            display: inline-flex; 
-            align-items: center; 
-            justify-content: center; 
-            min-width: 56px;
-            transition: transform .15s ease, box-shadow .15s ease, opacity .2s ease;
-        }
-        /* Tile animation on drag */
-        .tile:active, .tile.touch-dragging { cursor: grabbing; transform: scale(1.05); box-shadow: 0 6px 12px rgba(10,60,120,.15); }
-        .tile.dragging { opacity: 0; transform: scale(0.8); }
-        .tile.lock { opacity: .55; cursor: not-allowed; }
-        .tile.selected { outline: 3px solid rgba(79,134,198,.25); }
-
-        /* Style for the temporary clone created during touch drag */
-        .tile.clone {
-            position: fixed;
-            z-index: 9999;
-            pointer-events: none; /* Make sure it doesn't interfere with finding the dropzone */
-            opacity: 0.8;
-            transition: none; /* Disable transitions on the clone for smooth movement */
-        }
-
-        /* Result messages */
-        .result { font-weight: 700; animation: fadeIn .5s; }
-        .result.ok { color: var(--ok); }
-        .result.bad { color: var(--bad); }
-
-        /* Footer */
-        footer {
-            text-align: center; 
-            font-size: 14px; 
-            color: #334155; 
-            opacity: .9;
-            margin-bottom: 24px;
-        }
-
-        /* Toast message for quick feedback */
-        .toast {
-            position: fixed; 
-            inset: auto 16px 16px auto; 
-            background: var(--text); 
-            color: #fff; 
-            padding: 10px 14px; 
-            border-radius: 12px; 
-            box-shadow: 0 10px 24px rgba(15,23,42,.35);
-            transform: translateY(12px); 
-            opacity: 0; 
-            pointer-events: none; 
-            transition: all .25s ease;
-        }
-        .toast.show { transform: translateY(0); opacity: 1; }
-
-        /* Icon styling (for correct/incorrect marks) */
-        .icon {
-            font-size: 1.5em; 
-            margin-right: 8px; 
-            display: inline-block;
-            animation: popIn .3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-        }
-        .icon.ok { color: var(--ok); }
-        .icon.bad { color: var(--bad); }
-
-        /* Animation keyframes */
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-5px); }
-            40%, 80% { transform: translateX(5px); }
-        }
-        @keyframes popIn {
-            from { transform: scale(0); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        
-        /* Small helper for accessibility */
-        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0 }
     </style>
 </head>
-<body>
-    <div class="app" id="app">
-        <header>
-            <h1>🧠 ගණිත Drag & Drop — ප්‍රශ්න 5ක්</h1>
-            <div class="meta">
-                <div class="score" id="score">ලකුණු: 0 / 5</div>
-                <div class="controls">
-                    <button id="btnCheck">පරික්ෂා කරන්න</button>
-                    <button id="btnReset" class="secondary">නව ගේම්</button>
-                </div>
-            </div>
-            <div class="bar" aria-label="ප්‍රගති පටිය"><div id="progress"></div></div>
-        </header>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
 
-        <section class="grid" id="quiz"></section>
-        
-        <footer>
-            <p id="finalMsg">පිළිතුරු බැංකුවෙන් නිවැරදි අගය ගෙන්වා ඇද එවන්න.</p>
-        </footer>
+    <!-- Game container with a modern, clean design -->
+    <div id="game-container" class="bg-white rounded-xl shadow-lg p-8 w-full max-w-xl flex flex-col items-center text-center fade-in">
+        <h1 class="text-4xl font-bold text-gray-800 mb-6">ගණිත ක්‍රීඩාව - ප්‍රහේලිකා</h1>
+
+        <!-- Puzzle description and target -->
+        <div id="puzzle-info" class="w-full bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
+            <p class="text-xl text-gray-700 mb-2">පහත ග්‍රිඩ් එකෙන් එකතුව <span id="target-number" class="font-extrabold text-blue-600">0</span> ට සමාන වන අංක සොයාගන්න.</p>
+            <p class="text-lg text-gray-600 font-semibold mt-2">වැරදි පිළිතුරු: <span id="wrong-answers-count">0</span></p>
+        </div>
+
+        <!-- Puzzle grid -->
+        <div id="puzzle-grid" class="grid grid-cols-4 gap-4 w-full">
+            <!-- Grid buttons are dynamically created via JavaScript -->
+        </div>
+
+        <!-- Action buttons and feedback -->
+        <div class="mt-6 w-full flex flex-col items-center gap-4">
+            <p id="result" class="text-2xl font-semibold"></p>
+            <button id="check-button" class="w-full px-6 py-3 bg-blue-600 text-white font-bold rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-300">
+                පිළිතුර පරීක්ෂා කරන්න
+            </button>
+        </div>
     </div>
 
-    <!-- Answers bank as a responsive sidebar/bottom drawer -->
-    <div class="answers-sidebar" id="answersSidebar">
-        <h3>පිළිතුරු බැංකුව</h3>
-        <div class="bank" id="answersBank" aria-label="පිළිතුරු බැංකුව"></div>
+    <!-- Modal for game over -->
+    <div id="game-over-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-xl p-8 text-center max-w-sm w-full fade-in">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">ක්‍රීඩාව අවසන්!</h2>
+            <p class="text-xl text-gray-700 mb-2">ඔබේ අවසාන ලකුණු: <span id="final-score" class="font-extrabold text-blue-600">0</span></p>
+            <p class="text-sm text-gray-500">නිවැරදි පිළිතුරකට ලකුණු 10යි. වැරදි පිළිතුරකට ලකුණු 2ක් අඩු වේ.</p>
+            <button onclick="location.reload()" class="mt-6 px-6 py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition-colors duration-300">
+                නැවත ක්‍රීඩා කරන්න
+            </button>
+        </div>
     </div>
-
-    <div class="toast" id="toast" role="status" aria-live="polite"></div>
-
-    <template id="cardTpl">
-        <article class="card" data-qid="">
-            <div class="q-title"></div>
-            <div class="dropzone" tabindex="0" role="button" aria-label="මෙතැනට පිළිතුර දාන්න"></div>
-            <div class="result" aria-live="polite"></div>
-        </article>
-    </template>
 
     <script>
-        // Game data: questions and their correct answers
-        const DATA = [
-            { id: 1, q: "7 + 8 = ?", correct: "15" },
-            { id: 2, q: "6 × 7 = ?", correct: "42" },
-            { id: 3, q: "9 − 4 = ?", correct: "5" },
-            { id: 4, q: "5² = ?", correct: "25" },
-            { id: 5, q: "24 හි අර්ධය = ?", correct: "12" },
+        // Array of puzzle data. Each object contains a target number and a grid of numbers.
+        const puzzles = [
+            {
+                target: 15,
+                grid: [2, 5, 8, 1, 9, 3, 7, 6, 4, 11, 10, 12, 13, 14, 15, 0]
+            },
+            {
+                target: 20,
+                grid: [10, 5, 2, 8, 1, 15, 7, 13, 12, 6, 9, 11, 4, 16, 17, 3]
+            },
+            {
+                target: 18,
+                grid: [1, 5, 12, 8, 6, 10, 2, 16, 3, 15, 11, 7, 4, 14, 9, 13]
+            }
         ];
 
-        // Helper functions for selecting DOM elements
-        const $ = (sel,el=document) => el.querySelector(sel);
-        const $$ = (sel,el=document) => [...el.querySelectorAll(sel)];
+        let currentPuzzleIndex = 0;
+        let selectedNumbers = [];
+        let score = 0;
+        let wrongAnswers = 0;
 
-        // Get main game elements
-        const quiz = $('#quiz');
-        const scoreEl = $('#score');
-        const progressEl = $('#progress');
-        const finalMsg = $('#finalMsg');
-        const toast = $('#toast');
-        const answersBank = $('#answersBank');
-        const answersSidebar = $('#answersSidebar');
-
-        // Game state variables
-        let state = { answered:0, correct:0 };
-        let selectedTile = null; // for click-to-place functionality
-        let touchDragClone = null; // For the visual clone during touch-based dragging
-
-        // Function to shuffle an array
-        function shuffle(arr){
-            const a = [...arr];
-            for(let i=a.length-1;i>0;i--){
-                const j = Math.floor(Math.random()*(i+1));
-                [a[i],a[j]]=[a[j],a[i]];
-            }
-            return a;
-        }
-
-        // Creates a new draggable tile element
-        function makeTile(text){
-            const t = document.createElement('div');
-            t.className = 'tile';
-            t.textContent = text;
-            t.setAttribute('draggable','true');
-            t.dataset.value = text;
-            t.tabIndex = 0;
-
-            // Drag and drop event listeners for desktop
-            t.addEventListener('dragstart', (e)=>{
-                e.dataTransfer.setData('text/plain', text);
-                setTimeout(()=>t.classList.add('dragging'), 0); // Hide the original element slightly after drag starts
-            });
-            t.addEventListener('dragend', ()=> t.classList.remove('dragging'));
-
-            // Touch event listeners for mobile (creating a visual clone)
-            t.addEventListener('touchstart', (e)=>{
-                if(t.classList.contains('lock')) return;
-                e.preventDefault(); // Prevent default browser behavior (scrolling, etc.)
-                
-                // Create a visual clone of the tile for dragging feedback
-                touchDragClone = t.cloneNode(true);
-                touchDragClone.classList.add('clone');
-                document.body.appendChild(touchDragClone);
-                
-                // Hide the original tile while dragging
-                t.classList.add('dragging'); 
-
-                const touch = e.touches[0];
-                const rect = t.getBoundingClientRect();
-                
-                // Position the clone to the initial touch point
-                touchDragClone.style.left = `${touch.clientX - (rect.width / 2)}px`;
-                touchDragClone.style.top = `${touch.clientY - (rect.height / 2)}px`;
-            });
-
-            t.addEventListener('touchmove', (e)=>{
-                if(!touchDragClone) return;
-                e.preventDefault();
-                const touch = e.touches[0];
-                touchDragClone.style.left = `${touch.clientX - (touchDragClone.offsetWidth / 2)}px`;
-                touchDragClone.style.top = `${touch.clientY - (touchDragClone.offsetHeight / 2)}px`;
-            });
-
-            t.addEventListener('touchend', (e)=>{
-                if(!touchDragClone) return;
-                
-                const touch = e.changedTouches[0];
-                // Find the dropzone element at the touch coordinates
-                const dropzone = document.elementFromPoint(touch.clientX, touch.clientY);
-
-                if(dropzone && dropzone.classList.contains('dropzone')){
-                    // The original tile's value is in its dataset
-                    placeAnswer(dropzone, t.dataset.value, t);
-                } else {
-                    // If not dropped on a valid zone, animate clone back to original position
-                    // For simplicity, we just remove it here.
-                }
-
-                // Remove the clone and reset original tile styles
-                if(touchDragClone){
-                    touchDragClone.remove();
-                    touchDragClone = null;
-                }
-                t.classList.remove('dragging');
-            });
-
-            // Click-to-select functionality
-            t.addEventListener('click', (e)=>{
-                if(t.classList.contains('lock')) return;
-                if(selectedTile) selectedTile.classList.remove('selected');
-                selectedTile = t;
-                t.classList.add('selected');
-                announce(`තෝරාගත් පිළිතුර ${text}`);
-            });
-
-            return t;
-        }
-
-        // Creates a new question card element
-        function makeCard(item){
-            const tpl = $('#cardTpl').content.firstElementChild.cloneNode(true);
-            tpl.dataset.qid = item.id;
-            $('.q-title', tpl).textContent = item.q;
-            const drop = $('.dropzone', tpl);
-            drop.dataset.accept = item.correct;
-
-            // Drag and Drop (DnD) event listeners for desktop
-            drop.addEventListener('dragover', e=>{ e.preventDefault(); drop.classList.add('hover'); });
-            drop.addEventListener('dragleave', ()=> drop.classList.remove('hover'));
-            drop.addEventListener('drop', e=>{
-                e.preventDefault(); 
-                drop.classList.remove('hover');
-                const value = e.dataTransfer.getData('text/plain');
-                placeAnswer(drop, value);
-            });
-
-            // Click-to-place functionality
-            drop.addEventListener('click', ()=>{
-                if(selectedTile){
-                    placeAnswer(drop, selectedTile.dataset.value, selectedTile);
-                }
-            });
-
-            return tpl;
-        }
-
-        // Places an answer tile into a drop zone
-        function placeAnswer(drop, value, tileElem=null){
-            // Prevent placing if already answered
-            if(drop.classList.contains('correct') || drop.classList.contains('wrong')) return; 
-
-            // Find the tile element if not provided (was dragged)
-            if(!tileElem){
-                tileElem = [...answersBank.children].find(t=> t.dataset.value === value && !t.classList.contains('lock')) || null;
-            }
-
-            // Set displayed value and check correctness
-            drop.textContent = value;
-            const isCorrect = value === drop.dataset.accept;
-            drop.classList.add(isCorrect ? 'correct' : 'wrong');
+        // Function to load the current puzzle into the UI with animation.
+        function loadPuzzle() {
+            const puzzleGrid = document.getElementById('puzzle-grid');
             
-            // Update UI for result
-            const card = drop.closest('.card');
-            const res = $('.result', card);
-            const icon = isCorrect ? '✔️' : '✖️';
-            res.innerHTML = `<span class="icon">${icon}</span> ${isCorrect ? 'නිවැරදි!' : 'වැරදි.'}`;
-            res.className = 'result ' + (isCorrect ? 'ok' : 'bad');
+            // First, hide the current puzzle content
+            puzzleGrid.innerHTML = '';
+            
+            const currentPuzzle = puzzles[currentPuzzleIndex];
+            document.getElementById('target-number').textContent = currentPuzzle.target;
+            document.getElementById('result').textContent = '';
+            selectedNumbers = [];
 
-            // Remove or lock the tile from the bank
-            if(tileElem){
-                tileElem.classList.add('lock');
-                tileElem.classList.remove('selected');
-                // Use a slight delay to allow for visual feedback before removing
-                setTimeout(()=> {
-                    if (tileElem.parentNode === answersBank) {
-                       tileElem.remove();
+            // Add the slide-in animation class
+            puzzleGrid.classList.add('slide-in-animation');
+
+            currentPuzzle.grid.forEach((number, index) => {
+                const button = document.createElement('button');
+                button.textContent = number;
+                button.className = "w-full aspect-square px-2 py-2 bg-gray-200 text-gray-800 font-bold rounded-lg shadow-sm hover:bg-blue-400 hover:text-white transition-colors duration-300";
+                button.onclick = () => selectNumber(button, number);
+                button.setAttribute('data-index', index);
+                puzzleGrid.appendChild(button);
+            });
+
+            // Remove the animation class once the animation is complete
+            puzzleGrid.addEventListener('animationend', () => {
+                puzzleGrid.classList.remove('slide-in-animation');
+            }, { once: true });
+        }
+
+        // Function to handle number selection.
+        function selectNumber(button, number) {
+            const index = selectedNumbers.indexOf(number);
+            if (index > -1) {
+                // Number is already selected, un-select it
+                selectedNumbers.splice(index, 1);
+                button.classList.remove('selected-button');
+            } else {
+                // Number is not selected, select it
+                selectedNumbers.push(number);
+                button.classList.add('selected-button');
+            }
+        }
+
+        // Event listener for the check button.
+        document.getElementById('check-button').addEventListener('click', () => {
+            const currentPuzzle = puzzles[currentPuzzleIndex];
+            const resultElement = document.getElementById('result');
+            const allButtons = document.querySelectorAll('#puzzle-grid button');
+            const currentSum = selectedNumbers.reduce((sum, num) => sum + num, 0);
+
+            if (currentSum === currentPuzzle.target) {
+                resultElement.textContent = "නිවැරදියි! 🎉";
+                resultElement.style.color = "green";
+                score += 10;
+                
+                // Disable buttons to prevent further selection
+                allButtons.forEach(btn => btn.disabled = true);
+
+                // Move to the next puzzle after a short delay
+                setTimeout(() => {
+                    currentPuzzleIndex++;
+                    if (currentPuzzleIndex < puzzles.length) {
+                        loadPuzzle();
+                    } else {
+                        // Game over
+                        const finalScore = score - (wrongAnswers * 2);
+                        document.getElementById('final-score').textContent = finalScore;
+                        document.getElementById('game-over-modal').classList.remove('hidden');
                     }
-                }, 150);
-                if(selectedTile === tileElem) selectedTile = null;
+                }, 1000); // 1 second delay for better user experience
+                
+            } else {
+                resultElement.textContent = "වැරදියි! 😔 නැවත උත්සාහ කරන්න.";
+                resultElement.style.color = "red";
+                wrongAnswers++;
+                document.getElementById('wrong-answers-count').textContent = wrongAnswers;
+
+                // Add wrong animation to the container
+                document.getElementById('game-container').classList.add('wrong-animation');
+                setTimeout(() => {
+                    document.getElementById('game-container').classList.remove('wrong-animation');
+                }, 500); // Animation duration
             }
+        });
 
-            // Update game state and UI
-            state.answered++;
-            if(isCorrect) state.correct++;
-            updateUI();
-
-            // Show a quick toast message
-            toast.textContent = isCorrect ? 'නිවැරදි පිළිතුර!' : 'වැරදි පිළිතුර. නැවත උත්සාහ කරන්න.';
-            toast.classList.add('show');
-            setTimeout(()=>toast.classList.remove('show'), 1000);
-        }
-
-        // Updates the score, progress bar, and final message
-        function updateUI(){
-            scoreEl.textContent = `ලකුණු: ${state.correct} / ${DATA.length}`;
-            const pct = Math.round((state.answered/DATA.length)*100);
-            progressEl.style.width = pct + '%';
-
-            if(state.answered === DATA.length){
-                const msg = state.correct === DATA.length
-                    ? '🎉 සුපර්! සියල්ල නිවැරදි. ඔබ ඉතාමත් නියමයි!'
-                    : state.correct >= 3
-                        ? `👏 වඩාත් හොඳයි! ලකුණු ${state.correct}/${DATA.length}. තව ටිකක් පුහුණු වුනොත් ඉතාමත් හොඳයි.`
-                        : `💪 හරි! ලකුණු ${state.correct}/${DATA.length}. නැවත උත්සාහ කරමු.`;
-                finalMsg.textContent = msg;
-            }
-        }
-
-        // Renders the initial game state
-        function render(){
-            quiz.innerHTML = '';
-            answersBank.innerHTML = '';
-            state = {answered:0, correct:0};
-            selectedTile = null;
-            updateUI();
-            finalMsg.textContent = 'පිළිතුරු බැංකුවෙන් නිවැරදි අගය ගෙන්වා ඇද එවන්න.';
-
-            // Render cards in a shuffled order
-            const order = shuffle(DATA);
-            order.forEach(item=> quiz.appendChild(makeCard(item)));
-
-            // Create and shuffle the answer tiles in the bank
-            const answers = shuffle(DATA.map(d=> d.correct));
-            answers.forEach(a=> answersBank.appendChild(makeTile(a)));
-
-            // Allow clicking outside to deselect a tile
-            document.addEventListener('click', (e)=>{
-                if(!e.target.closest('.tile') && selectedTile){
-                    selectedTile.classList.remove('selected');
-                    selectedTile = null;
-                }
-            });
-        }
-
-        // Checks all answers and provides feedback for unanswered questions
-        function checkAll(){
-            $$('.card').forEach(card=>{
-                const drop = $('.dropzone', card);
-                if(!(drop.classList.contains('correct') || drop.classList.contains('wrong'))){
-                    drop.classList.add('wrong');
-                    $('.result', card).innerHTML = `<span class="icon">⚠️</span> පිළිතුරක් තෝරාගන්න.`;
-                    $('.result', card).className = 'result bad';
-                }
-            });
-            // Update UI after checking all
-            updateUI();
-        }
-
-        // Announce text for screen readers (accessibility)
-        function announce(text){
-            const live = document.createElement('div');
-            live.className = 'sr-only';
-            live.setAttribute('aria-live','assertive');
-            live.textContent = text;
-            document.body.appendChild(live);
-            setTimeout(()=>document.body.removeChild(live), 500);
-        }
-
-        // Attach event listeners to control buttons
-        $('#btnReset').addEventListener('click', render);
-        $('#btnCheck').addEventListener('click', checkAll);
-        
-        // Initialize the game when the page loads
-        window.onload = render;
+        // Load the first puzzle when the page is loaded.
+        document.addEventListener('DOMContentLoaded', loadPuzzle);
     </script>
+
 </body>
 </html>
