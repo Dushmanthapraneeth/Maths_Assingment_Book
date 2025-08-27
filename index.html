@@ -1,486 +1,115 @@
 <!DOCTYPE html>
 <html lang="si">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ගණිත ක්‍රීඩාව - ප්‍රකාශන සාදන්න</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Sinhala:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        /* CSS styling for the game interface */
-        :root {
-            --primary-color: #1a73e8;
-            --secondary-color: #e8f0fe;
-            --text-color: #3c4043;
-            --bg-color: #f1f3f4;
-            --correct-color: #34a853;
-            --incorrect-color: #ea4335;
-        }
+  <meta charset="UTF-8">
+  <title>Math Game Hub</title>
+  <style>
+    body { font-family: sans-serif; background: #eaf3fb; text-align: center; margin:0; padding:0; }
+    header { background:#4682b4; color:white; padding:15px; }
+    h1 { margin:0; }
+    nav { margin:20px; }
+    button {
+      padding: 10px 20px; margin: 10px; font-size: 16px;
+      border: none; border-radius: 8px; cursor: pointer; background: #4682b4; color: white;
+    }
+    button:hover { background: #315f7d; }
 
-        body {
-            font-family: 'Noto Sans Sinhala', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            flex-direction: column;
-            text-align: center;
-            padding: 20px;
-        }
-        h1 {
-            color: var(--primary-color);
-            margin-bottom: 20px;
-        }
-        .container {
-            background: #fff;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 650px;
-            transition: transform 0.5s ease-in-out, box-shadow 0.5s ease-in-out; /* Added box-shadow transition */
-        }
-        .container.correct-answer {
-            transform: scale(1.05);
-            box-shadow: 0 0 20px var(--correct-color), 0 0 40px var(--correct-color); /* Correct answer animation */
-        }
-        .problem-text {
-            font-size: 1.2em;
-            font-weight: bold;
-            margin-bottom: 30px;
-            color: var(--text-color);
-            min-height: 50px;
-            transition: transform 0.5s ease-in-out;
-        }
-        .score-display {
-            font-size: 1.2em;
-            font-weight: bold;
-            color: var(--primary-color);
-            margin-bottom: 20px;
-        }
-        .expression-area, .expression-display {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            border-radius: 10px;
-            padding: 15px;
-            min-height: 70px;
-            background-color: var(--secondary-color);
-            border: 2px dashed var(--primary-color);
-            align-items: center;
-        }
-        .expression-display {
-            background-color: #eaf1fb;
-            border: 2px solid var(--primary-color);
-        }
-        .math-item {
-            background-color: #fff;
-            border: 2px solid var(--primary-color);
-            color: var(--primary-color);
-            font-size: 1.3em;
-            font-weight: bold;
-            padding: 10px 15px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: transform 0.2s, background-color 0.2s, box-shadow 0.2s;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-        .math-item:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-        }
-        .math-item.dropped {
-            cursor: default;
-        }
-        .btn-container {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            margin-top: 20px;
-        }
-        button {
-            padding: 12px 25px;
-            font-size: 1em;
-            font-weight: bold;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.3s, transform 0.2s;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        button:disabled {
-            cursor: not-allowed;
-            opacity: 0.5;
-        }
-        #check-btn {
-            background-color: var(--primary-color);
-            color: #fff;
-        }
-        #check-btn:hover:not(:disabled) {
-            background-color: #1565c0;
-            transform: scale(1.02);
-        }
-        #undo-btn {
-            background-color: #9e9e9e;
-            color: #fff;
-        }
-        #undo-btn:hover:not(:disabled) {
-            background-color: #757575;
-            transform: scale(1.02);
-        }
-        .result-message {
-            margin-top: 20px;
-            font-size: 1.2em;
-            font-weight: bold;
-            min-height: 30px;
-            opacity: 0;
-            transition: opacity 0.5s ease-in-out;
-        }
-        .result-message.show {
-            opacity: 1;
-        }
-        .correct {
-            color: var(--correct-color);
-        }
-        .incorrect {
-            color: var(--incorrect-color);
-        }
-        /* Shake animation for incorrect answers */
-        .container.incorrect-animation {
-            animation: shake 0.5s ease-in-out;
-        }
-        @keyframes shake {
-            0% { transform: translateX(0); }
-            20% { transform: translateX(-5px); }
-            40% { transform: translateX(5px); }
-            60% { transform: translateX(-5px); }
-            80% { transform: translateX(5px); }
-            100% { transform: translateX(0); }
-        }
+    main { padding:20px; }
+    section { margin-top:20px; }
 
-        /* Modal styling for the final score popup */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
-        }
-        .modal-overlay.show {
-            opacity: 1;
-            visibility: visible;
-        }
-        .modal-content {
-            background: #fff;
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-            text-align: center;
-            transform: scale(0.9);
-            transition: transform 0.3s ease-in-out;
-            max-width: 400px;
-            width: 90%;
-        }
-        .modal-overlay.show .modal-content {
-            transform: scale(1);
-        }
-        .modal-content h2 {
-            font-size: 2em;
-            color: var(--primary-color);
-            margin-bottom: 10px;
-        }
-        .modal-content p {
-            font-size: 1.5em;
-            font-weight: bold;
-            color: var(--text-color);
-            margin-bottom: 20px;
-        }
-        .modal-content button {
-            background-color: var(--correct-color);
-            color: #fff;
-            padding: 10px 20px;
-        }
-        .modal-content button:hover {
-            background-color: #278d3b;
-        }
-    </style>
+    .modal {
+      display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+      background:rgba(0,0,0,0.6); justify-content:center; align-items:center;
+    }
+    .modal iframe {
+      width:90%; height:90%; border:none; border-radius: 12px; background:white;
+    }
+
+    /* Fixed Back Button */
+    #backBtn {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 1000;
+      padding: 10px 15px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background: #ff5c5c;
+      color: white;
+    }
+    #backBtn:hover { background:#e04b4b; }
+
+    #scoreboard { margin-top:20px; }
+    table { margin:auto; border-collapse: collapse; }
+    th, td { border:1px solid #ccc; padding:6px 12px; }
+  </style>
 </head>
 <body>
+  <header>
+    <h1>🧠 Math Game Hub</h1>
+  </header>
 
-<div class="container" id="game-container">
-    <h1>ගණිත ක්‍රීඩාව - ප්‍රකාශන සාදන්න</h1>
-    <div class="score-display">ලකුණු: <span id="score">0</span></div>
-    <p class="problem-text" id="problem-text">දුන් අංක සහ සංකේත භාවිතයෙන් $10$ ට සමාන ප්‍රකාශනයක් සාදන්න.</p>
+  <main>
+    <section id="home">
+      <h2>🏠 Home</h2>
+      <p>මෙතනින් ඔබට අවශ්‍ය Level එක තෝරන්න:</p>
+      <nav>
+        <button onclick="openLevel('level (1).html')">Level 1</button>
+        <button onclick="openLevel('level (2).html')">Level 2</button>
+        <button onclick="openLevel('level (3).html')">Level 3</button>
+        <button onclick="openLevel('level (4).html')">Level 4</button>
+        <button onclick="openLevel('level (5).html')">Level 5</button>
+        <button onclick="openLevel('level (6).html')">Level 6</button>
+        <button onclick="openLevel('level (7).html')">Level 7</button>
+        <button onclick="openLevel('level (8).html')">Level 8</button>
+      </nav>
+    </section>
 
-    <div class="expression-area" id="expression-area">
-        <!-- Draggable numbers and operators are placed here -->
-    </div>
-    <div class="expression-display" id="expression-display">
-        <!-- Dropped items are displayed here -->
-    </div>
+    <section id="scoreboard">
+      <h2>🏆 Scoreboard</h2>
+      <table>
+        <thead><tr><th>Level</th><th>Score</th></tr></thead>
+        <tbody id="scoreRows"></tbody>
+      </table>
+    </section>
+  </main>
 
-    <div class="btn-container">
-        <button id="undo-btn" disabled>ආපසු ගන්න (Undo)</button>
-        <button id="check-btn">පරීක්ෂා කරන්න</button>
-    </div>
+  <!-- Modal for Games -->
+  <div id="gameModal" class="modal">
+    <iframe id="gameFrame"></iframe>
+    <button id="backBtn" onclick="closeModal()">⬅ Back</button>
+  </div>
 
-    <p class="result-message" id="result-message"></p>
-</div>
-
-<!-- Final Score Pop-up Modal -->
-<div class="modal-overlay" id="score-modal">
-    <div class="modal-content">
-        <h2>ක්‍රීඩාව අවසන්!</h2>
-        <p>ඔබ ලබාගත් ලකුණු: <span id="final-score">0</span></p>
-        <button id="restart-btn">නැවත ආරම්භ කරන්න</button>
-    </div>
-</div>
-
-<script>
-    // JavaScript logic for the game
-    let score = 0;
-    let problemsPlayed = 0;
-    const totalProblems = 10; // Number of problems to play before the popup
-    
-    // Updated problems with a wider variety and guaranteed solutions
-    const problems = [
-        {
-            target: 10,
-            items: [8, 2, "+", 5, 3] // 8 + 2 = 10
-        },
-        {
-            target: 12,
-            items: [5, 7, "+", 6, 2, "×"] // 5 + 7 = 12
-        },
-        {
-            target: 20,
-            items: [4, 5, "×", 10, 2, "+"] // 4 * 5 = 20
-        },
-        {
-            target: 8,
-            items: [16, 2, "÷", 4, 2, "-"] // 16 / 2 = 8
-        },
-        {
-            target: 15,
-            items: [18, 3, "-", 10, 5, "÷"] // 18 - 3 = 15
-        },
-        {
-            target: 6,
-            items: [12, 2, "÷", 3, 3, "+"] // 12 / 2 = 6
-        },
-        {
-            target: 25,
-            items: [5, 5, "×", 20, 5, "-"] // 5 * 5 = 25
-        },
-        {
-            target: 9,
-            items: [1, 8, "+", 10, 1, "-"] // 1 + 8 = 9
-        },
-        {
-            target: 100,
-            items: [10, 10, "×", 5, 2, "×"] // 10 * 10 = 100
-        },
-        {
-            target: 3,
-            items: [9, 3, "÷", 6, 2, "÷"] // 9 / 3 = 3
-        },
-        {
-            target: 7,
-            items: [15, 8, "-", 10, 3, "-"] // 15 - 8 = 7
-        },
-        {
-            target: 18,
-            items: [9, 9, "+", 20, 2, "-"] // 9 + 9 = 18
-        },
-        {
-            target: 30,
-            items: [6, 5, "×", 25, 5, "+"] // 6 * 5 = 30
-        },
-        {
-            target: 2,
-            items: [10, 8, "-", 5, 3, "×"] // 10 - 8 = 2
-        },
-        // New problem added based on user request
-        {
-            target: 7,
-            items: [10, 9, 8, 2, "-", "-", 4, 3, "×"] // 10 - 9 + 8 - 2 = 7, or 10-2-1=7
-        }
-    ];
-
-    let shuffledProblems = [];
-    let currentProblemIndex = 0;
-
-    const gameContainer = document.getElementById('game-container');
-    const problemTextElem = document.getElementById('problem-text');
-    const expressionArea = document.getElementById('expression-area');
-    const expressionDisplay = document.getElementById('expression-display');
-    const checkBtn = document.getElementById('check-btn');
-    const undoBtn = document.getElementById('undo-btn');
-    const resultMessage = document.getElementById('result-message');
-    const scoreDisplay = document.getElementById('score');
-
-    const scoreModal = document.getElementById('score-modal');
-    const finalScoreDisplay = document.getElementById('final-score');
-    const restartButton = document.getElementById('restart-btn');
-
-    let history = [];
-
-    // Helper function to update the score display
-    function updateScoreDisplay() {
-        scoreDisplay.textContent = score;
+  <script>
+    function openLevel(file){
+      document.getElementById('gameFrame').src = file;
+      document.getElementById('gameModal').style.display = 'flex';
+    }
+    function closeModal(){
+      document.getElementById('gameFrame').src='';
+      document.getElementById('gameModal').style.display='none';
     }
 
-    // Shuffle the array of problems for random order
-    function shuffleArray(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
-        }
-        return array;
-    }
-
-    // Generate a new game problem
-    function generateNewGame() {
-        if (problemsPlayed >= totalProblems) {
-            showFinalScore();
-            return;
-        }
-        
-        // Shuffle problems on initial load or restart
-        if (problemsPlayed === 0) {
-            shuffledProblems = shuffleArray([...problems]);
-            currentProblemIndex = 0;
-        }
-
-        const currentProblem = shuffledProblems[currentProblemIndex];
-        problemTextElem.textContent = `දුන් අංක සහ සංකේත භාවිතයෙන් ${currentProblem.target} ට සමාන ප්‍රකාශනයක් සාදන්න.`;
-        
-        expressionArea.innerHTML = '';
-        expressionDisplay.innerHTML = '';
-        resultMessage.textContent = '';
-        resultMessage.classList.remove('show'); // Hide result message for new game
-        checkBtn.disabled = false;
-        undoBtn.disabled = true;
-        history = [];
-
-        // Remove animation classes before starting a new game
-        gameContainer.classList.remove('correct-answer', 'incorrect-animation');
-
-        const shuffledItems = shuffleArray([...currentProblem.items]);
-        shuffledItems.forEach(item => {
-            const itemElement = document.createElement('div');
-            itemElement.className = 'math-item';
-            itemElement.textContent = item;
-            itemElement.dataset.value = item;
-            expressionArea.appendChild(itemElement);
-        });
-    }
-
-    // Handle drag and drop logic
-    expressionArea.addEventListener('click', (event) => {
-        const item = event.target.closest('.math-item');
-        if (item && item.parentNode === expressionArea) {
-            history.push(item);
-            expressionDisplay.appendChild(item);
-            item.classList.add('dropped');
-            undoBtn.disabled = false;
-        }
+    // ESC key closes modal
+    window.addEventListener('keydown', e=>{
+      if(e.key==='Escape'){ closeModal(); }
     });
 
-    // Undo last move
-    undoBtn.addEventListener('click', () => {
-        if (history.length > 0) {
-            const lastItem = history.pop();
-            expressionArea.appendChild(lastItem);
-            lastItem.classList.remove('dropped');
-        }
-        if (history.length === 0) {
-            undoBtn.disabled = true;
-        }
+    // receive score from child level pages
+    window.addEventListener('message', (e)=>{
+      if(e.data && e.data.level && e.data.score !== undefined){
+        addScore(e.data.level, e.data.score);
+        closeModal();
+      }
     });
 
-    // Check the expression
-    checkBtn.addEventListener('click', () => {
-        const expression = Array.from(expressionDisplay.children).map(item => item.dataset.value).join('');
-        
-        // Use a simple evaluation function for demonstration
-        let result;
-        try {
-            // Replace division symbol for eval, and ensure multiplication is handled correctly
-            const evalExpression = expression.replace(/÷/g, '/').replace(/×/g, '*');
-            result = eval(evalExpression); // WARNING: eval() can be a security risk in production environments
-        } catch (e) {
-            result = NaN; // Handle invalid expressions
-        }
-
-        checkBtn.disabled = true;
-        undoBtn.disabled = true;
-
-        if (result === shuffledProblems[currentProblemIndex].target) {
-            resultMessage.textContent = 'නිවැරදියි!';
-            resultMessage.className = 'result-message correct show';
-            score += 10;
-            gameContainer.classList.add('correct-answer');
-        } else {
-            resultMessage.textContent = 'වැරදියි.';
-            resultMessage.className = 'result-message incorrect show';
-            score = Math.max(0, score - 2);
-            gameContainer.classList.add('incorrect-animation');
-        }
-
-        problemsPlayed++;
-        updateScoreDisplay();
-
-        setTimeout(() => {
-            gameContainer.classList.remove('correct-answer', 'incorrect-animation');
-            currentProblemIndex++;
-            generateNewGame();
-        }, 1500);
-    });
-
-    // Modal functions
-    function showFinalScore() {
-        finalScoreDisplay.textContent = score;
-        scoreModal.classList.add('show');
+    function addScore(level, score){
+      let row=document.createElement('tr');
+      row.innerHTML=`<td>${level}</td><td>${score}</td>`;
+      document.getElementById('scoreRows').appendChild(row);
     }
-
-    function hideFinalScore() {
-        scoreModal.classList.remove('show');
-    }
-
-    // Restart the game from the beginning
-    restartButton.addEventListener('click', () => {
-        hideFinalScore();
-        score = 0;
-        problemsPlayed = 0;
-        currentProblemIndex = 0; // Reset problem index for new shuffled array
-        updateScoreDisplay();
-        generateNewGame();
-    });
-
-    // Initial game setup on window load
-    window.onload = function() {
-        generateNewGame();
-        updateScoreDisplay();
-    };
-</script>
-
+  </script>
 </body>
 </html>
