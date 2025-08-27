@@ -113,8 +113,8 @@
     </div>
     
     <div id="app-container" class="min-h-screen flex flex-col items-center justify-center p-4">
-        <!-- වත්මන් div එකට පසුබිම වෙනුවට විනිවිද පෙනෙන bg-opacity-50 එකතු කිරීම -->
-        <div class="w-full max-w-4xl bg-white bg-opacity-50 rounded-xl shadow-2xl p-8 flex flex-col items-center relative z-10">
+        <!-- ක්‍රීඩාව සම්පූර්ණ තිරය පුරා පෙන්වීමට `max-w-4xl` ඉවත් කර ඇත -->
+        <div class="w-full bg-white bg-opacity-50 rounded-xl shadow-2xl p-8 flex flex-col items-center relative z-10">
             
             <!-- පිටු සංචාලන බොත්තම් -->
             <nav class="w-full flex justify-center mb-8">
@@ -342,7 +342,10 @@
         
         // Game Modal එකේ HTML කේතය
         const renderGameModal = () => {
-            const modalClass = `bg-white rounded-xl shadow-2xl p-6 sm:p-10 w-full max-w-2xl transform transition-all duration-500 relative ${isCorrect === true ? 'scale-105 shadow-green-500/50' : isCorrect === false ? 'shake-animation' : ''}`;
+            // ජංගම දුරකථන සඳහා සම්පූර්ණ තිරය පිරවීමට h-screen සහ w-screen භාවිතා කරන ලදී.
+            const modalContainerClass = `fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 h-screen w-screen`;
+            // ජංගම දුරකථන සඳහා padding අඩු කරන ලදී.
+            const modalContentClass = `bg-white rounded-xl shadow-2xl p-4 sm:p-6 w-full h-full sm:h-auto sm:max-w-2xl transform transition-all duration-500 relative flex flex-col items-center justify-center ${isCorrect === true ? 'scale-105 shadow-green-500/50' : isCorrect === false ? 'shake-animation' : ''}`;
             
             const expressionItemButtons = expressionItems.map((item, index) => `
                 <button
@@ -362,8 +365,8 @@
             const resultMessageClass = `text-center font-bold text-lg mt-4 ${isCorrect ? 'text-green-600' : 'text-red-600'} pop-in`;
 
             const modalHtml = `
-                <div id="game-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-                    <div class="${modalClass}">
+                <div id="game-modal" class="${modalContainerClass}">
+                    <div class="${modalContentClass}">
                         <!-- ආපසු යාමේ බොත්තම -->
                         <button
                             class="absolute top-4 right-4 bg-gray-200 text-gray-600 text-sm font-bold py-2 px-4 rounded-full shadow-md hover:bg-gray-300 transition-colors transform hover:scale-105 duration-300"
