@@ -3,149 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ගණිත ක්‍රීඩා වෙබ් අඩවිය</title>
+    <title>ගණිත ක්‍රීඩාව</title>
     <!-- Tailwind CSS CDN ඇතුළත් කිරීම -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* විශේෂ සජීවිකරණ (animations) සඳහා අමතර CSS */
-        .shake-animation {
-            animation: shake 0.5s ease-in-out;
+        /* ශරීරය (body) සහ ප්‍රධාන containe එක සඳහා අමතර CSS */
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #eef2ff; /* නව මෘදු පසුබිම් වර්ණය */
         }
-        @keyframes shake {
+        
+        .main-card {
+            background: linear-gradient(135deg, #f0f4ff, #e0e7ff);
+        }
+
+        /* සජීවිකරණ (Animations) */
+        @keyframes correct-pop {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            50% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        @keyframes incorrect-shake {
             0% { transform: translateX(0); }
-            20% { transform: translateX(-5px); }
-            40% { transform: translateX(5px); }
-            60% { transform: translateX(-5px); }
-            80% { transform: translateX(5px); }
+            20% { transform: translateX(-5px) rotate(-1deg); }
+            40% { transform: translateX(5px) rotate(1deg); }
+            60% { transform: translateX(-5px) rotate(-1deg); }
+            80% { transform: translateX(5px) rotate(1deg); }
             100% { transform: translateX(0); }
         }
 
-        .fade-in {
-            animation: fadeIn 1s ease-in-out forwards;
-        }
-        @keyframes fadeIn {
+        @keyframes fade-in-up {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .pop-in {
-            animation: popIn 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-        }
-        @keyframes popIn {
-            from { transform: scale(0.8); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
         }
 
-        .fly-out {
-            animation: flyOut 0.4s ease-in forwards;
-        }
-        @keyframes flyOut {
-            from { transform: scale(1); opacity: 1; }
-            to { transform: scale(0.5); opacity: 0; filter: blur(2px); }
-        }
-
-        /* සංචාලන බොත්තම් වල ක්‍රියාකාරී පෙනුම සඳහා පන්තිය */
-        .nav-btn-active {
-            @apply text-purple-600 font-bold;
-        }
-        
-        /* සංචාලන බාර් එක සඳහා CSS */
-        .nav-bar {
-            @apply h-1 bg-purple-600 rounded-full mt-2;
-            transform: scaleX(0);
-            transform-origin: center;
-            transition: transform 0.3s ease-in-out;
+        /* විනිවිද යන පසුබිම සඳහා */
+        .modal-overlay {
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
         }
 
-        .nav-bar-active {
-            transform: scaleX(1);
+        /* මධ්‍යගත බොත්තම් සඳහා පන්තිය */
+        .btn-game {
+            @apply flex-1 py-3 sm:py-4 rounded-full font-bold text-white shadow-lg transition-all duration-300 transform hover:scale-105;
         }
 
-        /* නව පසුබිම් සජීවිකරණය සඳහා CSS */
-        .animated-background {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            z-index: -10;
-        }
-
-        .blob {
-            position: absolute;
-            /* පසුබිම වඩාත් සියුම් කිරීමට opacity අඩු කරන ලදී */
-            border-radius: 50%;
-            opacity: 0.3; 
-            filter: blur(80px); 
-            will-change: transform, opacity;
-        }
-
-        @keyframes blob-animation {
-            0% {
-                transform: translate(0, 0) scale(1);
-            }
-            25% {
-                transform: translate(20vw, 30vh) scale(1.2);
-            }
-            50% {
-                transform: translate(-50vw, 10vh) scale(0.8);
-            }
-            75% {
-                transform: translate(30vw, -40vh) scale(1.1);
-            }
-            100% {
-                transform: translate(0, 0) scale(1);
-            }
+        /* ප්‍රධාන මාතෘකාව සඳහා CSS */
+        h1, h2 {
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
         }
     </style>
 </head>
-<body class="bg-gray-100 font-sans relative">
-    <!-- වර්ණවත් බුබුළු වැනි සජීවිකරණ පසුබිම (Colorful bubble-like animated background) -->
-    <div class="animated-background">
-        <!-- විවිධ වර්ණ සහ සජීවිකරණ ප්‍රමාදයන් සහිත බුබුළු (Blobs with different colors and animation delays) -->
-        <div class="blob w-96 h-96 -top-40 left-1/4 animate-[blob-animation_20s_ease-in-out_infinite_alternate] bg-blue-500"></div>
-        <div class="blob w-72 h-72 -bottom-20 right-1/4 animate-[blob-animation_18s_ease-in-out_infinite_reverse] bg-purple-500"></div>
-        <div class="blob w-64 h-64 top-1/2 -left-20 animate-[blob-animation_22s_ease-in-out_infinite_alternate] bg-pink-500"></div>
-        <div class="blob w-80 h-80 bottom-1/4 left-1/2 -translate-x-1/2 animate-[blob-animation_15s_ease-in-out_infinite] bg-green-500"></div>
-        <div class="blob w-56 h-56 top-10 right-10 animate-[blob-animation_25s_ease-in-out_infinite] bg-red-500"></div>
-        <div class="blob w-60 h-60 bottom-0 left-0 animate-[blob-animation_17s_ease-in-out_infinite_reverse] bg-yellow-500"></div>
-    </div>
-    
-    <div id="app-container" class="min-h-screen flex flex-col items-center justify-center p-4">
-        <!-- ප්‍රධාන කොටුවේ උපරිම පළල 'max-w-4xl' සිට 'max-w-5xl' දක්වා විශාල කරන ලදී -->
-        <div class="w-full max-w-5xl bg-white bg-opacity-50 rounded-xl shadow-2xl p-8 flex flex-col items-center relative z-10">
+<body class="bg-gray-100 font-sans antialiased">
+
+    <!-- ප්‍රධාන යෙදුම් බහාලුම -->
+    <div id="app-container" class="min-h-screen flex items-center justify-center p-4 sm:p-8">
+        <!-- ප්‍රධාන කාඩ්පත (card) -->
+        <div class="w-full max-w-2xl main-card rounded-3xl shadow-2xl p-6 sm:p-10 relative overflow-hidden">
             
             <!-- පිටු සංචාලන බොත්තම් -->
-            <nav class="w-full flex justify-center mb-8">
-                <ul class="flex space-x-4 sm:space-x-8">
-                    <li class="flex flex-col items-center">
-                        <button id="nav-home" class="nav-btn px-4 py-2 font-semibold text-md rounded-xl transition-all duration-300">මුල් පිටුව</button>
-                        <div id="bar-home" class="nav-bar w-full"></div>
-                    </li>
-                    <li class="flex flex-col items-center">
-                        <button id="nav-game" class="nav-btn px-4 py-2 font-semibold text-md rounded-xl transition-all duration-300">ක්‍රීඩාව</button>
-                        <div id="bar-game" class="nav-bar w-full"></div>
-                    </li>
-                    <li class="flex flex-col items-center">
-                        <button id="nav-scoreboard" class="nav-btn px-4 py-2 font-semibold text-md rounded-xl transition-all duration-300">ලකුණු පුවරුව</button>
-                        <div id="bar-scoreboard" class="nav-bar w-full"></div>
-                    </li>
-                </ul>
+            <nav class="flex justify-center space-x-4 mb-8">
+                <button id="nav-home" class="text-gray-600 font-semibold px-4 py-2 rounded-lg hover:bg-white hover:shadow transition-colors">
+                    මුල් පිටුව
+                </button>
+                <button id="nav-game" class="text-gray-600 font-semibold px-4 py-2 rounded-lg hover:bg-white hover:shadow transition-colors">
+                    ක්‍රීඩාව
+                </button>
+                <button id="nav-scoreboard" class="text-gray-600 font-semibold px-4 py-2 rounded-lg hover:bg-white hover:shadow transition-colors">
+                    ලකුණු පුවරුව
+                </button>
             </nav>
-            
+
             <!-- අන්තර්ගතය ප්‍රදර්ශනය කරන ප්‍රධාන කොටස -->
-            <div id="content" class="w-full fade-in">
+            <div id="content" class="fade-in-up">
                 <!-- JavaScript මගින් අන්තර්ගතය මෙහිදී ජනනය කරයි. -->
             </div>
-            
         </div>
     </div>
 
-    <!-- Modal එක ප්‍රධාන අන්තර්ගතයට පිටින් වෙනම div එකක් තුළ තබන ලදී. මෙය එය තිරයේ මැද තබා ගැනීමට උපකාරී වේ. -->
-    <div id="game-modal-container" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 sm:p-8 hidden">
-        <div id="game-modal-content" class="bg-white p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-xl flex flex-col items-center gap-4 sm:gap-6 transform transition-all duration-500 relative">
-            <!-- Modal අන්තර්ගතය JavaScript මගින් මෙහි ජනනය කරයි. -->
+    <!-- ගතික මොඩල් බහාලුම (Dynamically created modal container) -->
+    <div id="game-modal-container" class="fixed inset-0 hidden items-center justify-center z-50 modal-overlay p-4 sm:p-8">
+        <div id="game-modal-content" class="w-full max-w-xl bg-white p-6 sm:p-10 rounded-3xl shadow-2xl relative transform transition-transform duration-500 scale-95 opacity-0">
+            <!-- JavaScript මගින් මොඩල් අන්තර්ගතය මෙහි ජනනය කරයි. -->
         </div>
     </div>
 
@@ -153,7 +99,6 @@
         // ක්‍රීඩාවේ තත්ත්වය කළමනාකරණය කරන ගෝලීය විචල්‍යයන්
         let currentPage = 'home';
         let finalScore = 0;
-        let showGameModal = false;
         let score = 0;
         let problemsPlayed = 0;
         const totalProblems = 5;
@@ -194,23 +139,14 @@
 
         // සංචාලන බොත්තම් වල පෙනුම යාවත්කාලීන කිරීම
         const updateNavButtons = () => {
-            // සියලුම බොත්තම් වල ක්‍රියාකාරී පන්තිය ඉවත් කිරීම
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.remove('nav-btn-active');
+            document.querySelectorAll('nav button').forEach(btn => {
+                btn.classList.remove('bg-white', 'text-purple-600', 'shadow');
+                btn.classList.add('text-gray-600');
             });
-            // සියලුම බාර් වල ක්‍රියාකාරී පන්තිය ඉවත් කිරීම
-            document.querySelectorAll('.nav-bar').forEach(bar => {
-                bar.classList.remove('nav-bar-active');
-            });
-
-            // වත්මන් බොත්තම සහ අදාළ බාර් එක ක්‍රියාකාරී කිරීම
             const activeBtn = document.getElementById(`nav-${currentPage}`);
-            const activeBar = document.getElementById(`bar-${currentPage}`);
             if (activeBtn) {
-                activeBtn.classList.add('nav-btn-active');
-            }
-            if (activeBar) {
-                activeBar.classList.add('nav-bar-active');
+                activeBtn.classList.remove('text-gray-600');
+                activeBtn.classList.add('bg-white', 'text-purple-600', 'shadow');
             }
         };
 
@@ -253,10 +189,14 @@
 
         // ක්‍රීඩාව අවසන් වූ විට ක්‍රියාත්මක වන ශ්‍රිතය
         const handleGameEnd = (finalScoreValue) => {
-            showGameModal = false;
-            // Modal container එක සැඟවීම
-            document.getElementById('game-modal-container').classList.add('hidden');
-            navigate('scoreboard', finalScoreValue);
+            const modalContainer = document.getElementById('game-modal-container');
+            const modalContent = document.getElementById('game-modal-content');
+            modalContent.classList.remove('scale-100', 'opacity-100');
+            modalContent.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                modalContainer.classList.add('hidden');
+                navigate('scoreboard', finalScoreValue);
+            }, 300);
         };
 
         // අයිතමයක් මත click කිරීම හැසිරවීම
@@ -279,21 +219,24 @@
         const handleCheck = () => {
             const expression = history.join('');
             const result = evaluateExpression(expression);
+            const modalContent = document.getElementById('game-modal-content');
 
             if (result === currentProblem.target) {
                 isCorrect = true;
-                resultMessage = 'නිවැරදියි!';
+                resultMessage = 'නිවැරදියි! 🎉';
                 score += 10;
+                modalContent.style.animation = 'correct-pop 1s forwards';
             } else {
                 isCorrect = false;
-                resultMessage = 'වැරදියි.';
+                resultMessage = 'වැරදියි. 😥';
                 score = Math.max(0, score - 2);
+                modalContent.style.animation = 'incorrect-shake 0.5s forwards';
             }
 
-            // පරීක්ෂා කිරීමේ ප්‍රතිඵලය පෙන්වීමට කේතය නැවත යොමු කරන්න
             renderGameModal();
 
             setTimeout(() => {
+                modalContent.style.animation = '';
                 problemsPlayed++;
                 generateNewGame();
             }, 1500);
@@ -302,12 +245,12 @@
         // Home Page එකේ HTML කේතය
         const renderHomePage = () => {
             return `
-                <div class="text-center p-6 sm:p-10 fade-in">
-                    <h1 class="text-3xl sm:text-4xl font-extrabold text-blue-800 mb-4">ගණිත ක්‍රීඩාවට සාදරයෙන් පිළිගනිමු</h1>
-                    <p class="text-sm sm:text-lg text-gray-700 mb-8">
+                <div class="text-center p-4">
+                    <h1 class="text-3xl sm:text-4xl font-extrabold text-blue-800 mb-4 animate-[fade-in-up_1s_ease-in-out]">ගණිත ක්‍රීඩාවට සාදරයෙන් පිළිගනිමු</h1>
+                    <p class="text-sm sm:text-lg text-gray-700 mb-8 animate-[fade-in-up_1s_ease-in-out_0.2s_forwards] opacity-0">
                         ඔබට දුන් අංක සහ ගණිත කර්ම භාවිතයෙන් නිවැරදි ප්‍රකාශනයක් සාදා ඉලක්කගත අගය ලබා ගත හැකිදැයි බලමු.
                     </p>
-                    <button id="start-game-btn" class="bg-gradient-to-r from-green-400 to-green-600 text-white text-base sm:text-xl font-bold py-3 px-8 rounded-full shadow-lg hover:from-green-500 hover:to-green-700 transform hover:scale-105 transition-transform duration-300">
+                    <button id="start-game-btn" class="bg-gradient-to-r from-purple-500 to-indigo-600 text-white text-base sm:text-xl font-bold py-3 px-8 rounded-full shadow-lg hover:from-purple-600 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105 animate-[pulse_2s_infinite]">
                         ක්‍රීඩාව ආරම්භ කරන්න
                     </button>
                 </div>
@@ -316,20 +259,16 @@
 
         // Game Page එකේ HTML කේතය
         const renderGamePage = () => {
-            const levelButtons = [1, 2, 3, 4, 5, 6].map(level => `
-                <button
-                    class="start-math-btn bg-blue-500 text-white text-lg sm:text-xl font-bold py-4 rounded-xl shadow-lg hover:bg-blue-600 transform hover:scale-105 transition-transform duration-300"
-                >
-                    ගණිත ක්‍රීඩාව ${level}
-                </button>
-            `).join('');
-
             return `
-                <div class="text-center p-6 sm:p-10 fade-in">
+                <div class="text-center p-4 fade-in-up">
                     <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-6">ක්‍රීඩා මට්ටම්</h2>
                     <p class="text-sm sm:text-base text-gray-600 mb-8">ඔබට කැමති මට්ටමක් තෝරා ක්‍රීඩා කළ හැක.</p>
-                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6">
-                        ${levelButtons}
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                        ${[1, 2, 3, 4, 5, 6].map(level => `
+                            <button class="start-math-btn bg-blue-500 text-white text-lg sm:text-xl font-bold py-4 rounded-xl shadow-lg hover:bg-blue-600 transform hover:scale-105 transition-transform duration-300">
+                                මට්ටම ${level}
+                            </button>
+                        `).join('')}
                     </div>
                 </div>
             `;
@@ -338,10 +277,10 @@
         // Scoreboard Page එකේ HTML කේතය
         const renderScoreboardPage = () => {
             return `
-                <div class="text-center p-6 sm:p-10 fade-in">
+                <div class="text-center p-4 fade-in-up">
                     <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-6">ලකුණු පුවරුව</h2>
                     <p class="text-lg sm:text-xl text-gray-600 mb-4">ඔබගේ අවසන් ලකුණු:</p>
-                    <div class="text-4xl sm:text-6xl font-extrabold text-blue-600 mb-8">${finalScore}</div>
+                    <div class="text-4xl sm:text-6xl font-extrabold text-blue-600 mb-8 animate-[pulse_1s_ease-in-out]">${finalScore}</div>
                     <button id="play-again-btn" class="bg-purple-500 text-white text-base sm:text-lg font-bold py-3 px-8 rounded-full shadow-lg hover:bg-purple-600 transform hover:scale-105 transition-transform duration-300">
                         නැවත ක්‍රීඩා කරන්න
                     </button>
@@ -351,107 +290,102 @@
         
         // Modal එකේ අන්තර්ගතය render කරන ශ්‍රිතයකි.
         const renderGameModal = () => {
+            const modalContainer = document.getElementById('game-modal-container');
+            const modalContent = document.getElementById('game-modal-content');
+
+            // අන්තර්ගතය ජනනය කිරීම
             const expressionItemButtons = expressionItems.map((item, index) => `
                 <button
-                    class="bg-blue-100 text-blue-800 text-xl sm:text-2xl font-bold rounded-lg shadow-md hover:bg-blue-200 transition-colors pop-in w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center"
+                    class="bg-white text-blue-800 text-xl sm:text-2xl font-bold rounded-xl shadow-md hover:bg-gray-100 transition-colors pop-in w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center"
                     onclick="handleItemClick('${item}', ${index})"
                 >
                     ${item}
                 </button>
             `).join('');
 
-            const historySpans = history.map((item, index) => `
-                <span class="bg-white text-blue-800 text-lg sm:text-xl font-bold px-3 py-1 sm:px-4 sm:py-2 rounded-lg shadow-md pop-in">
+            const historySpans = history.map((item) => `
+                <span class="bg-white text-purple-600 text-lg sm:text-xl font-bold px-3 py-1 sm:px-4 sm:py-2 rounded-lg shadow-md pop-in">
                     ${item}
                 </span>
             `).join('');
 
             const resultMessageClass = `text-center font-bold text-md sm:text-xl mt-4 ${isCorrect ? 'text-green-600' : 'text-red-600'} pop-in`;
 
-            const modalHtml = `
-                <!-- ඉහළ කොටස -->
-                <div class="flex flex-col items-center w-full">
-                    <button
-                        class="absolute top-2 right-2 sm:top-4 sm:right-4 bg-gray-200 text-gray-600 text-xs sm:text-sm font-bold py-1 px-2 sm:py-2 sm:px-4 rounded-full shadow-md hover:bg-gray-300 transition-colors transform hover:scale-105 duration-300"
-                        onclick="handleGameEnd(0)"
-                    >
-                        ආපසු යන්න
-                    </button>
-                    <!-- මාතෘකාවේ සහ අනෙකුත් පෙළෙහි ප්‍රමාණය ජංගම දුරකථන සඳහා ගතිකව සකස් කිරීම -->
-                    <h2 class="text-lg sm:text-2xl font-bold text-blue-800 mb-2">ගණිත ක්‍රීඩාව</h2>
-                    <p class="text-sm sm:text-lg font-bold text-gray-700 mb-4">ලකුණු: ${score}</p>
-                    <p class="text-sm sm:text-lg font-semibold text-gray-800 text-center">
-                        දුන් අංක සහ සංකේත භාවිතයෙන් <span class="text-xl sm:text-2xl font-extrabold text-purple-600">${currentProblem.target}</span> ට සමාන ප්‍රකාශනයක් සාදන්න.
+            modalContent.innerHTML = `
+                <button
+                    class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+                    onclick="handleGameEnd(0)"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 sm:h-8 sm:w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+                
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-blue-800 mb-2 text-center">ගණිත ප්‍රශ්නය</h2>
+                <p class="text-sm sm:text-lg font-bold text-gray-700 mb-4 text-center">ලකුණු: ${score}</p>
+                <div class="flex flex-col items-center p-4 bg-gray-100 rounded-2xl mb-6 shadow-inner w-full">
+                    <p class="text-lg sm:text-xl font-semibold text-gray-800 text-center">
+                        ඉලක්කය: <span class="text-2xl sm:text-3xl font-extrabold text-purple-600">${currentProblem.target}</span>
                     </p>
                 </div>
-                
-                <!-- මැද කොටස: අංක සහ සංකේත -->
-                <div class="w-full flex justify-center mt-4">
-                    <!-- ග්‍රිඩ් එකේ පිරිසැලසුම කුඩා තිර සඳහා ගතිකව සකස් කිරීම -->
-                    <div class="grid grid-cols-3 gap-2 sm:gap-4 p-2 sm:p-4 bg-gray-200 rounded-lg border-4 border-dashed border-gray-400">
-                        ${expressionItemButtons}
-                    </div>
+
+                <div class="w-full flex flex-wrap justify-center gap-2 sm:gap-4 p-4 bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl mb-6">
+                    ${expressionItemButtons}
                 </div>
 
-                <!-- ප්‍රකාශන පෙන්වන පෙට්ටිය -->
-                <div class="w-full h-20 sm:h-24 mt-4 bg-gray-50 border-2 border-gray-300 rounded-lg flex flex-wrap justify-center items-center gap-1 sm:gap-2 p-2">
-                     ${historySpans}
+                <div class="w-full h-20 sm:h-24 bg-gray-200 border-2 border-gray-300 rounded-lg flex flex-wrap justify-center items-center gap-2 p-2 mb-6">
+                    ${historySpans}
                 </div>
 
-                <!-- පහළ කොටස: බොත්තම් -->
-                <div class="flex justify-between w-full mt-6 gap-2 sm:gap-4">
-                    <!-- බොත්තම් වල ප්‍රමාණය ජංගම දුරකථන සඳහා සකස් කිරීම -->
-                    <button
-                        class="flex-1 bg-gray-500 text-white text-sm sm:text-base font-bold py-3 sm:py-4 rounded-full shadow-lg hover:bg-gray-600 transition-colors transform hover:scale-105 duration-300"
-                        onclick="handleUndo()"
-                        ${history.length === 0 ? 'disabled' : ''}
-                    >
+                <div class="flex justify-between w-full gap-4">
+                    <button class="btn-game bg-gray-500 hover:bg-gray-600" onclick="handleUndo()" ${history.length === 0 ? 'disabled' : ''}>
                         ආපසු ගන්න
                     </button>
-                    <button
-                        class="flex-1 bg-green-500 text-white text-sm sm:text-base font-bold py-3 sm:py-4 rounded-full shadow-lg hover:bg-green-600 transition-colors transform hover:scale-105 duration-300"
-                        onclick="handleCheck()"
-                    >
+                    <button class="btn-game bg-green-500 hover:bg-green-600" onclick="handleCheck()">
                         පරීක්ෂා කරන්න
                     </button>
                 </div>
                 
                 ${resultMessage ? `<p class="${resultMessageClass}">${resultMessage}</p>` : ''}
             `;
-            
-            // Modal එක render කිරීම
-            document.getElementById('game-modal-content').innerHTML = modalHtml;
 
-            // Modal container එක දර්ශනය කිරීම
-            document.getElementById('game-modal-container').classList.remove('hidden');
+            // මොඩල් එක දර්ශනය කිරීම සහ සජීවිකරණය (animation) කිරීම
+            modalContainer.classList.remove('hidden');
+            setTimeout(() => {
+                modalContainer.classList.add('flex');
+                modalContent.classList.remove('scale-95', 'opacity-0');
+                modalContent.classList.add('scale-100', 'opacity-100');
+            }, 10);
         };
 
         // පිටුව render කරන ප්‍රධාන ශ්‍රිතය
         const renderPage = () => {
             const contentDiv = document.getElementById('content');
-            switch(currentPage) {
-                case 'home':
-                    contentDiv.innerHTML = renderHomePage();
-                    // බොත්තම් වලට event listeners එකතු කිරීම
-                    document.getElementById('start-game-btn').addEventListener('click', () => navigate('game'));
-                    break;
-                case 'game':
-                    contentDiv.innerHTML = renderGamePage();
-                    // 'onclick' හැර JavaScript මගින් Event Listener එකතු කිරීම
-                    document.querySelectorAll('.start-math-btn').forEach(btn => {
-                        btn.addEventListener('click', () => {
-                            score = 0;
-                            problemsPlayed = 0;
-                            showGameModal = true;
-                            generateNewGame();
+            contentDiv.classList.add('opacity-0');
+            
+            setTimeout(() => {
+                switch(currentPage) {
+                    case 'home':
+                        contentDiv.innerHTML = renderHomePage();
+                        document.getElementById('start-game-btn').addEventListener('click', () => navigate('game'));
+                        break;
+                    case 'game':
+                        contentDiv.innerHTML = renderGamePage();
+                        document.querySelectorAll('.start-math-btn').forEach(btn => {
+                            btn.addEventListener('click', () => {
+                                score = 0;
+                                problemsPlayed = 0;
+                                generateNewGame();
+                            });
                         });
-                    });
-                    break;
-                case 'scoreboard':
-                    contentDiv.innerHTML = renderScoreboardPage();
-                    document.getElementById('play-again-btn').addEventListener('click', () => navigate('game'));
-                    break;
-            }
+                        break;
+                    case 'scoreboard':
+                        contentDiv.innerHTML = renderScoreboardPage();
+                        document.getElementById('play-again-btn').addEventListener('click', () => navigate('game'));
+                        break;
+                }
+                contentDiv.classList.remove('opacity-0');
+            }, 300);
         };
 
         // වෙබ් අඩවිය load වූ විට ආරම්භ කරන ශ්‍රිතය
