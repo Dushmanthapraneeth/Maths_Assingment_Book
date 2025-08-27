@@ -1,179 +1,141 @@
+
 <!DOCTYPE html>
 <html lang="si">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ගණිත ක්‍රීඩාව - පියවර පිළිවෙලට තබන්න</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Sinhala:wght@400;700&display=swap" rel="stylesheet">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ගැලපෙන යුගල සොයන්න</title>
+    <!-- Tailwind CSS CDN for basic utility classes -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* CSS styling for the game interface */
+        /* Import a clean, modern font */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+        /* Define color variables for easy theme changes */
         :root {
-            --primary-color: #1a73e8;
-            --secondary-color: #e8f0fe;
-            --text-color: #3c4043;
-            --bg-color: #f1f3f4;
-            --correct-color: #34a853;
-            --incorrect-color: #ea4335;
+            --primary-color: #3949ab; /* New deep blue */
+            --secondary-color: #42a5f5; /* New lighter blue */
+            --bg-color-1: #e3f2fd; /* New light blue background */
+            --bg-color-2: #bbdefb; /* New slightly darker blue background */
+            --card-bg: #ffffff;
+            --text-color: #1a237e; /* Dark blue text */
+            --correct-color: #1e88e5; /* New blue for correct answer */
+            --wrong-color: #ff7043; /* New orange for wrong answer */
+            --shadow-light: rgba(0, 0, 0, 0.1);
+            --shadow-medium: rgba(0, 0, 0, 0.2);
         }
 
+        /* General body styling for background and centering */
         body {
-            font-family: 'Noto Sans Sinhala', sans-serif;
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 20px;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            margin: 0;
-            background-color: var(--bg-color);
+            background: linear-gradient(135deg, var(--bg-color-1), var(--bg-color-2));
             color: var(--text-color);
-            flex-direction: column;
-            text-align: center;
-            padding: 20px;
-        }
-        h1 {
-            color: var(--primary-color);
-            margin-bottom: 20px;
-        }
-        .container {
-            background: #fff;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 650px;
-            transition: transform 0.5s ease-in-out;
-        }
-        .container.correct-answer {
-            transform: scale(1.05);
-        }
-        .problem-text {
-            font-size: 1.2em;
-            font-weight: bold;
-            margin-bottom: 30px;
-            color: var(--text-color);
-        }
-        .score-display {
-            font-size: 1.2em;
-            font-weight: bold;
-            color: var(--primary-color);
-            margin-bottom: 20px;
-        }
-        .shuffled-items, .drop-area {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            border-radius: 10px;
-            padding: 10px;
-            min-height: 120px;
-        }
-        .shuffled-items {
-            background-color: var(--secondary-color);
-            border: 2px dashed var(--primary-color);
-        }
-        .drop-area {
-            background-color: #eaf1fb;
-            border: 2px solid var(--primary-color);
-            align-items: center;
-        }
-        .math-item {
-            background-color: #fff;
-            border: 2px solid var(--primary-color);
-            color: var(--primary-color);
-            font-size: 1.3em;
-            font-weight: bold;
-            padding: 15px 25px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: transform 0.2s, background-color 0.2s, box-shadow 0.2s;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-        .math-item:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-        }
-        .math-item.dropped {
-            border: 2px solid var(--primary-color);
-            background-color: #e6f4ea;
-            color: var(--correct-color);
-            cursor: default; /* Make items in drop area non-clickable */
-        }
-        .math-item.correct {
-            border-color: var(--correct-color);
-            background-color: #e6f4ea;
-            color: var(--correct-color);
-            box-shadow: 0 0 8px var(--correct-color);
-        }
-        .math-item.incorrect {
-            border-color: var(--incorrect-color);
-            background-color: #fce8e6;
-            color: var(--incorrect-color);
-            animation: shake 0.5s ease-in-out;
-        }
-        @keyframes shake {
-            0% { transform: translateX(0); }
-            20% { transform: translateX(-5px); }
-            40% { transform: translateX(5px); }
-            60% { transform: translateX(-5px); }
-            80% { transform: translateX(5px); }
-            100% { transform: translateX(0); }
-        }
-        .btn-container {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            margin-top: 20px;
-        }
-        button {
-            padding: 12px 25px;
-            font-size: 1em;
-            font-weight: bold;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.3s, transform 0.2s;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        button:disabled {
-            cursor: not-allowed;
-            opacity: 0.5;
-        }
-        #check-btn {
-            background-color: var(--primary-color);
-            color: #fff;
-        }
-        #check-btn:hover:not(:disabled) {
-            background-color: #1565c0;
-            transform: scale(1.02);
-        }
-        #undo-btn {
-            background-color: #9e9e9e;
-            color: #fff;
-        }
-        #undo-btn:hover:not(:disabled) {
-            background-color: #757575;
-            transform: scale(1.02);
-        }
-        .result-message {
-            margin-top: 20px;
-            font-size: 1.2em;
-            font-weight: bold;
-            min-height: 30px;
-        }
-        .correct {
-            color: var(--correct-color);
-        }
-        .incorrect {
-            color: var(--incorrect-color);
+            transition: background 0.5s ease;
         }
 
-        /* Modal styling for the final score popup */
-        .modal-overlay {
+        /* Main quiz container with modern styling */
+        .quiz-container {
+            background: var(--card-bg);
+            border-radius: 25px;
+            box-shadow: 0 15px 40px var(--shadow-medium);
+            padding: 40px;
+            max-width: 750px;
+            width: 100%;
+            transform: perspective(1000px) rotateY(0deg);
+            transition: transform 0.5s ease;
+        }
+
+        /* Title styling */
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 25px;
+            font-weight: 700;
+            text-shadow: 1px 1px 2px var(--shadow-light);
+        }
+
+        /* Score and wrong attempts display layout */
+        .score-display-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            text-align: center;
+            color: var(--text-color);
+            font-weight: 600;
+            margin-bottom: 25px;
+            padding: 10px;
+            background: var(--bg-color-1);
+            border-radius: 15px;
+            box-shadow: 0 5px 15px var(--shadow-light);
+        }
+        
+        #score-display, #wrong-attempts-display {
+            font-size: 1.2em;
+        }
+
+        /* Card grid layout */
+        .card-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            justify-items: center;
+            margin-top: 20px;
+        }
+
+        /* Base styling for card buttons */
+        .card {
+            width: 100%;
+            padding: 20px;
+            min-height: 120px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease, transform 0.2s ease;
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            border-radius: 12px;
+            box-shadow: 0 5px 15px var(--shadow-light);
+        }
+
+        /* Hover and active effects */
+        .card:hover:not(.matched) {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px var(--shadow-medium);
+        }
+
+        .card.active {
+            background-color: var(--secondary-color);
+            color: #fff;
+            box-shadow: 0 5px 20px var(--secondary-color);
+        }
+
+        .card.matched {
+            background-color: var(--correct-color);
+            color: #fff;
+            cursor: not-allowed;
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px var(--correct-color);
+            animation: correctAnim 0.5s ease-out;
+        }
+
+        /* Keyframes for animations */
+        @keyframes correctAnim {
+            0%, 100% { transform: scale(1.05); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* Modal specific styles */
+        .modal {
             position: fixed;
             top: 0;
             left: 0;
@@ -184,271 +146,198 @@
             justify-content: center;
             align-items: center;
             z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
         }
-        .modal-overlay.show {
-            opacity: 1;
-            visibility: visible;
-        }
+
         .modal-content {
-            background: #fff;
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            background-color: white;
+            padding: 2.5rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
             text-align: center;
-            transform: scale(0.9);
-            transition: transform 0.3s ease-in-out;
-            max-width: 400px;
-            width: 90%;
+            max-width: 90%;
+            animation: fadeIn 0.5s ease-out;
         }
-        .modal-overlay.show .modal-content {
-            transform: scale(1);
-        }
-        .modal-content h2 {
-            font-size: 2em;
-            color: var(--primary-color);
-            margin-bottom: 10px;
-        }
-        .modal-content p {
-            font-size: 1.5em;
-            font-weight: bold;
-            color: var(--text-color);
-            margin-bottom: 20px;
-        }
-        .modal-content button {
-            background-color: var(--correct-color);
-            color: #fff;
-            padding: 10px 20px;
-        }
-        .modal-content button:hover {
-            background-color: #278d3b;
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
         }
     </style>
 </head>
 <body>
+    <div class="quiz-container">
+        <h1>ගැලපෙන යුගල සොයන්න</h1>
+        <p class="text-center text-gray-500 text-sm md:text-base">ගැලපෙන යුගල සොයාගන්න! එකවර කාඩ්පත් දෙකක් තෝරන්න.</p>
+        
+        <!-- Score and wrong attempts display elements -->
+        <div class="score-display-wrapper">
+            <div id="score-display">ලකුණු: 0</div>
+            <div id="wrong-attempts-display">වැරදි වූ වාර: 0</div>
+        </div>
 
-<div class="container" id="game-container">
-    <h1>ගණිත ක්‍රීඩාව</h1>
-    <div class="score-display">ලකුණු: <span id="score">0</span></div>
-    <p class="problem-text" id="problem-text">මෙම ගණිත පියවර නිවැරදි පිළිවෙලට තබන්න.</p>
-
-    <div class="shuffled-items" id="shuffled-items">
-        <!-- Math steps are inserted here -->
+        <div id="game-board" class="card-container">
+            <!-- Cards will be populated here by JavaScript -->
+        </div>
+    </div>
+    
+    <!-- Final Score Modal (Popup) -->
+    <div id="final-score-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2 class="text-3xl font-bold text-green-700 mb-4">සුභ පැතුම්!</h2>
+            <p class="text-lg text-gray-700 mb-2">ඔබ සියලු යුගල සොයාගත්තා.</p>
+            <p id="modal-final-score" class="text-3xl font-bold text-gray-800 mb-2"></p>
+            <p id="modal-score-details" class="text-sm text-gray-600 mb-6"></p>
+            <button id="play-again-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-full transition-colors duration-300">
+                නැවත ක්‍රීඩා කරන්න
+            </button>
+        </div>
     </div>
 
-    <div class="drop-area" id="drop-area">
-        <!-- Steps placed by the player appear here -->
-    </div>
+    <script>
+        // Game items. Change the 'left' and 'right' arrays to create your own matching game.
+        // Make sure the order of items corresponds to their match.
+        const pairs = [
+            { id: 1, left: "කොළඹ", right: "ශ්‍රී ලංකාවේ අගනුවර" },
+            { id: 2, left: "පේරාදෙණිය", right: "උද්භිද උද්‍යානය" },
+            { id: 3, left: "සූර්යා", right: "සෞරග්‍රහ මණ්ඩලයේ තාරකාව" },
+            { id: 4, left: "පොත්", right: "කියවීමට" },
+            { id: 5, left: "ජලය", right: "H₂O" },
+            { id: 6, left: "ඇපල්", right: "පළතුරක්" }
+        ];
 
-    <div class="btn-container">
-        <button id="undo-btn" disabled>ආපසු ගන්න (Undo)</button>
-        <button id="check-btn">පරීක්ෂා කරන්න</button>
-    </div>
-
-    <p class="result-message" id="result-message"></p>
-</div>
-
-<!-- Final Score Pop-up Modal -->
-<div class="modal-overlay" id="score-modal">
-    <div class="modal-content">
-        <h2>ක්‍රීඩාව අවසන්!</h2>
-        <p>ඔබ ලබාගත් ලකුණු: <span id="final-score">0</span></p>
-        <button id="restart-btn">නැවත ආරම්භ කරන්න</button>
-    </div>
-</div>
-
-<script>
-    // JavaScript logic for the game
-    let currentProblem = {};
-    let score = 0;
-    let problemsPlayed = 0;
-    const totalProblems = 5; // Number of problems to play before the popup
-    const problems = [
-        {
-            text: "මෙම ගණිත පියවර නිවැරදි පිළිවෙලට තබන්න: $$(2 + 3) \\times 4$$",
-            steps: ["$2 + 3 = 5$", "$5 \\times 4 = 20$"]
-        },
-        {
-            text: "මෙම ගණිත පියවර නිවැරදි පිළිවෙලට තබන්න: $$(10 - 2) / 2$$",
-            steps: ["$10 - 2 = 8$", "$8 / 2 = 4$"]
-        },
-        {
-            text: "මෙම ගණිත පියවර නිවැරදි පිළිවෙලට තබන්න: $$15 + 5 - 12$$",
-            steps: ["$15 + 5 = 20$", "$20 - 12 = 8$"]
-        },
-        {
-            text: "මෙම ගණිත පියවර නිවැරදි පිළිවෙලට තබන්න: $$24 / 4 + 5$$",
-            steps: ["$24 / 4 = 6$", "$6 + 5 = 11$"]
-        }
-    ];
-
-    const gameContainer = document.getElementById('game-container');
-    const problemTextElem = document.getElementById('problem-text');
-    const shuffledContainer = document.getElementById('shuffled-items');
-    const dropArea = document.getElementById('drop-area');
-    const checkButton = document.getElementById('check-btn');
-    const undoButton = document.getElementById('undo-btn');
-    const resultMessage = document.getElementById('result-message');
-    const scoreDisplay = document.getElementById('score');
-
-    const scoreModal = document.getElementById('score-modal');
-    const finalScoreDisplay = document.getElementById('final-score');
-    const restartButton = document.getElementById('restart-btn');
-
-    // LaTeX math rendering using MathJax
-    const script = document.createElement('script');
-    script.type = 'text/javascript';
-    script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
-    script.async = true;
-    document.head.appendChild(script);
-
-    window.MathJax = {
-        tex: {
-            inlineMath: [['$', '$'], ['\\(', '\\)']]
-        },
-        svg: {
-            fontCache: 'global'
-        }
-    };
-
-    let history = []; // To store the order of moves for undo functionality
-    let isChecking = false; // To prevent multiple checks
-
-    function updateScoreDisplay() {
-        scoreDisplay.textContent = score;
-    }
-
-    function generateNewGame() {
-        gameContainer.classList.remove('correct-answer');
-        shuffledContainer.innerHTML = '';
-        dropArea.innerHTML = '';
-        resultMessage.textContent = '';
-        checkButton.style.display = 'block';
-        undoButton.style.display = 'block';
-        undoButton.disabled = true;
-        history = [];
-
-        const randomIndex = Math.floor(Math.random() * problems.length);
-        currentProblem = problems[randomIndex];
-
-        problemTextElem.textContent = currentProblem.text;
-        const shuffledSteps = [...currentProblem.steps].sort(() => Math.random() - 0.5);
-
-        shuffledSteps.forEach(step => {
-            const item = createMathItem(step);
-            shuffledContainer.appendChild(item);
+        // Combine and shuffle the items
+        let items = [];
+        pairs.forEach(p => {
+            items.push({ id: p.id, text: p.left, type: 'left' });
+            items.push({ id: p.id, text: p.right, type: 'right' });
         });
 
-        MathJax.typesetPromise([problemTextElem, shuffledContainer]);
-    }
+        // Shuffle the array to randomize the card positions
+        items.sort(() => Math.random() - 0.5);
 
-    function createMathItem(content) {
-        const item = document.createElement('div');
-        item.className = 'math-item';
-        item.textContent = content;
-        item.dataset.value = content;
-        return item;
-    }
+        // State variables for the game
+        let firstCard = null;
+        let lockBoard = false;
+        let matchesFound = 0;
+        const totalMatches = pairs.length;
+        let score = 0;
+        let incorrectAttempts = 0;
+        
+        const gameBoard = document.getElementById('game-board');
+        const scoreDisplay = document.getElementById('score-display');
+        const wrongAttemptsDisplay = document.getElementById('wrong-attempts-display');
+        const finalScoreModal = document.getElementById('final-score-modal');
+        const modalFinalScore = document.getElementById('modal-final-score');
+        const modalScoreDetails = document.getElementById('modal-score-details');
+        const playAgainBtn = document.getElementById('play-again-btn');
 
-    // Use event delegation on the parent container
-    shuffledContainer.addEventListener('click', (event) => {
-        const item = event.target.closest('.math-item');
-        if (item && item.parentNode === shuffledContainer) {
-            history.push(item);
-            dropArea.appendChild(item);
-            item.classList.add('dropped');
-            undoButton.disabled = false;
-        }
-    });
-
-    function undoLastMove() {
-        if (history.length > 0) {
-            const lastItem = history.pop();
-            shuffledContainer.appendChild(lastItem);
-            lastItem.classList.remove('dropped', 'correct', 'incorrect');
-        }
-
-        if (history.length === 0) {
-            undoButton.disabled = true;
-        }
-    }
-
-    function showFinalScore() {
-        finalScoreDisplay.textContent = score;
-        scoreModal.classList.add('show');
-    }
-
-    function hideFinalScore() {
-        scoreModal.classList.remove('show');
-    }
-
-    checkButton.addEventListener('click', () => {
-        if (isChecking) return; // Prevent multiple clicks while checking
-        isChecking = true;
-
-        const droppedItems = Array.from(dropArea.children);
-        let isCorrect = true;
-
-        if (droppedItems.length !== currentProblem.steps.length) {
-            isCorrect = false;
-        } else {
-            droppedItems.forEach((item, index) => {
-                item.classList.remove('correct', 'incorrect');
-                if (item.dataset.value !== currentProblem.steps[index]) {
-                    isCorrect = false;
-                    item.classList.add('incorrect');
-                } else {
-                    item.classList.add('correct');
-                }
+        // Function to create and display cards
+        function createCards() {
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.classList.add('card', 'bg-white', 'p-4', 'rounded-2xl', 'shadow-md', 'text-gray-700', 'font-medium', 'border', 'border-gray-300');
+                card.innerHTML = item.text;
+                card.dataset.id = item.id;
+                card.dataset.type = item.type;
+                card.addEventListener('click', handleCardClick);
+                gameBoard.appendChild(card);
             });
         }
 
-        if (isCorrect) {
-            resultMessage.textContent = 'නිවැරදියි! ඔබ සියලු පියවර නිවැරදිව සකස් කර ඇත.';
-            resultMessage.className = 'result-message correct';
-            gameContainer.classList.add('correct-answer');
-            score += 10;
-        } else {
-            resultMessage.textContent = 'වැරදියි. වැරදි පියවර නැවත උත්සාහ කරන්න.';
-            resultMessage.className = 'result-message incorrect';
-            score = Math.max(0, score - 2); // Ensure score doesn't go below 0
+        // Handle card click events
+        function handleCardClick(event) {
+            if (lockBoard) return;
+            const clickedCard = event.currentTarget;
+
+            // Prevent clicking the same card twice
+            if (clickedCard === firstCard || clickedCard.classList.contains('matched')) return;
+
+            // Highlight the clicked card
+            clickedCard.classList.add('active');
+
+            // If this is the first card clicked
+            if (!firstCard) {
+                firstCard = clickedCard;
+                return;
+            }
+
+            // If this is the second card clicked
+            lockBoard = true;
+            const secondCard = clickedCard;
+            
+            checkMatch(firstCard, secondCard);
         }
 
-        problemsPlayed++;
-        updateScoreDisplay();
+        // Check if the two selected cards are a match
+        function checkMatch(card1, card2) {
+            const isMatch = card1.dataset.id === card2.dataset.id;
 
-        checkButton.style.display = 'none';
-        undoButton.style.display = 'none';
-        
-        setTimeout(() => {
-            if (problemsPlayed >= totalProblems) {
-                showFinalScore();
+            if (isMatch) {
+                disableCards(card1, card2);
             } else {
-                generateNewGame();
+                unflipCards(card1, card2);
             }
-            isChecking = false;
-        }, 1500);
-    });
+        }
 
-    undoButton.addEventListener('click', () => {
-        undoLastMove();
-    });
-    
-    restartButton.addEventListener('click', () => {
-        hideFinalScore();
-        score = 0;
-        problemsPlayed = 0;
-        updateScoreDisplay();
-        generateNewGame();
-    });
+        // Disable cards after a match
+        function disableCards(card1, card2) {
+            // Add a matched class and remove click listeners
+            card1.classList.add('matched');
+            card2.classList.add('matched');
+            card1.removeEventListener('click', handleCardClick);
+            card2.removeEventListener('click', handleCardClick);
+            
+            // Remove active highlight
+            card1.classList.remove('active');
+            card2.classList.remove('active');
 
-    window.onload = function() {
-        generateNewGame();
-        updateScoreDisplay();
-    };
-</script>
+            matchesFound++;
+            score += 10;
+            scoreDisplay.textContent = 'ලකුණු: ' + score;
+            
+            resetBoard();
+            
+            // Check for game completion and show modal
+            if (matchesFound === totalMatches) {
+                showFinalScoreModal();
+            }
+        }
 
+        // Unflip cards if they don't match
+        function unflipCards(card1, card2) {
+            incorrectAttempts++;
+            wrongAttemptsDisplay.textContent = 'වැරදි වූ වාර: ' + incorrectAttempts;
+
+            setTimeout(() => {
+                // Remove active highlight
+                card1.classList.remove('active');
+                card2.classList.remove('active');
+                resetBoard();
+            }, 1000);
+        }
+
+        // Show the final score modal
+        function showFinalScoreModal() {
+            const finalScore = Math.max(0, score - (incorrectAttempts * 2));
+            
+            modalFinalScore.textContent = `මුළු ලකුණු: ${finalScore}`;
+            modalScoreDetails.textContent = `(වැරදි වූ වාර ${incorrectAttempts}ක් නිසා, ලකුණු ${incorrectAttempts * 2}ක් අඩු කරන ලදි.)`;
+            
+            finalScoreModal.classList.remove('hidden');
+        }
+
+        // Reset the board state
+        function resetBoard() {
+            [firstCard, lockBoard] = [null, false];
+        }
+
+        // Add event listener to the play again button
+        playAgainBtn.addEventListener('click', () => {
+            window.location.reload();
+        });
+
+        // Start the game when the page loads
+        window.onload = createCards;
+    </script>
 </body>
 </html>
