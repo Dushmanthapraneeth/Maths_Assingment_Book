@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ගැලපෙන යුගල සොයන්න</title>
+    <!-- Tailwind CSS CDN for basic utility classes -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Import a clean, modern font */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+        /* Define color variables for easy theme changes */
+        :root {
+            --primary-color: #3949ab; /* New deep blue */
+            --secondary-color: #42a5f5; /* New lighter blue */
+            --bg-color-1: #e3f2fd; /* New light blue background */
+            --bg-color-2: #bbdefb; /* New slightly darker blue background */
+            --card-bg: #ffffff;
+            --text-color: #1a237e; /* Dark blue text */
+            --correct-color: #1e88e5; /* New blue for correct answer */
+            --wrong-color: #ff7043; /* New orange for wrong answer */
+            --shadow-light: rgba(0, 0, 0, 0.1);
+            --shadow-medium: rgba(0, 0, 0, 0.2);
+        }
+
+        /* General body styling for background and centering */
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--bg-color-1), var(--bg-color-2));
+            color: var(--text-color);
+            transition: background 0.5s ease;
+        }
+
+        /* Main quiz container with modern styling */
+        .quiz-container {
+            background: var(--card-bg);
+            border-radius: 25px;
+            box-shadow: 0 15px 40px var(--shadow-medium);
+            padding: 40px;
+            max-width: 750px;
+            width: 100%;
+            transform: perspective(1000px) rotateY(0deg);
+            transition: transform 0.5s ease;
+        }
+
+        /* Title styling */
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 25px;
+            font-weight: 700;
+            text-shadow: 1px 1px 2px var(--shadow-light);
+        }
+
+        /* Score and wrong attempts display layout */
+        .score-display-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            text-align: center;
+            color: var(--text-color);
+            font-weight: 600;
+            margin-bottom: 25px;
+            padding: 10px;
+            background: var(--bg-color-1);
+            border-radius: 15px;
+            box-shadow: 0 5px 15px var(--shadow-light);
+        }
+        
+        #score-display, #wrong-attempts-display {
+            font-size: 1.2em;
+        }
+
+        /* Card grid layout */
+        .card-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            justify-items: center;
+            margin-top: 20px;
+        }
+
+        /* Base styling for card buttons */
+        .card {
+            width: 100%;
+            padding: 20px;
+            min-height: 120px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease, transform 0.2s ease;
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            border-radius: 12px;
+            box-shadow: 0 5px 15px var(--shadow-light);
+        }
+
+        /* Hover and active effects */
+        .card:hover:not(.matched) {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px var(--shadow-medium);
+        }
+
+        .card.active {
+            background-color: var(--secondary-color);
+            color: #fff;
+            box-shadow: 0 5px 20px var(--secondary-color);
+        }
+
+        .card.matched {
+            background-color: var(--correct-color);
+            color: #fff;
+            cursor: not-allowed;
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px var(--correct-color);
+            animation: correctAnim 0.5s ease-out;
+        }
+
+        /* Keyframes for animations */
+        @keyframes correctAnim {
+            0%, 100% { transform: scale(1.05); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* Modal specific styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 2.5rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 90%;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <h1>ගැලපෙන යුගල සොයන්න</h1>
+        <p class="text-center text-gray-500 text-sm md:text-base">ගැලපෙන යුගල සොයාගන්න! එකවර කාඩ්පත් දෙකක් තෝරන්න.</p>
+        
+        <!-- Score and wrong attempts display elements -->
+        <div class="score-display-wrapper">
+            <div id="score-display">ලකුණු: 0</div>
+            <div id="wrong-attempts-display">වැරදි වූ වාර: 0</div>
+        </div>
+
+        <div id="game-board" class="card-container">
+            <!-- Cards will be populated here by JavaScript -->
+        </div>
+    </div>
+    
+    <!-- Final Score Modal (Popup) -->
+    <div id="final-score-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2 class="text-3xl font-bold text-green-700 mb-4">සුභ පැතුම්!</h2>
+            <p class="text-lg text-gray-700 mb-2">ඔබ සියලු යුගල සොයාගත්තා.</p>
+            <p id="modal-final-score" class="text-3xl font-bold text-gray-800 mb-2"></p>
+            <p id="modal-score-details" class="text-sm text-gray-600 mb-6"></p>
+            <button id="play-again-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-full transition-colors duration-300">
+                නැවත ක්‍රීඩා කරන්න
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Game items. Change the 'left' and 'right' arrays to create your own matching game.
+        // Make sure the order of items corresponds to their match.
+        const pairs = [
+            { id: 1, left: "කොළඹ", right: "ශ්‍රී ලංකාවේ අගනුවර" },
+            { id: 2, left: "පේරාදෙණිය", right: "උද්භිද උද්‍යානය" },
+            { id: 3, left: "සූර්යා", right: "සෞරග්‍රහ මණ්ඩලයේ තාරකාව" },
+            { id: 4, left: "පොත්", right: "කියවීමට" },
+            { id: 5, left: "ජලය", right: "H₂O" },
+            { id: 6, left: "ඇපල්", right: "පළතුරක්" }
+        ];
+
+        // Combine and shuffle the items
+        let items = [];
+        pairs.forEach(p => {
+            items.push({ id: p.id, text: p.left, type: 'left' });
+            items.push({ id: p.id, text: p.right, type: 'right' });
+        });
+
+        // Shuffle the array to randomize the card positions
+        items.sort(() => Math.random() - 0.5);
+
+        // State variables for the game
+        let firstCard = null;
+        let lockBoard = false;
+        let matchesFound = 0;
+        const totalMatches = pairs.length;
+        let score = 0;
+        let incorrectAttempts = 0;
+        
+        const gameBoard = document.getElementById('game-board');
+        const scoreDisplay = document.getElementById('score-display');
+        const wrongAttemptsDisplay = document.getElementById('wrong-attempts-display');
+        const finalScoreModal = document.getElementById('final-score-modal');
+        const modalFinalScore = document.getElementById('modal-final-score');
+        const modalScoreDetails = document.getElementById('modal-score-details');
+        const playAgainBtn = document.getElementById('play-again-btn');
+
+        // Function to create and display cards
+        function createCards() {
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.classList.add('card', 'bg-white', 'p-4', 'rounded-2xl', 'shadow-md', 'text-gray-700', 'font-medium', 'border', 'border-gray-300');
+                card.innerHTML = item.text;
+                card.dataset.id = item.id;
+                card.dataset.type = item.type;
+                card.addEventListener('click', handleCardClick);
+                gameBoard.appendChild(card);
+            });
+        }
+
+        // Handle card click events
+        function handleCardClick(event) {
+            if (lockBoard) return;
+            const clickedCard = event.currentTarget;
+
+            // Prevent clicking the same card twice
+            if (clickedCard === firstCard || clickedCard.classList.contains('matched')) return;
+
+            // Highlight the clicked card
+            clickedCard.classList.add('active');
+
+            // If this is the first card clicked
+            if (!firstCard) {
+                firstCard = clickedCard;
+                return;
+            }
+
+            // If this is the second card clicked
+            lockBoard = true;
+            const secondCard = clickedCard;
+            
+            checkMatch(firstCard, secondCard);
+        }
+
+        // Check if the two selected cards are a match
+        function checkMatch(card1, card2) {
+            const isMatch = card1.dataset.id === card2.dataset.id;
+
+            if (isMatch) {
+                disableCards(card1, card2);
+            } else {
+                unflipCards(card1, card2);
+            }
+        }
+
+        // Disable cards after a match
+        function disableCards(card1, card2) {
+            // Add a matched class and remove click listeners
+            card1.classList.add('matched');
+            card2.classList.add('matched');
+            card1.removeEventListener('click', handleCardClick);
+            card2.removeEventListener('click', handleCardClick);
+            
+            // Remove active highlight
+            card1.classList.remove('active');
+            card2.classList.remove('active');
+
+            matchesFound++;
+            score += 10;
+            scoreDisplay.textContent = 'ලකුණු: ' + score;
+            
+            resetBoard();
+            
+            // Check for game completion and show modal
+            if (matchesFound === totalMatches) {
+                showFinalScoreModal();
+            }
+        }
+
+        // Unflip cards if they don't match
+        function unflipCards(card1, card2) {
+            incorrectAttempts++;
+            wrongAttemptsDisplay.textContent = 'වැරදි වූ වාර: ' + incorrectAttempts;
+
+            setTimeout(() => {
+                // Remove active highlight
+                card1.classList.remove('active');
+                card2.classList.remove('active');
+                resetBoard();
+            }, 1000);
+        }
+
+        // Show the final score modal
+        function showFinalScoreModal() {
+            const finalScore = Math.max(0, score - (incorrectAttempts * 2));
+            
+            modalFinalScore.textContent = `මුළු ලකුණු: ${finalScore}`;
+            modalScoreDetails.textContent = `(වැරදි වූ වාර ${incorrectAttempts}ක් නිසා, ලකුණු ${incorrectAttempts * 2}ක් අඩු කරන ලදි.)`;
+            
+            finalScoreModal.classList.remove('hidden');
+        }
+
+        // Reset the board state
+        function resetBoard() {
+            [firstCard, lockBoard] = [null, false];
+        }
+
+        // Add event listener to the play again button
+        playAgainBtn.addEventListener('click', () => {
+            window.location.reload();
+        });
+
+        // Start the game when the page loads
+        window.onload = createCards;
+    </script>
+</body>
+</html>
