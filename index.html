@@ -1,136 +1,598 @@
-<!DOCTYPE html>
-<html lang="si">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Math Game Hub</title>
-  <style>
-    /* General */
-    body { font-family: sans-serif; background: #eaf3fb; text-align: center; margin:0; padding:0; }
-    header { background:#4682b4; color:white; padding:15px; position: sticky; top:0; z-index:10; }
-    h1 { margin:0; font-size:1.8rem; }
-    main { padding:20px; max-width: 480px; margin:auto; }
-    section { margin-top:20px; }
-    nav { display:flex; flex-wrap:wrap; justify-content:center; gap:10px; }
+import React, { useState, useEffect } from 'react';
+import { createRoot } from 'react-dom/client';
 
-    /* Buttons */
-    button {
-      padding: 12px 20px; font-size: 16px; border: none; border-radius: 12px;
-      cursor: pointer; background: #4682b4; color: white; transition: all 0.2s ease;
-      flex:1 1 40%;
-      min-width:120px;
+// ප්‍රධාන App component එක, පිටු අතර සංචාලනය සහ තත්ත්වය කළමනාකරණය කරයි.
+const App = () => {
+  const [currentPage, setCurrentPage] = useState('home');
+  const [finalScore, setFinalScore] = useState(0);
+
+  // පිටු අතර සංචාලනය සඳහා ශ්‍රිතයකි.
+  const navigate = (page, score = 0) => {
+    setCurrentPage(page);
+    if (page === 'scoreboard') {
+      setFinalScore(score);
     }
-    button:hover, button:active {
-      transform: scale(1.05);
-      background: #315f7d;
+  };
+
+  const renderPage = () => {
+    switch (currentPage) {
+      case 'home':
+        return <HomePage navigate={navigate} />;
+      case 'game':
+        return <GamePage navigate={navigate} />;
+      case 'scoreboard':
+        return <ScoreboardPage score={finalScore} navigate={navigate} />;
+      default:
+        return <HomePage navigate={navigate} />;
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gray-100 font-sans">
+      <div className="w-full max-w-4xl bg-white rounded-xl shadow-2xl p-8 flex flex-col items-center">
+        <nav className="w-full flex justify-center mb-8">
+          <ul className="flex space-x-4 sm:space-x-8">
+            <li>
+              <button
+                className={`text-lg sm:text-xl font-bold rounded-full px-4 sm:px-6 py-2 transition-all duration-300 ${
+                  currentPage === 'home'
+                    ? 'bg-blue-600 text-white shadow-md'
+                    : 'text-gray-600 hover:bg-blue-100'
+                }`}
+                onClick={() => navigate('home')}
+              >
+                මුල් පිටුව
+              </button>
+            </li>
+            <li>
+              <button
+                className={`text-lg sm:text-xl font-bold rounded-full px-4 sm:px-6 py-2 transition-all duration-300 ${
+                  currentPage === 'game'
+                    ? 'bg-blue-600 text-white shadow-md'
+                    : 'text-gray-600 hover:bg-blue-100'
+                }`}
+                onClick={() => navigate('game')}
+              >
+                ක්‍රීඩාව
+              </button>
+            </li>
+            <li>
+              <button
+                className={`text-lg sm:text-xl font-bold rounded-full px-4 sm:px-6 py-2 transition-all duration-300 ${
+                  currentPage === 'scoreboard'
+                    ? 'bg-blue-600 text-white shadow-md'
+                    : 'text-gray-600 hover:bg-blue-100'
+                }`}
+                onClick={() => navigate('scoreboard')}
+              >
+                ලකුණු පුවරුව
+              </button>
+            </li>
+          </ul>
+        </nav>
+        <div className="w-full">
+          {renderPage()}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// මුල් පිටුව component එක
+const HomePage = ({ navigate }) => {
+  return (
+    <div className="text-center p-6 sm:p-10">
+      <h1 className="text-4xl sm:text-5xl font-extrabold text-blue-800 mb-4">ගණිත ක්‍රීඩාවට සාදරයෙන් පිළිගනිමු</h1>
+      <p className="text-md sm:text-xl text-gray-700 mb-8">
+        ඔබට දුන් අංක සහ ගණිත කර්ම භාවිතයෙන් නිවැරදි ප්‍රකාශනයක් සාදා ඉලක්කගත අගය ලබා ගත හැකිදැයි බලමු.
+      </p>
+      <button
+        className="bg-green-500 text-white text-lg sm:text-2xl font-bold py-3 px-8 rounded-full shadow-lg hover:bg-green-600 transform hover:scale-105 transition-transform duration-300"
+        onClick={() => navigate('game')}
+      >
+        ක්‍රීඩාව ආරම්භ කරන්න
+      </button>
+    </div>
+  );
+};
+
+// ක්‍රීඩා පිටුව component එක
+const GamePage = ({ navigate }) => {
+  const [showGameModal, setShowGameModal] = useState(null);
+
+  const startLevel = (gameType) => {
+    setShowGameModal(gameType);
+  };
+
+  const handleGameEnd = (score) => {
+    setShowGameModal(null);
+    navigate('scoreboard', score);
+  };
+
+  return (
+    <div className="text-center p-6 sm:p-10">
+      <h2 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-6">ක්‍රීඩා මට්ටම්</h2>
+      <p className="text-md sm:text-lg text-gray-600 mb-8">ඔබට කැමති මට්ටමක් තෝරා ක්‍රීඩා කළ හැක.</p>
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6">
+        {[1, 2, 3, 4, 5, 6].map((level) => (
+          <button
+            key={`math-${level}`}
+            className="bg-blue-500 text-white text-xl sm:text-2xl font-bold py-4 rounded-xl shadow-lg hover:bg-blue-600 transform hover:scale-105 transition-transform duration-300"
+            onClick={() => startLevel('math')}
+          >
+            ගණිත ක්‍රීඩාව {level}
+          </button>
+        ))}
+        <button
+          key="matching-game"
+          className="bg-purple-500 text-white text-xl sm:text-2xl font-bold py-4 rounded-xl shadow-lg hover:bg-purple-600 transform hover:scale-105 transition-transform duration-300 col-span-2 sm:col-span-3 md:col-span-4"
+          onClick={() => startLevel('matching')}
+        >
+          ගැලපෙන යුගල සොයන්න
+        </button>
+      </div>
+      {showGameModal === 'math' && <GameModal onGameEnd={handleGameEnd} />}
+      {showGameModal === 'matching' && <MatchingGameModal onGameEnd={handleGameEnd} />}
+    </div>
+  );
+};
+
+// ගණිත ක්‍රීඩාව සඳහා Modal component එක
+const GameModal = ({ onGameEnd }) => {
+  const [score, setScore] = useState(0);
+  const [problemsPlayed, setProblemsPlayed] = useState(0);
+  const totalProblems = 5;
+  const [currentProblem, setCurrentProblem] = useState(null);
+  const [expressionItems, setExpressionItems] = useState([]);
+  const [history, setHistory] = useState([]);
+  const [resultMessage, setResultMessage] = useState('');
+  const [isCorrect, setIsCorrect] = useState(null);
+
+  // ගැටළු දත්ත
+  const problems = [
+    { target: 10, items: [8, 2, "+", 5, 3] },
+    { target: 12, items: [5, 7, "+", 6, 2, "×"] },
+    { target: 20, items: [4, 5, "×", 10, 2, "+"] },
+    { target: 8, items: [16, 2, "÷", 4, 2, "-"] },
+    { target: 15, items: [18, 3, "-", 10, 5, "÷"] },
+    { target: 6, items: [12, 2, "÷", 3, 3, "+"] },
+    { target: 25, items: [5, 5, "×", 20, 5, "-"] },
+    { target: 9, items: [1, 8, "+", 10, 1, "-"] },
+    { target: 100, items: [10, 10, "×", 5, 2, "×"] },
+    { target: 3, items: [9, 3, "÷", 6, 2, "÷"] },
+    { target: 7, items: [15, 8, "-", 10, 3, "-"] },
+    { target: 18, items: [9, 9, "+", 20, 2, "-"] },
+    { target: 30, items: [6, 5, "×", 25, 5, "+"] },
+    { target: 2, items: [10, 8, "-", 5, 3, "×"] },
+    { target: 7, items: [10, 9, 8, 2, "-", "-", 4, 3, "×"] }
+  ];
+
+  // component එක mount වන විට හෝ නව මට්ටමක් ආරම්භ වන විට නව ක්‍රීඩාවක් උත්පාදනය කිරීමට useEffect භාවිතා කරයි.
+  useEffect(() => {
+    generateNewGame();
+  }, []);
+
+  // array එකක් මාරු කිරීමට උපකාරී වන ශ්‍රිතයකි.
+  const shuffleArray = (array) => {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  };
+
+  // නව ගැටළුවක් උත්පාදනය කිරීමේ ශ්‍රිතයකි.
+  const generateNewGame = () => {
+    if (problemsPlayed >= totalProblems) {
+      onGameEnd(score);
+      return;
     }
 
-    /* Modal */
-    .modal {
-      display:none; position:fixed; top:0; left:0; width:100%; height:100%;
-      background:rgba(0,0,0,0.6); justify-content:center; align-items:center;
-      animation: fadeIn 0.3s forwards;
+    const shuffledProblems = shuffleArray([...problems]);
+    const newProblem = shuffledProblems[Math.floor(Math.random() * shuffledProblems.length)];
+    setCurrentProblem(newProblem);
+    setExpressionItems(shuffleArray([...newProblem.items]));
+    setHistory([]);
+    setResultMessage('');
+    setIsCorrect(null);
+  };
+
+  // අයිතමයක් මත click කිරීම හැසිරවීම
+  const handleItemClick = (item) => {
+    setHistory((prevHistory) => [...prevHistory, item]);
+    setExpressionItems((prevItems) => prevItems.filter((i) => i !== item));
+  };
+
+  // අවසාන පියවර ආපසු ගැනීම
+  const handleUndo = () => {
+    if (history.length > 0) {
+      const lastItem = history[history.length - 1];
+      setHistory((prevHistory) => prevHistory.slice(0, -1));
+      setExpressionItems((prevItems) => [...prevItems, lastItem]);
     }
-    .modal iframe {
-      width:90%; height:90%; border:none; border-radius: 12px; background:white;
-      animation: slideIn 0.3s forwards;
+  };
+
+  // ආරක්ෂිත ඇගයීමේ ශ්‍රිතයකි.
+  const evaluateExpression = (expression) => {
+    try {
+      const sanitizedExpression = expression.replace(/[^0-9+\-*/().]/g, '');
+      const evalExpression = sanitizedExpression.replace(/÷/g, '/').replace(/×/g, '*');
+      const safeEvaluator = new Function(`return (${evalExpression});`);
+      return safeEvaluator();
+    } catch (e) {
+      return NaN;
     }
-    @keyframes fadeIn {
-      from { opacity:0; } to { opacity:1; }
-    }
-    @keyframes slideIn {
-      from { transform: translateY(-20px); opacity:0; } to { transform: translateY(0); opacity:1; }
-    }
+  };
 
-    /* Fixed Back Button */
-    #backBtn {
-      position: fixed; top: 20px; left: 20px; z-index: 1000;
-      padding: 10px 15px; font-size: 16px; border: none; border-radius: 8px;
-      cursor: pointer; background: #ff5c5c; color: white;
-      transition: all 0.2s ease;
-    }
-    #backBtn:hover, #backBtn:active { background:#e04b4b; transform: scale(1.05); }
+  // පරිශීලකයාගේ ප්‍රකාශනය පරීක්ෂා කිරීම
+  const handleCheck = () => {
+    const expression = history.join('');
+    const result = evaluateExpression(expression);
 
-    /* Scoreboard */
-    #scoreboard { margin-top:20px; overflow-x:auto; }
-    table { margin:auto; border-collapse: collapse; width:100%; min-width:250px; }
-    th, td { border:1px solid #ccc; padding:8px 12px; font-size: 14px; }
-
-    /* Responsive headings */
-    h2 { font-size: 1.4rem; margin-bottom: 10px; }
-
-    @media (max-width: 480px){
-      button { flex:1 1 45%; font-size: 14px; padding:10px; }
-      h1 { font-size:1.5rem; }
-      h2 { font-size:1.2rem; }
-      th, td { font-size:12px; padding:6px; }
-    }
-  </style>
-</head>
-<body>
-  <header>
-    <h1>🧠 Math Game Hub</h1>
-  </header>
-
-  <main>
-    <section id="home">
-      <h2>🏠 Home</h2>
-      <p>මෙතනින් ඔබට අවශ්‍ය Level එක තෝරන්න:</p>
-      <nav>
-        <button onclick="openLevel('level (1).html')">Level 1</button>
-        <button onclick="openLevel('level (2).html')">Level 2</button>
-        <button onclick="openLevel('level (3).html')">Level 3</button>
-        <button onclick="openLevel('level (4).html')">Level 4</button>
-        <button onclick="openLevel('level (5).html')">Level 5</button>
-        <button onclick="openLevel('level (6).html')">Level 6</button>
-        <button onclick="openLevel('level (7).html')">Level 7</button>
-        <button onclick="openLevel('level (8).html')">Level 8</button>
-      </nav>
-    </section>
-
-    <section id="scoreboard">
-      <h2>🏆 Scoreboard</h2>
-      <table>
-        <thead><tr><th>Level</th><th>Score</th></tr></thead>
-        <tbody id="scoreRows"></tbody>
-      </table>
-    </section>
-  </main>
-
-  <!-- Modal for Games -->
-  <div id="gameModal" class="modal">
-    <iframe id="gameFrame"></iframe>
-    <button id="backBtn" onclick="closeModal()">⬅ Back</button>
-  </div>
-
-  <script>
-    function openLevel(file){
-      document.getElementById('gameFrame').src = file;
-      document.getElementById('gameModal').style.display = 'flex';
-    }
-    function closeModal(){
-      document.getElementById('gameFrame').src='';
-      document.getElementById('gameModal').style.display='none';
+    if (result === currentProblem.target) {
+      setIsCorrect(true);
+      setResultMessage('නිවැරදියි!');
+      setScore(score + 10);
+    } else {
+      setIsCorrect(false);
+      setResultMessage('වැරදියි.');
+      setScore(Math.max(0, score - 2));
     }
 
-    // ESC key closes modal
-    window.addEventListener('keydown', e=>{
-      if(e.key==='Escape'){ closeModal(); }
+    setTimeout(() => {
+      setProblemsPlayed(problemsPlayed + 1);
+      generateNewGame();
+    }, 1500);
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className={`bg-white rounded-xl shadow-2xl p-6 sm:p-10 w-full max-w-2xl transform transition-all duration-500 ${isCorrect === true ? 'scale-105 shadow-green-500/50' : isCorrect === false ? 'shake-animation' : ''}`}>
+        <h2 className="text-2xl sm:text-3xl font-bold text-blue-800 mb-4 text-center">ගණිත ක්‍රීඩාව</h2>
+        <div className="text-center mb-6">
+          <p className="text-xl sm:text-2xl font-bold text-gray-700">ලකුණු: {score}</p>
+        </div>
+        {currentProblem && (
+          <>
+            <p className="text-lg sm:text-xl font-bold text-gray-700 mb-4 text-center">
+              දුන් අංක සහ සංකේත භාවිතයෙන් {currentProblem.target} ට සමාන ප්‍රකාශනයක් සාදන්න.
+            </p>
+            <div className="flex justify-center flex-wrap gap-2 sm:gap-4 mb-6 p-4 bg-gray-200 rounded-lg border-2 border-dashed border-gray-400">
+              {expressionItems.map((item, index) => (
+                <button
+                  key={`item-${index}`}
+                  className="bg-blue-100 text-blue-800 font-bold px-4 py-2 rounded-lg shadow hover:bg-blue-200 transition-colors"
+                  onClick={() => handleItemClick(item)}
+                >
+                  {item}
+                </button>
+              ))}
+            </div>
+            <div className="flex justify-center flex-wrap gap-2 sm:gap-4 mb-6 p-4 bg-blue-100 rounded-lg border-2 border-solid border-blue-400">
+              {history.map((item, index) => (
+                <span key={`history-${index}`} className="bg-white text-blue-800 font-bold px-4 py-2 rounded-lg shadow">
+                  {item}
+                </span>
+              ))}
+            </div>
+          </>
+        )}
+        <div className="flex justify-center gap-4">
+          <button
+            className="bg-gray-500 text-white font-bold py-2 px-6 rounded-full shadow-md hover:bg-gray-600 transition-colors"
+            onClick={handleUndo}
+            disabled={history.length === 0}
+          >
+            ආපසු ගන්න
+          </button>
+          <button
+            className="bg-green-500 text-white font-bold py-2 px-6 rounded-full shadow-md hover:bg-green-600 transition-colors"
+            onClick={handleCheck}
+          >
+            පරීක්ෂා කරන්න
+          </button>
+          <button
+            className="bg-red-500 text-white font-bold py-2 px-6 rounded-full shadow-md hover:bg-red-600 transition-colors"
+            onClick={() => onGameEnd(0)}
+          >
+            ක්‍රීඩාවෙන් ඉවත් වන්න
+          </button>
+        </div>
+        {resultMessage && (
+          <p className={`text-center font-bold text-lg mt-4 ${isCorrect ? 'text-green-600' : 'text-red-600'}`}>
+            {resultMessage}
+          </p>
+        )}
+      </div>
+      <style>{`
+        .shake-animation {
+          animation: shake 0.5s ease-in-out;
+        }
+        @keyframes shake {
+          0% { transform: translateX(0); }
+          20% { transform: translateX(-5px); }
+          40% { transform: translateX(5px); }
+          60% { transform: translateX(-5px); }
+          80% { transform: translateX(5px); }
+          100% { transform: translateX(0); }
+        }
+      `}</style>
+    </div>
+  );
+};
+
+// ගැලපෙන යුගල සොයන්න ක්‍රීඩාව සඳහා Modal component එක
+const MatchingGameModal = ({ onGameEnd }) => {
+  const [firstCard, setFirstCard] = useState(null);
+  const [lockBoard, setLockBoard] = useState(false);
+  const [matchesFound, setMatchesFound] = useState(0);
+  const [score, setScore] = useState(0);
+  const [incorrectAttempts, setIncorrectAttempts] = useState(0);
+  const [showFinalScoreModal, setShowFinalScoreModal] = useState(false);
+
+  const pairs = [
+    { id: 1, left: "කොළඹ", right: "ශ්‍රී ලංකාවේ අගනුවර" },
+    { id: 2, left: "පේරාදෙණිය", right: "උද්භිද උද්‍යානය" },
+    { id: 3, left: "සූර්යා", right: "සෞරග්‍රහ මණ්ඩලයේ තාරකාව" },
+    { id: 4, left: "පොත්", right: "කියවීමට" },
+    { id: 5, left: "ජලය", right: "H₂O" },
+    { id: 6, left: "ඇපල්", right: "පළතුරක්" }
+  ];
+
+  const [items, setItems] = useState(() => {
+    let newItems = [];
+    pairs.forEach(p => {
+      newItems.push({ id: p.id, text: p.left, type: 'left', isFlipped: false, isMatched: false, key: `left-${p.id}` });
+      newItems.push({ id: p.id, text: p.right, type: 'right', isFlipped: false, isMatched: false, key: `right-${p.id}` });
     });
+    return newItems.sort(() => Math.random() - 0.5);
+  });
+  
+  const checkWinCondition = (currentMatches) => {
+    if (currentMatches === pairs.length) {
+      setTimeout(() => {
+        const finalScore = Math.max(0, score - (incorrectAttempts * 2));
+        setShowFinalScoreModal(true);
+      }, 500);
+    }
+  };
 
-    // receive score from child level pages
-    window.addEventListener('message', (e)=>{
-      if(e.data && e.data.level && e.data.score !== undefined){
-        addScore(e.data.level, e.data.score);
-        closeModal();
+  const resetBoard = () => {
+    setFirstCard(null);
+    setLockBoard(false);
+  };
+  
+  const handleCardClick = (clickedCard) => {
+    if (lockBoard) return;
+    if (clickedCard.isMatched) return;
+
+    setItems(prevItems => prevItems.map(item =>
+      item.key === clickedCard.key ? { ...item, isFlipped: true } : item
+    ));
+
+    if (!firstCard) {
+      setFirstCard(clickedCard);
+    } else {
+      setLockBoard(true);
+      const secondCard = clickedCard;
+      const isMatch = firstCard.id === secondCard.id;
+
+      if (isMatch) {
+        setMatchesFound(prev => {
+          const newMatches = prev + 1;
+          setScore(s => s + 10);
+          setItems(prevItems => prevItems.map(item =>
+            item.id === firstCard.id ? { ...item, isMatched: true, isFlipped: true } : item
+          ));
+          checkWinCondition(newMatches);
+          return newMatches;
+        });
+        resetBoard();
+      } else {
+        setIncorrectAttempts(prev => prev + 1);
+        setTimeout(() => {
+          setItems(prevItems => prevItems.map(item => 
+            (item.key === firstCard.key || item.key === secondCard.key) ? { ...item, isFlipped: false } : item
+          ));
+          resetBoard();
+        }, 1000);
       }
-    });
-
-    function addScore(level, score){
-      let row=document.createElement('tr');
-      row.innerHTML=`<td>${level}</td><td>${score}</td>`;
-      document.getElementById('scoreRows').appendChild(row);
     }
-  </script>
-</body>
-</html>
+  };
+
+  const handlePlayAgain = () => {
+    setShowFinalScoreModal(false);
+    onGameEnd(0);
+  };
+  
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="quiz-container">
+        <h1>ගැලපෙන යුගල සොයන්න</h1>
+        <p className="text-center text-gray-500 text-sm md:text-base">ගැලපෙන යුගල සොයාගන්න! එකවර කාඩ්පත් දෙකක් තෝරන්න.</p>
+        
+        <div className="score-display-wrapper">
+          <div id="score-display">ලකුණු: {score}</div>
+          <div id="wrong-attempts-display">වැරදි වූ වාර: {incorrectAttempts}</div>
+        </div>
+
+        <div id="game-board" className="card-container">
+          {items.map((item) => (
+            <div
+              key={item.key}
+              className={`card ${item.isFlipped ? 'active' : ''} ${item.isMatched ? 'matched' : ''}`}
+              onClick={() => handleCardClick(item)}
+            >
+              {item.text}
+            </div>
+          ))}
+        </div>
+        
+        <div className="flex justify-center mt-6">
+          <button
+            className="bg-red-500 text-white font-bold py-2 px-6 rounded-full shadow-md hover:bg-red-600 transition-colors"
+            onClick={() => onGameEnd(0)}
+          >
+            ක්‍රීඩාවෙන් ඉවත් වන්න
+          </button>
+        </div>
+      </div>
+      
+      {showFinalScoreModal && (
+        <div id="final-score-modal" className="modal">
+          <div className="modal-content">
+            <h2 className="text-3xl font-bold text-green-700 mb-4">සුභ පැතුම්!</h2>
+            <p className="text-lg text-gray-700 mb-2">ඔබ සියලු යුගල සොයාගත්තා.</p>
+            <p id="modal-final-score" className="text-3xl font-bold text-gray-800 mb-2">
+              මුළු ලකුණු: {Math.max(0, score - (incorrectAttempts * 2))}
+            </p>
+            <p id="modal-score-details" className="text-sm text-gray-600 mb-6">
+              (වැරදි වූ වාර {incorrectAttempts}ක් නිසා, ලකුණු {incorrectAttempts * 2}ක් අඩු කරන ලදි.)
+            </p>
+            <button
+              id="play-again-btn"
+              className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-full transition-colors duration-300"
+              onClick={handlePlayAgain}
+            >
+              නැවත ක්‍රීඩා කරන්න
+            </button>
+          </div>
+        </div>
+      )}
+
+      <style>{`
+        .quiz-container {
+          background: #ffffff;
+          border-radius: 25px;
+          box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+          padding: 40px;
+          max-width: 750px;
+          width: 100%;
+          transition: transform 0.5s ease;
+          color: #1a237e;
+        }
+
+        h1 {
+          text-align: center;
+          color: #3949ab;
+          margin-bottom: 25px;
+          font-weight: 700;
+          text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .score-display-wrapper {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          text-align: center;
+          color: #1a237e;
+          font-weight: 600;
+          margin-bottom: 25px;
+          padding: 10px;
+          background: #e3f2fd;
+          border-radius: 15px;
+          box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        #score-display, #wrong-attempts-display {
+          font-size: 1.2em;
+        }
+
+        .card-container {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+          gap: 15px;
+          justify-items: center;
+          margin-top: 20px;
+        }
+
+        .card {
+          width: 100%;
+          padding: 20px;
+          min-height: 120px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          text-align: center;
+          font-size: 1.1em;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s ease, transform 0.2s ease;
+          background-color: #ffffff;
+          color: #1a237e;
+          border-radius: 12px;
+          box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+          user-select: none;
+        }
+        
+        .card.active {
+          background-color: #42a5f5;
+          color: #fff;
+          box-shadow: 0 5px 20px #42a5f5;
+        }
+
+        .card.matched {
+          background-color: #1e88e5;
+          color: #fff;
+          cursor: not-allowed;
+          transform: scale(1.05);
+          box-shadow: 0 5px 20px #1e88e5;
+          animation: correctAnim 0.5s ease-out;
+        }
+
+        @keyframes correctAnim {
+          0%, 100% { transform: scale(1.05); }
+          50% { transform: scale(1.1); }
+        }
+
+        .modal {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-color: rgba(0, 0, 0, 0.5);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          z-index: 1000;
+        }
+
+        .modal-content {
+          background-color: white;
+          padding: 2.5rem;
+          border-radius: 1.5rem;
+          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+          text-align: center;
+          max-width: 90%;
+          animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+          from { opacity: 0; transform: scale(0.95); }
+          to { opacity: 1; transform: scale(1); }
+        }
+      `}</style>
+    </div>
+  );
+};
+
+
+// ලකුණු පුවරුව component එක
+const ScoreboardPage = ({ score, navigate }) => {
+  return (
+    <div className="text-center p-6 sm:p-10">
+      <h2 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-6">ලකුණු පුවරුව</h2>
+      <p className="text-xl sm:text-2xl text-gray-600 mb-4">ඔබගේ අවසන් ලකුණු:</p>
+      <div className="text-5xl sm:text-7xl font-extrabold text-blue-600 mb-8">{score}</div>
+      <button
+        className="bg-purple-500 text-white text-lg sm:text-xl font-bold py-3 px-8 rounded-full shadow-lg hover:bg-purple-600 transform hover:scale-105 transition-transform duration-300"
+        onClick={() => navigate('game')}
+      >
+        නැවත ක්‍රීඩා කරන්න
+      </button>
+    </div>
+  );
+};
+
+export default App;
