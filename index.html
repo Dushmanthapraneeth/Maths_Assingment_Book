@@ -7,14 +7,24 @@
     <!-- Tailwind CSS CDN ඇතුළත් කිරීම -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* ශරීරය (body) සහ ප්‍රධාන containe එක සඳහා අමතර CSS */
+        /* ශරීරය (body) සහ ප්‍රධාන container එක සඳහා අමතර CSS */
         body {
             font-family: 'Inter', sans-serif;
-            background: #eef2ff; /* නව මෘදු පසුබිම් වර්ණය */
+            background: #eef2ff;
         }
         
         .main-card {
-            background: linear-gradient(135deg, #f0f4ff, #e0e7ff);
+            background: rgba(255, 255, 255, 0.5); /* වඩා විනිවිද යන පසුබිමක් */
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        /* මොඩලය ක්‍රියාකාරී වන විට පසුබිම් කාඩ්පත අක්‍රිය කිරීම */
+        .is-modal-active .main-card {
+            pointer-events: none;
+            opacity: 0.5;
+            transform: scale(0.95);
         }
 
         /* සජීවිකරණ (Animations) */
@@ -43,11 +53,42 @@
             50% { transform: scale(1.05); }
         }
 
+        /* බුබුළු සජීවිකරණය සඳහා CSS */
+        .bubble-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            will-change: transform, background-color;
+            box-shadow: 0 0 20px 10px rgba(100, 116, 139, 0.5);
+        }
+
+        /* බුබුළු වර්ණ සජීවිකරණය සඳහා */
+        @keyframes bubble-color-morph {
+            0%, 100% { background-color: #a78bfa; }
+            25% { background-color: #60a5fa; }
+            50% { background-color: #34d399; }
+            75% { background-color: #fcd34d; }
+        }
+        
+        .bubble {
+            animation: bubble-color-morph 20s infinite alternate ease-in-out;
+            animation-delay: calc(var(--delay) * -1s);
+        }
+
         /* විනිවිද යන පසුබිම සඳහා */
         .modal-overlay {
-            background-color: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
+            background-color: rgba(0, 0, 0, 0.4); /* වඩා විනිවිදභාවය */
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
         }
 
         /* මධ්‍යගත බොත්තම් සඳහා පන්තිය */
@@ -63,8 +104,13 @@
 </head>
 <body class="bg-gray-100 font-sans antialiased">
 
+    <!-- බුබුළු සජීවිකරණ බහාලුම -->
+    <div class="bubble-container" id="bubble-container">
+        <!-- JS මගින් මෙහි බුබුළු ජනනය කරයි -->
+    </div>
+
     <!-- ප්‍රධාන යෙදුම් බහාලුම -->
-    <div id="app-container" class="min-h-screen flex items-center justify-center p-4 sm:p-8">
+    <div id="app-container" class="min-h-screen flex items-center justify-center p-4 sm:p-8 relative z-10">
         <!-- ප්‍රධාන කාඩ්පත (card) -->
         <div class="w-full max-w-2xl main-card rounded-3xl shadow-2xl p-6 sm:p-10 relative overflow-hidden">
             
@@ -90,7 +136,8 @@
 
     <!-- ගතික මොඩල් බහාලුම (Dynamically created modal container) -->
     <div id="game-modal-container" class="fixed inset-0 hidden items-center justify-center z-50 modal-overlay p-4 sm:p-8">
-        <div id="game-modal-content" class="w-full max-w-xl bg-white p-6 sm:p-10 rounded-3xl shadow-2xl relative transform transition-transform duration-500 scale-95 opacity-0">
+        <!-- මෙම කාඩ්පතේ විනිවිදභාවය සඳහා rgba වර්ණයක් භාවිත කරයි -->
+        <div id="game-modal-content" class="w-full max-w-xl p-6 sm:p-10 rounded-3xl shadow-2xl relative transform transition-transform duration-500 scale-95 opacity-0" style="background-color: rgba(191, 219, 254, 0.4); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);">
             <!-- JavaScript මගින් මොඩල් අන්තර්ගතය මෙහි ජනනය කරයි. -->
         </div>
     </div>
@@ -126,6 +173,29 @@
             { target: 2, items: [10, 8, "-", 5, 3, "×"] },
             { target: 7, items: [10, 9, 8, 2, "-", "-", 4, 3, "×"] }
         ];
+        
+        // අහඹු බුබුළු ජනනය කිරීමේ ශ්‍රිතය
+        const generateBubbles = () => {
+            const container = document.getElementById('bubble-container');
+            const bubbleSizes = [32, 40, 48, 56, 64];
+            
+            for (let i = 0; i < 10; i++) { // බුබුළු 10ක් ජනනය කිරීම
+                const bubble = document.createElement('div');
+                const size = bubbleSizes[Math.floor(Math.random() * bubbleSizes.length)];
+                
+                // අහඹු ස්ථාන සහ සජීවිකරණ ප්‍රමාදයන් ජනනය කිරීම
+                const xPos = Math.random() * 100;
+                const yPos = Math.random() * 100;
+                const animDelay = Math.random() * 10;
+
+                bubble.className = `bubble w-${size} h-${size}`;
+                bubble.style.top = `${yPos}vh`;
+                bubble.style.left = `${xPos}vw`;
+                bubble.style.setProperty('--delay', animDelay);
+                
+                container.appendChild(bubble);
+            }
+        };
 
         // පිටු අතර සංචාලනය සඳහා ශ්‍රිතයකි.
         const navigate = (page, finalScoreValue = 0) => {
@@ -191,6 +261,7 @@
         const handleGameEnd = (finalScoreValue) => {
             const modalContainer = document.getElementById('game-modal-container');
             const modalContent = document.getElementById('game-modal-content');
+            document.body.classList.remove('is-modal-active'); // මොඩලය අක්‍රිය වූ විට පන්තිය ඉවත් කිරීම
             modalContent.classList.remove('scale-100', 'opacity-100');
             modalContent.classList.add('scale-95', 'opacity-0');
             setTimeout(() => {
@@ -350,6 +421,7 @@
             `;
 
             // මොඩල් එක දර්ශනය කිරීම සහ සජීවිකරණය (animation) කිරීම
+            document.body.classList.add('is-modal-active'); // මොඩලය ක්‍රියාත්මක වූ විට පන්තිය එකතු කිරීම
             modalContainer.classList.remove('hidden');
             setTimeout(() => {
                 modalContainer.classList.add('flex');
@@ -390,6 +462,9 @@
 
         // වෙබ් අඩවිය load වූ විට ආරම්භ කරන ශ්‍රිතය
         window.onload = function() {
+            // බුබුළු ජනනය කිරීම
+            generateBubbles();
+
             // සංචාලන බොත්තම් වලට event listeners එකතු කිරීම
             document.getElementById('nav-home').addEventListener('click', () => navigate('home'));
             document.getElementById('nav-game').addEventListener('click', () => navigate('game'));
