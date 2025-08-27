@@ -42,10 +42,11 @@
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
             width: 100%;
             max-width: 650px;
-            transition: transform 0.5s ease-in-out;
+            transition: transform 0.5s ease-in-out, box-shadow 0.5s ease-in-out; /* Added box-shadow transition */
         }
         .container.correct-answer {
             transform: scale(1.05);
+            box-shadow: 0 0 20px var(--correct-color), 0 0 40px var(--correct-color); /* Correct answer animation */
         }
         .problem-text {
             font-size: 1.2em;
@@ -53,6 +54,7 @@
             margin-bottom: 30px;
             color: var(--text-color);
             min-height: 50px;
+            transition: transform 0.5s ease-in-out;
         }
         .score-display {
             font-size: 1.2em;
@@ -140,6 +142,11 @@
             font-size: 1.2em;
             font-weight: bold;
             min-height: 30px;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        .result-message.show {
+            opacity: 1;
         }
         .correct {
             color: var(--correct-color);
@@ -147,7 +154,8 @@
         .incorrect {
             color: var(--incorrect-color);
         }
-        .problem-text.incorrect-animation {
+        /* Shake animation for incorrect answers */
+        .container.incorrect-animation {
             animation: shake 0.5s ease-in-out;
         }
         @keyframes shake {
@@ -367,9 +375,13 @@
         expressionArea.innerHTML = '';
         expressionDisplay.innerHTML = '';
         resultMessage.textContent = '';
+        resultMessage.classList.remove('show'); // Hide result message for new game
         checkBtn.disabled = false;
         undoBtn.disabled = true;
         history = [];
+
+        // Remove animation classes before starting a new game
+        gameContainer.classList.remove('correct-answer', 'incorrect-animation');
 
         const shuffledItems = shuffleArray([...currentProblem.items]);
         shuffledItems.forEach(item => {
@@ -423,18 +435,21 @@
 
         if (result === shuffledProblems[currentProblemIndex].target) {
             resultMessage.textContent = 'නිවැරදියි!';
-            resultMessage.className = 'result-message correct';
+            resultMessage.className = 'result-message correct show';
             score += 10;
+            gameContainer.classList.add('correct-answer');
         } else {
             resultMessage.textContent = 'වැරදියි.';
-            resultMessage.className = 'result-message incorrect';
+            resultMessage.className = 'result-message incorrect show';
             score = Math.max(0, score - 2);
+            gameContainer.classList.add('incorrect-animation');
         }
 
         problemsPlayed++;
         updateScoreDisplay();
 
         setTimeout(() => {
+            gameContainer.classList.remove('correct-answer', 'incorrect-animation');
             currentProblemIndex++;
             generateNewGame();
         }, 1500);
