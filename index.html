@@ -113,22 +113,22 @@
     </div>
     
     <div id="app-container" class="min-h-screen flex flex-col items-center justify-center p-4">
-        <!-- ක්‍රීඩාව සම්පූර්ණ තිරය පුරා පෙන්වීමට `max-w-4xl` ඉවත් කර ඇත -->
-        <div class="w-full bg-white bg-opacity-50 rounded-xl shadow-2xl p-8 flex flex-col items-center relative z-10">
+        <!-- ප්‍රධාන කොටුවේ උපරිම පළල 'max-w-4xl' සිට 'max-w-5xl' දක්වා විශාල කරන ලදී -->
+        <div class="w-full max-w-5xl bg-white bg-opacity-50 rounded-xl shadow-2xl p-8 flex flex-col items-center relative z-10">
             
             <!-- පිටු සංචාලන බොත්තම් -->
             <nav class="w-full flex justify-center mb-8">
                 <ul class="flex space-x-4 sm:space-x-8">
                     <li class="flex flex-col items-center">
-                        <button id="nav-home" class="nav-btn px-4 py-2 font-semibold text-lg rounded-xl transition-all duration-300">මුල් පිටුව</button>
+                        <button id="nav-home" class="nav-btn px-4 py-2 font-semibold text-md rounded-xl transition-all duration-300">මුල් පිටුව</button>
                         <div id="bar-home" class="nav-bar w-full"></div>
                     </li>
                     <li class="flex flex-col items-center">
-                        <button id="nav-game" class="nav-btn px-4 py-2 font-semibold text-lg rounded-xl transition-all duration-300">ක්‍රීඩාව</button>
+                        <button id="nav-game" class="nav-btn px-4 py-2 font-semibold text-md rounded-xl transition-all duration-300">ක්‍රීඩාව</button>
                         <div id="bar-game" class="nav-bar w-full"></div>
                     </li>
                     <li class="flex flex-col items-center">
-                        <button id="nav-scoreboard" class="nav-btn px-4 py-2 font-semibold text-lg rounded-xl transition-all duration-300">ලකුණු පුවරුව</button>
+                        <button id="nav-scoreboard" class="nav-btn px-4 py-2 font-semibold text-md rounded-xl transition-all duration-300">ලකුණු පුවරුව</button>
                         <div id="bar-scoreboard" class="nav-bar w-full"></div>
                     </li>
                 </ul>
@@ -294,11 +294,11 @@
         const renderHomePage = () => {
             return `
                 <div class="text-center p-6 sm:p-10 fade-in">
-                    <h1 class="text-4xl sm:text-5xl font-extrabold text-blue-800 mb-4">ගණිත ක්‍රීඩාවට සාදරයෙන් පිළිගනිමු</h1>
-                    <p class="text-md sm:text-xl text-gray-700 mb-8">
+                    <h1 class="text-3xl sm:text-4xl font-extrabold text-blue-800 mb-4">ගණිත ක්‍රීඩාවට සාදරයෙන් පිළිගනිමු</h1>
+                    <p class="text-sm sm:text-lg text-gray-700 mb-8">
                         ඔබට දුන් අංක සහ ගණිත කර්ම භාවිතයෙන් නිවැරදි ප්‍රකාශනයක් සාදා ඉලක්කගත අගය ලබා ගත හැකිදැයි බලමු.
                     </p>
-                    <button id="start-game-btn" class="bg-gradient-to-r from-green-400 to-green-600 text-white text-lg sm:text-2xl font-bold py-3 px-8 rounded-full shadow-lg hover:from-green-500 hover:to-green-700 transform hover:scale-105 transition-transform duration-300">
+                    <button id="start-game-btn" class="bg-gradient-to-r from-green-400 to-green-600 text-white text-base sm:text-xl font-bold py-3 px-8 rounded-full shadow-lg hover:from-green-500 hover:to-green-700 transform hover:scale-105 transition-transform duration-300">
                         ක්‍රීඩාව ආරම්භ කරන්න
                     </button>
                 </div>
@@ -309,7 +309,7 @@
         const renderGamePage = () => {
             const levelButtons = [1, 2, 3, 4, 5, 6].map(level => `
                 <button
-                    class="start-math-btn bg-blue-500 text-white text-xl sm:text-2xl font-bold py-4 rounded-xl shadow-lg hover:bg-blue-600 transform hover:scale-105 transition-transform duration-300"
+                    class="start-math-btn bg-blue-500 text-white text-lg sm:text-xl font-bold py-4 rounded-xl shadow-lg hover:bg-blue-600 transform hover:scale-105 transition-transform duration-300"
                 >
                     ගණිත ක්‍රීඩාව ${level}
                 </button>
@@ -317,8 +317,8 @@
 
             return `
                 <div class="text-center p-6 sm:p-10 fade-in">
-                    <h2 class="text-3xl sm:text-4xl font-bold text-gray-800 mb-6">ක්‍රීඩා මට්ටම්</h2>
-                    <p class="text-md sm:text-lg text-gray-600 mb-8">ඔබට කැමති මට්ටමක් තෝරා ක්‍රීඩා කළ හැක.</p>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-6">ක්‍රීඩා මට්ටම්</h2>
+                    <p class="text-sm sm:text-base text-gray-600 mb-8">ඔබට කැමති මට්ටමක් තෝරා ක්‍රීඩා කළ හැක.</p>
                     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6">
                         ${levelButtons}
                     </div>
@@ -330,10 +330,10 @@
         const renderScoreboardPage = () => {
             return `
                 <div class="text-center p-6 sm:p-10 fade-in">
-                    <h2 class="text-3xl sm:text-4xl font-bold text-gray-800 mb-6">ලකුණු පුවරුව</h2>
-                    <p class="text-xl sm:text-2xl text-gray-600 mb-4">ඔබගේ අවසන් ලකුණු:</p>
-                    <div class="text-5xl sm:text-7xl font-extrabold text-blue-600 mb-8">${finalScore}</div>
-                    <button id="play-again-btn" class="bg-purple-500 text-white text-lg sm:text-xl font-bold py-3 px-8 rounded-full shadow-lg hover:bg-purple-600 transform hover:scale-105 transition-transform duration-300">
+                    <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-6">ලකුණු පුවරුව</h2>
+                    <p class="text-lg sm:text-xl text-gray-600 mb-4">ඔබගේ අවසන් ලකුණු:</p>
+                    <div class="text-4xl sm:text-6xl font-extrabold text-blue-600 mb-8">${finalScore}</div>
+                    <button id="play-again-btn" class="bg-purple-500 text-white text-base sm:text-lg font-bold py-3 px-8 rounded-full shadow-lg hover:bg-purple-600 transform hover:scale-105 transition-transform duration-300">
                         නැවත ක්‍රීඩා කරන්න
                     </button>
                 </div>
@@ -342,14 +342,14 @@
         
         // Game Modal එකේ HTML කේතය
         const renderGameModal = () => {
-            // ජංගම දුරකථන සඳහා සම්පූර්ණ තිරය පිරවීමට h-screen සහ w-screen භාවිතා කරන ලදී.
-            const modalContainerClass = `fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 h-screen w-screen`;
-            // ජංගම දුරකථන සඳහා padding අඩු කරන ලදී.
-            const modalContentClass = `bg-white rounded-xl shadow-2xl p-4 sm:p-6 w-full h-full sm:h-auto sm:max-w-2xl transform transition-all duration-500 relative flex flex-col items-center justify-center ${isCorrect === true ? 'scale-105 shadow-green-500/50' : isCorrect === false ? 'shake-animation' : ''}`;
+            // ජංගම දුරකථන සඳහා පිරිසැලසුම වැඩිදියුණු කිරීම
+            const modalContainerClass = `fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 sm:p-8`;
+            const modalContentClass = `bg-white p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-xl flex flex-col items-center gap-4 sm:gap-6 transform transition-all duration-500 relative ${isCorrect === true ? 'scale-105 shadow-green-500/50' : isCorrect === false ? 'shake-animation' : ''}`;
             
             const expressionItemButtons = expressionItems.map((item, index) => `
+                <!-- ජංගම දුරකථන සඳහා බොත්තම් ප්‍රමාණය සහ අකුරු ප්‍රමාණය ගතිකව සකස් කිරීම -->
                 <button
-                    class="bg-blue-100 text-blue-800 font-bold px-4 py-2 rounded-lg shadow hover:bg-blue-200 transition-colors pop-in"
+                    class="bg-blue-100 text-blue-800 text-xl sm:text-2xl font-bold rounded-lg shadow-md hover:bg-blue-200 transition-colors pop-in w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center"
                     onclick="handleItemClick('${item}', ${index})"
                 >
                     ${item}
@@ -357,52 +357,64 @@
             `).join('');
 
             const historySpans = history.map((item, index) => `
-                <span class="bg-white text-blue-800 font-bold px-4 py-2 rounded-lg shadow pop-in">
+                <!-- ඉතිහාසය පෙන්වන පෙළෙහි අකුරු ප්‍රමාණය ජංගම දුරකථන සඳහා සකස් කිරීම -->
+                <span class="bg-white text-blue-800 text-lg sm:text-xl font-bold px-3 py-1 sm:px-4 sm:py-2 rounded-lg shadow-md pop-in">
                     ${item}
                 </span>
             `).join('');
 
-            const resultMessageClass = `text-center font-bold text-lg mt-4 ${isCorrect ? 'text-green-600' : 'text-red-600'} pop-in`;
+            const resultMessageClass = `text-center font-bold text-md sm:text-xl mt-4 ${isCorrect ? 'text-green-600' : 'text-red-600'} pop-in`;
 
             const modalHtml = `
                 <div id="game-modal" class="${modalContainerClass}">
                     <div class="${modalContentClass}">
-                        <!-- ආපසු යාමේ බොත්තම -->
-                        <button
-                            class="absolute top-4 right-4 bg-gray-200 text-gray-600 text-sm font-bold py-2 px-4 rounded-full shadow-md hover:bg-gray-300 transition-colors transform hover:scale-105 duration-300"
-                            onclick="handleGameEnd(0)"
-                        >
-                            ආපසු යන්න
-                        </button>
-                        
-                        <h2 class="text-2xl sm:text-3xl font-bold text-blue-800 mb-4 text-center">ගණිත ක්‍රීඩාව</h2>
-                        <div class="text-center mb-6">
-                            <p class="text-xl sm:text-2xl font-bold text-gray-700">ලකුණු: ${score}</p>
-                        </div>
-                        <p class="text-lg sm:text-xl font-bold text-gray-700 mb-4 text-center">
-                            දුන් අංක සහ සංකේත භාවිතයෙන් ${currentProblem.target} ට සමාන ප්‍රකාශනයක් සාදන්න.
-                        </p>
-                        <div class="flex justify-center flex-wrap gap-2 sm:gap-4 mb-6 p-4 bg-gray-200 rounded-lg border-2 border-dashed border-gray-400">
-                            ${expressionItemButtons}
-                        </div>
-                        <div class="flex justify-center flex-wrap gap-2 sm:gap-4 mb-6 p-4 bg-blue-100 rounded-lg border-2 border-solid border-blue-400">
-                            ${historySpans}
-                        </div>
-                        <div class="flex justify-center gap-4">
+                        <!-- ඉහළ කොටස -->
+                        <div class="flex flex-col items-center w-full">
                             <button
-                                class="bg-gray-500 text-white font-bold py-2 px-6 rounded-full shadow-md hover:bg-gray-600 transition-colors transform hover:scale-105 duration-300"
+                                class="absolute top-2 right-2 sm:top-4 sm:right-4 bg-gray-200 text-gray-600 text-xs sm:text-sm font-bold py-1 px-2 sm:py-2 sm:px-4 rounded-full shadow-md hover:bg-gray-300 transition-colors transform hover:scale-105 duration-300"
+                                onclick="handleGameEnd(0)"
+                            >
+                                ආපසු යන්න
+                            </button>
+                            <!-- මාතෘකාවේ සහ අනෙකුත් පෙළෙහි ප්‍රමාණය ජංගම දුරකථන සඳහා ගතිකව සකස් කිරීම -->
+                            <h2 class="text-lg sm:text-2xl font-bold text-blue-800 mb-2">ගණිත ක්‍රීඩාව</h2>
+                            <p class="text-sm sm:text-lg font-bold text-gray-700 mb-4">ලකුණු: ${score}</p>
+                            <p class="text-sm sm:text-lg font-semibold text-gray-800 text-center">
+                                දුන් අංක සහ සංකේත භාවිතයෙන් <span class="text-xl sm:text-2xl font-extrabold text-purple-600">${currentProblem.target}</span> ට සමාන ප්‍රකාශනයක් සාදන්න.
+                            </p>
+                        </div>
+                        
+                        <!-- මැද කොටස: අංක සහ සංකේත -->
+                        <div class="w-full flex justify-center mt-4">
+                            <!-- ග්‍රිඩ් එකේ පිරිසැලසුම කුඩා තිර සඳහා ගතිකව සකස් කිරීම -->
+                            <div class="grid grid-cols-3 gap-2 sm:gap-4 p-2 sm:p-4 bg-gray-200 rounded-lg border-4 border-dashed border-gray-400">
+                                ${expressionItemButtons}
+                            </div>
+                        </div>
+
+                        <!-- ප්‍රකාශන පෙන්වන පෙට්ටිය -->
+                        <div class="w-full h-20 sm:h-24 mt-4 bg-gray-50 border-2 border-gray-300 rounded-lg flex flex-wrap justify-center items-center gap-1 sm:gap-2 p-2">
+                             ${historySpans}
+                        </div>
+
+                        <!-- පහළ කොටස: බොත්තම් -->
+                        <div class="flex justify-between w-full mt-6 gap-2 sm:gap-4">
+                            <!-- බොත්තම් වල ප්‍රමාණය ජංගම දුරකථන සඳහා සකස් කිරීම -->
+                            <button
+                                class="flex-1 bg-gray-500 text-white text-sm sm:text-base font-bold py-3 sm:py-4 rounded-full shadow-lg hover:bg-gray-600 transition-colors transform hover:scale-105 duration-300"
                                 onclick="handleUndo()"
                                 ${history.length === 0 ? 'disabled' : ''}
                             >
                                 ආපසු ගන්න
                             </button>
                             <button
-                                class="bg-green-500 text-white font-bold py-2 px-6 rounded-full shadow-md hover:bg-green-600 transition-colors transform hover:scale-105 duration-300"
+                                class="flex-1 bg-green-500 text-white text-sm sm:text-base font-bold py-3 sm:py-4 rounded-full shadow-lg hover:bg-green-600 transition-colors transform hover:scale-105 duration-300"
                                 onclick="handleCheck()"
                             >
                                 පරීක්ෂා කරන්න
                             </button>
                         </div>
+                        
                         ${resultMessage ? `<p class="${resultMessageClass}">${resultMessage}</p>` : ''}
                     </div>
                 </div>
