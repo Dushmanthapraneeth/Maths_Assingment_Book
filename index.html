@@ -3,16 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ගණිත ක්‍රීඩාව</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>ගණිත ක්‍රීඩාව - පියවර පිළිවෙලට තබන්න</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Sinhala:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
-        body {
-            font-family: 'Inter', sans-serif;
+        /* CSS styling for the game interface */
+        :root {
+            --primary-color: #1a73e8;
+            --secondary-color: #e8f0fe;
+            --text-color: #3c4043;
+            --bg-color: #f1f3f4;
+            --correct-color: #34a853;
+            --incorrect-color: #ea4335;
         }
 
-        /* Animation for wrong answer (shake effect) */
-        @keyframes wrong-answer {
+        body {
+            font-family: 'Noto Sans Sinhala', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            flex-direction: column;
+            text-align: center;
+            padding: 20px;
+        }
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+        .container {
+            background: #fff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 650px;
+            transition: transform 0.5s ease-in-out;
+        }
+        .container.correct-answer {
+            transform: scale(1.05);
+        }
+        .problem-text {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 30px;
+            color: var(--text-color);
+        }
+        .score-display {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+        .shuffled-items, .drop-area {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            border-radius: 10px;
+            padding: 10px;
+            min-height: 120px;
+        }
+        .shuffled-items {
+            background-color: var(--secondary-color);
+            border: 2px dashed var(--primary-color);
+        }
+        .drop-area {
+            background-color: #eaf1fb;
+            border: 2px solid var(--primary-color);
+            align-items: center;
+        }
+        .math-item {
+            background-color: #fff;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            font-size: 1.3em;
+            font-weight: bold;
+            padding: 15px 25px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .math-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        .math-item.dropped {
+            border: 2px solid var(--primary-color);
+            background-color: #e6f4ea;
+            color: var(--correct-color);
+            cursor: default; /* Make items in drop area non-clickable */
+        }
+        .math-item.correct {
+            border-color: var(--correct-color);
+            background-color: #e6f4ea;
+            color: var(--correct-color);
+            box-shadow: 0 0 8px var(--correct-color);
+        }
+        .math-item.incorrect {
+            border-color: var(--incorrect-color);
+            background-color: #fce8e6;
+            color: var(--incorrect-color);
+            animation: shake 0.5s ease-in-out;
+        }
+        @keyframes shake {
             0% { transform: translateX(0); }
             20% { transform: translateX(-5px); }
             40% { transform: translateX(5px); }
@@ -20,185 +123,332 @@
             80% { transform: translateX(5px); }
             100% { transform: translateX(0); }
         }
-
-        /* Animation for a smooth transition of the puzzle grid */
-        @keyframes slide-in-right {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+        .btn-container {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
         }
-        
-        .selected-button {
-            background-color: #2196F3 !important;
-            color: white !important;
+        button {
+            padding: 12px 25px;
+            font-size: 1em;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        button:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+        #check-btn {
+            background-color: var(--primary-color);
+            color: #fff;
+        }
+        #check-btn:hover:not(:disabled) {
+            background-color: #1565c0;
+            transform: scale(1.02);
+        }
+        #undo-btn {
+            background-color: #9e9e9e;
+            color: #fff;
+        }
+        #undo-btn:hover:not(:disabled) {
+            background-color: #757575;
+            transform: scale(1.02);
+        }
+        .result-message {
+            margin-top: 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+            min-height: 30px;
+        }
+        .correct {
+            color: var(--correct-color);
+        }
+        .incorrect {
+            color: var(--incorrect-color);
         }
 
-        .wrong-animation {
-            animation: wrong-answer 0.5s ease-in-out;
+        /* Modal styling for the final score popup */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
         }
-
-        .slide-in-animation {
-            animation: slide-in-right 0.8s ease-in-out forwards;
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
         }
-
-        .fade-in {
-            animation: fadeIn 1s ease-in-out;
+        .modal-content {
+            background: #fff;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            transform: scale(0.9);
+            transition: transform 0.3s ease-in-out;
+            max-width: 400px;
+            width: 90%;
         }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        .modal-overlay.show .modal-content {
+            transform: scale(1);
+        }
+        .modal-content h2 {
+            font-size: 2em;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        .modal-content p {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--text-color);
+            margin-bottom: 20px;
+        }
+        .modal-content button {
+            background-color: var(--correct-color);
+            color: #fff;
+            padding: 10px 20px;
+        }
+        .modal-content button:hover {
+            background-color: #278d3b;
         }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+<body>
 
-    <!-- Game container with a modern, clean design -->
-    <div id="game-container" class="bg-white rounded-xl shadow-lg p-8 w-full max-w-xl flex flex-col items-center text-center fade-in">
-        <h1 class="text-4xl font-bold text-gray-800 mb-6">ගණිත ක්‍රීඩාව - ප්‍රහේලිකා</h1>
+<div class="container" id="game-container">
+    <h1>ගණිත ක්‍රීඩාව</h1>
+    <div class="score-display">ලකුණු: <span id="score">0</span></div>
+    <p class="problem-text" id="problem-text">මෙම ගණිත පියවර නිවැරදි පිළිවෙලට තබන්න.</p>
 
-        <!-- Puzzle description and target -->
-        <div id="puzzle-info" class="w-full bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
-            <p class="text-xl text-gray-700 mb-2">පහත ග්‍රිඩ් එකෙන් එකතුව <span id="target-number" class="font-extrabold text-blue-600">0</span> ට සමාන වන අංක සොයාගන්න.</p>
-            <p class="text-lg text-gray-600 font-semibold mt-2">වැරදි පිළිතුරු: <span id="wrong-answers-count">0</span></p>
-        </div>
-
-        <!-- Puzzle grid -->
-        <div id="puzzle-grid" class="grid grid-cols-4 gap-4 w-full">
-            <!-- Grid buttons are dynamically created via JavaScript -->
-        </div>
-
-        <!-- Action buttons and feedback -->
-        <div class="mt-6 w-full flex flex-col items-center gap-4">
-            <p id="result" class="text-2xl font-semibold"></p>
-            <button id="check-button" class="w-full px-6 py-3 bg-blue-600 text-white font-bold rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-300">
-                පිළිතුර පරීක්ෂා කරන්න
-            </button>
-        </div>
+    <div class="shuffled-items" id="shuffled-items">
+        <!-- Math steps are inserted here -->
     </div>
 
-    <!-- Modal for game over -->
-    <div id="game-over-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl shadow-xl p-8 text-center max-w-sm w-full fade-in">
-            <h2 class="text-3xl font-bold text-gray-800 mb-4">ක්‍රීඩාව අවසන්!</h2>
-            <p class="text-xl text-gray-700 mb-2">ඔබේ අවසාන ලකුණු: <span id="final-score" class="font-extrabold text-blue-600">0</span></p>
-            <p class="text-sm text-gray-500">නිවැරදි පිළිතුරකට ලකුණු 10යි. වැරදි පිළිතුරකට ලකුණු 2ක් අඩු වේ.</p>
-            <button onclick="location.reload()" class="mt-6 px-6 py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition-colors duration-300">
-                නැවත ක්‍රීඩා කරන්න
-            </button>
-        </div>
+    <div class="drop-area" id="drop-area">
+        <!-- Steps placed by the player appear here -->
     </div>
 
-    <script>
-        // Array of puzzle data. Each object contains a target number and a grid of numbers.
-        const puzzles = [
-            {
-                target: 15,
-                grid: [2, 5, 8, 1, 9, 3, 7, 6, 4, 11, 10, 12, 13, 14, 15, 0]
-            },
-            {
-                target: 20,
-                grid: [10, 5, 2, 8, 1, 15, 7, 13, 12, 6, 9, 11, 4, 16, 17, 3]
-            },
-            {
-                target: 18,
-                grid: [1, 5, 12, 8, 6, 10, 2, 16, 3, 15, 11, 7, 4, 14, 9, 13]
-            }
-        ];
+    <div class="btn-container">
+        <button id="undo-btn" disabled>ආපසු ගන්න (Undo)</button>
+        <button id="check-btn">පරීක්ෂා කරන්න</button>
+    </div>
 
-        let currentPuzzleIndex = 0;
-        let selectedNumbers = [];
-        let score = 0;
-        let wrongAnswers = 0;
+    <p class="result-message" id="result-message"></p>
+</div>
 
-        // Function to load the current puzzle into the UI with animation.
-        function loadPuzzle() {
-            const puzzleGrid = document.getElementById('puzzle-grid');
-            
-            // First, hide the current puzzle content
-            puzzleGrid.innerHTML = '';
-            
-            const currentPuzzle = puzzles[currentPuzzleIndex];
-            document.getElementById('target-number').textContent = currentPuzzle.target;
-            document.getElementById('result').textContent = '';
-            selectedNumbers = [];
+<!-- Final Score Pop-up Modal -->
+<div class="modal-overlay" id="score-modal">
+    <div class="modal-content">
+        <h2>ක්‍රීඩාව අවසන්!</h2>
+        <p>ඔබ ලබාගත් ලකුණු: <span id="final-score">0</span></p>
+        <button id="restart-btn">නැවත ආරම්භ කරන්න</button>
+    </div>
+</div>
 
-            // Add the slide-in animation class
-            puzzleGrid.classList.add('slide-in-animation');
-
-            currentPuzzle.grid.forEach((number, index) => {
-                const button = document.createElement('button');
-                button.textContent = number;
-                button.className = "w-full aspect-square px-2 py-2 bg-gray-200 text-gray-800 font-bold rounded-lg shadow-sm hover:bg-blue-400 hover:text-white transition-colors duration-300";
-                button.onclick = () => selectNumber(button, number);
-                button.setAttribute('data-index', index);
-                puzzleGrid.appendChild(button);
-            });
-
-            // Remove the animation class once the animation is complete
-            puzzleGrid.addEventListener('animationend', () => {
-                puzzleGrid.classList.remove('slide-in-animation');
-            }, { once: true });
+<script>
+    // JavaScript logic for the game
+    let currentProblem = {};
+    let score = 0;
+    let problemsPlayed = 0;
+    const totalProblems = 5; // Number of problems to play before the popup
+    const problems = [
+        {
+            text: "මෙම ගණිත පියවර නිවැරදි පිළිවෙලට තබන්න: $$(2 + 3) \\times 4$$",
+            steps: ["$2 + 3 = 5$", "$5 \\times 4 = 20$"]
+        },
+        {
+            text: "මෙම ගණිත පියවර නිවැරදි පිළිවෙලට තබන්න: $$(10 - 2) / 2$$",
+            steps: ["$10 - 2 = 8$", "$8 / 2 = 4$"]
+        },
+        {
+            text: "මෙම ගණිත පියවර නිවැරදි පිළිවෙලට තබන්න: $$15 + 5 - 12$$",
+            steps: ["$15 + 5 = 20$", "$20 - 12 = 8$"]
+        },
+        {
+            text: "මෙම ගණිත පියවර නිවැරදි පිළිවෙලට තබන්න: $$24 / 4 + 5$$",
+            steps: ["$24 / 4 = 6$", "$6 + 5 = 11$"]
         }
+    ];
 
-        // Function to handle number selection.
-        function selectNumber(button, number) {
-            const index = selectedNumbers.indexOf(number);
-            if (index > -1) {
-                // Number is already selected, un-select it
-                selectedNumbers.splice(index, 1);
-                button.classList.remove('selected-button');
-            } else {
-                // Number is not selected, select it
-                selectedNumbers.push(number);
-                button.classList.add('selected-button');
-            }
+    const gameContainer = document.getElementById('game-container');
+    const problemTextElem = document.getElementById('problem-text');
+    const shuffledContainer = document.getElementById('shuffled-items');
+    const dropArea = document.getElementById('drop-area');
+    const checkButton = document.getElementById('check-btn');
+    const undoButton = document.getElementById('undo-btn');
+    const resultMessage = document.getElementById('result-message');
+    const scoreDisplay = document.getElementById('score');
+
+    const scoreModal = document.getElementById('score-modal');
+    const finalScoreDisplay = document.getElementById('final-score');
+    const restartButton = document.getElementById('restart-btn');
+
+    // LaTeX math rendering using MathJax
+    const script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+    script.async = true;
+    document.head.appendChild(script);
+
+    window.MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']]
+        },
+        svg: {
+            fontCache: 'global'
         }
+    };
 
-        // Event listener for the check button.
-        document.getElementById('check-button').addEventListener('click', () => {
-            const currentPuzzle = puzzles[currentPuzzleIndex];
-            const resultElement = document.getElementById('result');
-            const allButtons = document.querySelectorAll('#puzzle-grid button');
-            const currentSum = selectedNumbers.reduce((sum, num) => sum + num, 0);
+    let history = []; // To store the order of moves for undo functionality
+    let isChecking = false; // To prevent multiple checks
 
-            if (currentSum === currentPuzzle.target) {
-                resultElement.textContent = "නිවැරදියි! 🎉";
-                resultElement.style.color = "green";
-                score += 10;
-                
-                // Disable buttons to prevent further selection
-                allButtons.forEach(btn => btn.disabled = true);
+    function updateScoreDisplay() {
+        scoreDisplay.textContent = score;
+    }
 
-                // Move to the next puzzle after a short delay
-                setTimeout(() => {
-                    currentPuzzleIndex++;
-                    if (currentPuzzleIndex < puzzles.length) {
-                        loadPuzzle();
-                    } else {
-                        // Game over
-                        const finalScore = score - (wrongAnswers * 2);
-                        document.getElementById('final-score').textContent = finalScore;
-                        document.getElementById('game-over-modal').classList.remove('hidden');
-                    }
-                }, 1000); // 1 second delay for better user experience
-                
-            } else {
-                resultElement.textContent = "වැරදියි! 😔 නැවත උත්සාහ කරන්න.";
-                resultElement.style.color = "red";
-                wrongAnswers++;
-                document.getElementById('wrong-answers-count').textContent = wrongAnswers;
+    function generateNewGame() {
+        gameContainer.classList.remove('correct-answer');
+        shuffledContainer.innerHTML = '';
+        dropArea.innerHTML = '';
+        resultMessage.textContent = '';
+        checkButton.style.display = 'block';
+        undoButton.style.display = 'block';
+        undoButton.disabled = true;
+        history = [];
 
-                // Add wrong animation to the container
-                document.getElementById('game-container').classList.add('wrong-animation');
-                setTimeout(() => {
-                    document.getElementById('game-container').classList.remove('wrong-animation');
-                }, 500); // Animation duration
-            }
+        const randomIndex = Math.floor(Math.random() * problems.length);
+        currentProblem = problems[randomIndex];
+
+        problemTextElem.textContent = currentProblem.text;
+        const shuffledSteps = [...currentProblem.steps].sort(() => Math.random() - 0.5);
+
+        shuffledSteps.forEach(step => {
+            const item = createMathItem(step);
+            shuffledContainer.appendChild(item);
         });
 
-        // Load the first puzzle when the page is loaded.
-        document.addEventListener('DOMContentLoaded', loadPuzzle);
-    </script>
+        MathJax.typesetPromise([problemTextElem, shuffledContainer]);
+    }
+
+    function createMathItem(content) {
+        const item = document.createElement('div');
+        item.className = 'math-item';
+        item.textContent = content;
+        item.dataset.value = content;
+        return item;
+    }
+
+    // Use event delegation on the parent container
+    shuffledContainer.addEventListener('click', (event) => {
+        const item = event.target.closest('.math-item');
+        if (item && item.parentNode === shuffledContainer) {
+            history.push(item);
+            dropArea.appendChild(item);
+            item.classList.add('dropped');
+            undoButton.disabled = false;
+        }
+    });
+
+    function undoLastMove() {
+        if (history.length > 0) {
+            const lastItem = history.pop();
+            shuffledContainer.appendChild(lastItem);
+            lastItem.classList.remove('dropped', 'correct', 'incorrect');
+        }
+
+        if (history.length === 0) {
+            undoButton.disabled = true;
+        }
+    }
+
+    function showFinalScore() {
+        finalScoreDisplay.textContent = score;
+        scoreModal.classList.add('show');
+    }
+
+    function hideFinalScore() {
+        scoreModal.classList.remove('show');
+    }
+
+    checkButton.addEventListener('click', () => {
+        if (isChecking) return; // Prevent multiple clicks while checking
+        isChecking = true;
+
+        const droppedItems = Array.from(dropArea.children);
+        let isCorrect = true;
+
+        if (droppedItems.length !== currentProblem.steps.length) {
+            isCorrect = false;
+        } else {
+            droppedItems.forEach((item, index) => {
+                item.classList.remove('correct', 'incorrect');
+                if (item.dataset.value !== currentProblem.steps[index]) {
+                    isCorrect = false;
+                    item.classList.add('incorrect');
+                } else {
+                    item.classList.add('correct');
+                }
+            });
+        }
+
+        if (isCorrect) {
+            resultMessage.textContent = 'නිවැරදියි! ඔබ සියලු පියවර නිවැරදිව සකස් කර ඇත.';
+            resultMessage.className = 'result-message correct';
+            gameContainer.classList.add('correct-answer');
+            score += 10;
+        } else {
+            resultMessage.textContent = 'වැරදියි. වැරදි පියවර නැවත උත්සාහ කරන්න.';
+            resultMessage.className = 'result-message incorrect';
+            score = Math.max(0, score - 2); // Ensure score doesn't go below 0
+        }
+
+        problemsPlayed++;
+        updateScoreDisplay();
+
+        checkButton.style.display = 'none';
+        undoButton.style.display = 'none';
+        
+        setTimeout(() => {
+            if (problemsPlayed >= totalProblems) {
+                showFinalScore();
+            } else {
+                generateNewGame();
+            }
+            isChecking = false;
+        }, 1500);
+    });
+
+    undoButton.addEventListener('click', () => {
+        undoLastMove();
+    });
+    
+    restartButton.addEventListener('click', () => {
+        hideFinalScore();
+        score = 0;
+        problemsPlayed = 0;
+        updateScoreDisplay();
+        generateNewGame();
+    });
+
+    window.onload = function() {
+        generateNewGame();
+        updateScoreDisplay();
+    };
+</script>
 
 </body>
 </html>
