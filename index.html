@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ගණිත ක්‍රීඩාව</title>
-    <!-- Tailwind CSS CDN ඇතුළත් කිරීම -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* ශරීරය (body) සහ ප්‍රධාන container එක සඳහා අමතර CSS */
@@ -12,7 +11,7 @@
             font-family: 'Inter', sans-serif;
             background: #eef2ff;
         }
-        
+
         .main-card {
             background: rgba(255, 255, 255, 0.5); /* වඩා විනිවිද යන පසුබිමක් */
             backdrop-filter: blur(15px);
@@ -33,7 +32,7 @@
             50% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
             100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
         }
-
+        
         @keyframes incorrect-shake {
             0% { transform: translateX(0); }
             20% { transform: translateX(-5px) rotate(-1deg); }
@@ -47,7 +46,7 @@
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-
+        
         @keyframes pulse {
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.05); }
@@ -103,18 +102,10 @@
     </style>
 </head>
 <body class="bg-gray-100 font-sans antialiased">
-
-    <!-- බුබුළු සජීවිකරණ බහාලුම -->
     <div class="bubble-container" id="bubble-container">
-        <!-- JS මගින් මෙහි බුබුළු ජනනය කරයි -->
-    </div>
-
-    <!-- ප්‍රධාන යෙදුම් බහාලුම -->
+        </div>
     <div id="app-container" class="min-h-screen flex items-center justify-center p-4 sm:p-8 relative z-10">
-        <!-- ප්‍රධාන කාඩ්පත (card) -->
         <div class="w-full max-w-2xl main-card rounded-3xl shadow-2xl p-6 sm:p-10 relative overflow-hidden">
-            
-            <!-- පිටු සංචාලන බොත්තම් -->
             <nav class="flex justify-center space-x-4 mb-8">
                 <button id="nav-home" class="text-gray-600 font-semibold px-4 py-2 rounded-lg hover:bg-white hover:shadow transition-colors">
                     මුල් පිටුව
@@ -127,21 +118,14 @@
                 </button>
             </nav>
 
-            <!-- අන්තර්ගතය ප්‍රදර්ශනය කරන ප්‍රධාන කොටස -->
             <div id="content" class="fade-in-up">
-                <!-- JavaScript මගින් අන්තර්ගතය මෙහිදී ජනනය කරයි. -->
-            </div>
+                </div>
         </div>
     </div>
-
-    <!-- ගතික මොඩල් බහාලුම (Dynamically created modal container) -->
     <div id="game-modal-container" class="fixed inset-0 hidden items-center justify-center z-50 modal-overlay p-4 sm:p-8">
-        <!-- මෙම කාඩ්පතේ විනිවිදභාවය සඳහා rgba වර්ණයක් භාවිත කරයි -->
         <div id="game-modal-content" class="w-full max-w-xl p-6 sm:p-10 rounded-3xl shadow-2xl relative transform transition-transform duration-500 scale-95 opacity-0" style="background-color: rgba(191, 219, 254, 0.4); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);">
-            <!-- JavaScript මගින් මොඩල් අන්තර්ගතය මෙහි ජනනය කරයි. -->
-        </div>
+            </div>
     </div>
-
     <script>
         // ක්‍රීඩාවේ තත්ත්වය කළමනාකරණය කරන ගෝලීය විචල්‍යයන්
         let currentPage = 'home';
@@ -173,16 +157,16 @@
             { target: 2, items: [10, 8, "-", 5, 3, "×"] },
             { target: 7, items: [10, 9, 8, 2, "-", "-", 4, 3, "×"] }
         ];
-        
+
         // අහඹු බුබුළු ජනනය කිරීමේ ශ්‍රිතය
         const generateBubbles = () => {
             const container = document.getElementById('bubble-container');
             const bubbleSizes = [32, 40, 48, 56, 64];
-            
+
             for (let i = 0; i < 10; i++) { // බුබුළු 10ක් ජනනය කිරීම
                 const bubble = document.createElement('div');
                 const size = bubbleSizes[Math.floor(Math.random() * bubbleSizes.length)];
-                
+
                 // අහඹු ස්ථාන සහ සජීවිකරණ ප්‍රමාදයන් ජනනය කිරීම
                 const xPos = Math.random() * 100;
                 const yPos = Math.random() * 100;
@@ -192,7 +176,7 @@
                 bubble.style.top = `${yPos}vh`;
                 bubble.style.left = `${xPos}vw`;
                 bubble.style.setProperty('--delay', animDelay);
-                
+
                 container.appendChild(bubble);
             }
         };
@@ -247,7 +231,7 @@
                 handleGameEnd(score);
                 return;
             }
-            
+
             const shuffledProblems = shuffleArray([...problems]);
             currentProblem = shuffledProblems[Math.floor(Math.random() * shuffledProblems.length)];
             expressionItems = shuffleArray([...currentProblem.items]);
@@ -261,13 +245,31 @@
         const handleGameEnd = (finalScoreValue) => {
             const modalContainer = document.getElementById('game-modal-container');
             const modalContent = document.getElementById('game-modal-content');
+
+            // --- AppsGeyser දැන්වීම් කේතය මෙතනින් ආරම්භ වේ ---
+            // මෙම කොටස ක්‍රීඩාව අවසන් වූ පසු දැන්වීමක් පෙන්වීමට යොදාගනී.
+            console.log("ක්‍රීඩාව අවසන් වී දැන්වීම පෙන්වීමට උත්සාහ කරයි.");
+            if (typeof appsgeyser !== 'undefined' && appsgeyser !== null) {
+                try {
+                    appsgeyser.showAdMobInterstitialAd();
+                    console.log("AppsGeyser වෙත දැන්වීම පෙන්වීමට සංඥාව යැවීය.");
+                } catch (error) {
+                    console.error("දැන්වීම පෙන්වීමට උත්සාහ කිරීමේදී දෝෂයක් ඇති විය:", error);
+                }
+            } else {
+                console.warn("AppsGeyser JavaScript Interface එක හඳුනාගත නොහැක. සාමාන්‍ය බ්‍රවුසරයක දෝෂයක් නැත.");
+            }
+            // --- AppsGeyser දැන්වීම් කේතය මෙතනින් අවසන් වේ ---
+
             document.body.classList.remove('is-modal-active'); // මොඩලය අක්‍රිය වූ විට පන්තිය ඉවත් කිරීම
             modalContent.classList.remove('scale-100', 'opacity-100');
             modalContent.classList.add('scale-95', 'opacity-0');
+            
+            // දැන්වීම පෙන්වීමෙන් පසු තත්පර කිහිපයක ප්‍රමාදයක් තැබීම
             setTimeout(() => {
                 modalContainer.classList.add('hidden');
                 navigate('scoreboard', finalScoreValue);
-            }, 300);
+            }, 300); // ඔබට අවශ්‍ය නම් මෙම ප්‍රමාදය වැඩි කළ හැක.
         };
 
         // අයිතමයක් මත click කිරීම හැසිරවීම
@@ -381,7 +383,7 @@
             `).join('');
 
             const resultMessageClass = `text-center font-bold text-md sm:text-xl mt-4 ${isCorrect ? 'text-green-600' : 'text-red-600'} pop-in`;
-
+            
             modalContent.innerHTML = `
                 <button
                     class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
@@ -391,7 +393,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
-                
+
                 <h2 class="text-2xl sm:text-3xl font-extrabold text-blue-800 mb-2 text-center">ගණිත ප්‍රශ්නය</h2>
                 <p class="text-sm sm:text-lg font-bold text-gray-700 mb-4 text-center">ලකුණු: ${score}</p>
                 <div class="flex flex-col items-center p-4 bg-gray-100 rounded-2xl mb-6 shadow-inner w-full">
@@ -416,7 +418,7 @@
                         පරීක්ෂා කරන්න
                     </button>
                 </div>
-                
+
                 ${resultMessage ? `<p class="${resultMessageClass}">${resultMessage}</p>` : ''}
             `;
 
@@ -434,7 +436,7 @@
         const renderPage = () => {
             const contentDiv = document.getElementById('content');
             contentDiv.classList.add('opacity-0');
-            
+
             setTimeout(() => {
                 switch(currentPage) {
                     case 'home':
@@ -469,7 +471,7 @@
             document.getElementById('nav-home').addEventListener('click', () => navigate('home'));
             document.getElementById('nav-game').addEventListener('click', () => navigate('game'));
             document.getElementById('nav-scoreboard').addEventListener('click', () => navigate('scoreboard'));
-            
+
             // මුල් පිටුව render කිරීම
             navigate('home');
         };
