@@ -1,477 +1,484 @@
 <!DOCTYPE html>
+
 <html lang="si">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ගණිත ක්‍රීඩාව</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        /* ශරීරය (body) සහ ප්‍රධාන container එක සඳහා අමතර CSS */
-        body {
-            font-family: 'Inter', sans-serif;
-            background: #eef2ff;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ගණිත ක්‍රීඩාව</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+/* ශරීරය (body) සහ ප්‍රධාන container එක සඳහා අමතර CSS */
+body {
+font-family: 'Inter', sans-serif;
+background: #eef2ff;
+}
 
-        .main-card {
-            background: rgba(255, 255, 255, 0.5); /* වඩා විනිවිද යන පසුබිමක් */
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            transition: opacity 0.3s ease, transform 0.3s ease;
-        }
+    .main-card {
+        background: rgba(255, 255, 255, 0.5); /* වඩා විනිවිද යන පසුබිමක් */
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        transition: opacity 0.3s ease, transform 0.3s ease;
+    }
 
-        /* මොඩලය ක්‍රියාකාරී වන විට පසුබිම් කාඩ්පත අක්‍රිය කිරීම */
-        .is-modal-active .main-card {
-            pointer-events: none;
-            opacity: 0.5;
-            transform: scale(0.95);
-        }
+    /* මොඩලය ක්‍රියාකාරී වන විට පසුබිම් කාඩ්පත අක්‍රිය කිරීම */
+    .is-modal-active .main-card {
+        pointer-events: none;
+        opacity: 0.5;
+        transform: scale(0.95);
+    }
 
-        /* සජීවිකරණ (Animations) */
-        @keyframes correct-pop {
-            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-            50% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
-            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
-        }
-        
-        @keyframes incorrect-shake {
-            0% { transform: translateX(0); }
-            20% { transform: translateX(-5px) rotate(-1deg); }
-            40% { transform: translateX(5px) rotate(1deg); }
-            60% { transform: translateX(-5px) rotate(-1deg); }
-            80% { transform: translateX(5px) rotate(1deg); }
-            100% { transform: translateX(0); }
-        }
+    /* සජීවිකරණ (Animations) */
+    @keyframes correct-pop {
+        0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+        50% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+        100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+    
+    @keyframes incorrect-shake {
+        0% { transform: translateX(0); }
+        20% { transform: translateX(-5px) rotate(-1deg); }
+        40% { transform: translateX(5px) rotate(1deg); }
+        60% { transform: translateX(-5px) rotate(-1deg); }
+        80% { transform: translateX(5px) rotate(1deg); }
+        100% { transform: translateX(0); }
+    }
 
-        @keyframes fade-in-up {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
+    @keyframes fade-in-up {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
 
-        /* බුබුළු සජීවිකරණය සඳහා CSS */
-        .bubble-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            z-index: 0;
-        }
+    /* බුබුළු සජීවිකරණය සඳහා CSS */
+    .bubble-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        z-index: 0;
+    }
 
-        .bubble {
-            position: absolute;
-            border-radius: 50%;
-            will-change: transform, background-color;
-            box-shadow: 0 0 20px 10px rgba(100, 116, 139, 0.5);
-        }
+    .bubble {
+        position: absolute;
+        border-radius: 50%;
+        will-change: transform, background-color;
+        box-shadow: 0 0 20px 10px rgba(100, 116, 139, 0.5);
+    }
 
-        /* බුබුළු වර්ණ සජීවිකරණය සඳහා */
-        @keyframes bubble-color-morph {
-            0%, 100% { background-color: #a78bfa; }
-            25% { background-color: #60a5fa; }
-            50% { background-color: #34d399; }
-            75% { background-color: #fcd34d; }
-        }
-        
-        .bubble {
-            animation: bubble-color-morph 20s infinite alternate ease-in-out;
-            animation-delay: calc(var(--delay) * -1s);
-        }
+    /* බුබුළු වර්ණ සජීවිකරණය සඳහා */
+    @keyframes bubble-color-morph {
+        0%, 100% { background-color: #a78bfa; }
+        25% { background-color: #60a5fa; }
+        50% { background-color: #34d399; }
+        75% { background-color: #fcd34d; }
+    }
+    
+    .bubble {
+        animation: bubble-color-morph 20s infinite alternate ease-in-out;
+        animation-delay: calc(var(--delay) * -1s);
+    }
 
-        /* විනිවිද යන පසුබිම සඳහා */
-        .modal-overlay {
-            background-color: rgba(0, 0, 0, 0.4); /* වඩා විනිවිදභාවය */
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-        }
+    /* විනිවිද යන පසුබිම සඳහා */
+    .modal-overlay {
+        background-color: rgba(0, 0, 0, 0.4); /* වඩා විනිවිදභාවය */
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+    }
 
-        /* මධ්‍යගත බොත්තම් සඳහා පන්තිය */
-        .btn-game {
-            @apply flex-1 py-3 sm:py-4 rounded-full font-bold text-white shadow-lg transition-all duration-300 transform hover:scale-105;
-        }
+    /* මධ්‍යගත බොත්තම් සඳහා පන්තිය */
+    .btn-game {
+        @apply flex-1 py-3 sm:py-4 rounded-full font-bold text-white shadow-lg transition-all duration-300 transform hover:scale-105;
+    }
 
-        /* ප්‍රධාන මාතෘකාව සඳහා CSS */
-        h1, h2 {
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-        }
-    </style>
+    /* ප්‍රධාන මාතෘකාව සඳහා CSS */
+    h1, h2 {
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    }
+</style>
+
 </head>
 <body class="bg-gray-100 font-sans antialiased">
-    <div class="bubble-container" id="bubble-container">
-    </div>
-    <div id="app-container" class="min-h-screen flex items-center justify-center p-4 sm:p-8 relative z-10">
-        <div class="w-full max-w-2xl main-card rounded-3xl shadow-2xl p-6 sm:p-10 relative overflow-hidden">
-            <nav class="flex justify-center space-x-4 mb-8">
-                <button id="nav-home" class="text-gray-600 font-semibold px-4 py-2 rounded-lg hover:bg-white hover:shadow transition-colors">
-                    මුල් පිටුව
-                </button>
-                <button id="nav-game" class="text-gray-600 font-semibold px-4 py-2 rounded-lg hover:bg-white hover:shadow transition-colors">
-                    ක්‍රීඩාව
-                </button>
-                <button id="nav-scoreboard" class="text-gray-600 font-semibold px-4 py-2 rounded-lg hover:bg-white hover:shadow transition-colors">
-                    ලකුණු පුවරුව
-                </button>
-            </nav>
+<div class="bubble-container" id="bubble-container">
+</div>
+<div id="app-container" class="min-h-screen flex items-center justify-center p-4 sm:p-8 relative z-10">
+<div class="w-full max-w-2xl main-card rounded-3xl shadow-2xl p-6 sm:p-10 relative overflow-hidden">
+<nav class="flex justify-center space-x-4 mb-8">
+<button id="nav-home" class="text-gray-600 font-semibold px-4 py-2 rounded-lg hover:bg-white hover:shadow transition-colors">
+මුල් පිටුව
+</button>
+<button id="nav-game" class="text-gray-600 font-semibold px-4 py-2 rounded-lg hover:bg-white hover:shadow transition-colors">
+ක්‍රීඩාව
+</button>
+<button id="nav-scoreboard" class="text-gray-600 font-semibold px-4 py-2 rounded-lg hover:bg-white hover:shadow transition-colors">
+ලකුණු පුවරුව
+</button>
+</nav>
 
-            <div id="content" class="fade-in-up">
-            </div>
+        <div id="content" class="fade-in-up">
         </div>
     </div>
-    <div id="game-modal-container" class="fixed inset-0 hidden items-center justify-center z-50 modal-overlay p-4 sm:p-8">
-        <div id="game-modal-content" class="w-full max-w-xl p-6 sm:p-10 rounded-3xl shadow-2xl relative transform transition-transform duration-500 scale-95 opacity-0" style="background-color: rgba(191, 219, 254, 0.4); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);">
-            </div>
-    </div>
-    <script>
-        // ක්‍රීඩාවේ තත්ත්වය කළමනාකරණය කරන ගෝලීය විචල්‍යයන්
-        let currentPage = 'home';
-        let finalScore = 0;
-        let score = 0;
-        let problemsPlayed = 0;
-        const totalProblems = 5;
-        let currentProblem = null;
-        let expressionItems = [];
-        let history = [];
-        let resultMessage = '';
-        let isCorrect = null;
+</div>
+<div id="game-modal-container" class="fixed inset-0 hidden items-center justify-center z-50 modal-overlay p-4 sm:p-8">
+    <div id="game-modal-content" class="w-full max-w-xl p-6 sm:p-10 rounded-3xl shadow-2xl relative transform transition-transform duration-500 scale-95 opacity-0" style="background-color: rgba(191, 219, 254, 0.4); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);">
+        </div>
+</div>
+<script>
+    // ක්‍රීඩාවේ තත්ත්වය කළමනාකරණය කරන ගෝලීය විචල්‍යයන්
+    let currentPage = 'home';
+    let finalScore = 0;
+    let score = 0;
+    let problemsPlayed = 0;
+    const totalProblems = 5;
+    let currentProblem = null;
+    let expressionItems = [];
+    let history = [];
+    let resultMessage = '';
+    let isCorrect = null;
 
-        // ගැටළු දත්ත
-        const problems = [
-            { target: 10, items: [8, 2, "+", 5, 3] },
-            { target: 12, items: [5, 7, "+", 6, 2, "×"] },
-            { target: 20, items: [4, 5, "×", 10, 2, "+"] },
-            { target: 8, items: [16, 2, "÷", 4, 2, "-"] },
-            { target: 15, items: [18, 3, "-", 10, 5, "÷"] },
-            { target: 6, items: [12, 2, "÷", 3, 3, "+"] },
-            { target: 25, items: [5, 5, "×", 20, 5, "-"] },
-            { target: 9, items: [1, 8, "+", 10, 1, "-"] },
-            { target: 100, items: [10, 10, "×", 5, 2, "×"] },
-            { target: 3, items: [9, 3, "÷", 6, 2, "÷"] },
-            { target: 7, items: [15, 8, "-", 10, 3, "-"] },
-            { target: 18, items: [9, 9, "+", 20, 2, "-"] },
-            { target: 30, items: [6, 5, "×", 25, 5, "+"] },
-            { target: 2, items: [10, 8, "-", 5, 3, "×"] },
-            { target: 7, items: [10, 9, 8, 2, "-", "-", 4, 3, "×"] }
-        ];
+    // ගැටළු දත්ත
+    const problems = [
+        { target: 10, items: [8, 2, "+", 5, 3] },
+        { target: 12, items: [5, 7, "+", 6, 2, "×"] },
+        { target: 20, items: [4, 5, "×", 10, 2, "+"] },
+        { target: 8, items: [16, 2, "÷", 4, 2, "-"] },
+        { target: 15, items: [18, 3, "-", 10, 5, "÷"] },
+        { target: 6, items: [12, 2, "÷", 3, 3, "+"] },
+        { target: 25, items: [5, 5, "×", 20, 5, "-"] },
+        { target: 9, items: [1, 8, "+", 10, 1, "-"] },
+        { target: 100, items: [10, 10, "×", 5, 2, "×"] },
+        { target: 3, items: [9, 3, "÷", 6, 2, "÷"] },
+        { target: 7, items: [15, 8, "-", 10, 3, "-"] },
+        { target: 18, items: [9, 9, "+", 20, 2, "-"] },
+        { target: 30, items: [6, 5, "×", 25, 5, "+"] },
+        { target: 2, items: [10, 8, "-", 5, 3, "×"] },
+        { target: 7, items: [10, 9, 8, 2, "-", "-", 4, 3, "×"] }
+    ];
 
-        // අහඹු බුබුළු ජනනය කිරීමේ ශ්‍රිතය
-        const generateBubbles = () => {
-            const container = document.getElementById('bubble-container');
-            const bubbleSizes = [32, 40, 48, 56, 64];
+    // අහඹු බුබුළු ජනනය කිරීමේ ශ්‍රිතය
+    const generateBubbles = () => {
+        const container = document.getElementById('bubble-container');
+        const bubbleSizes = [32, 40, 48, 56, 64];
 
-            for (let i = 0; i < 10; i++) { // බුබුළු 10ක් ජනනය කිරීම
-                const bubble = document.createElement('div');
-                const size = bubbleSizes[Math.floor(Math.random() * bubbleSizes.length)];
+        for (let i = 0; i < 10; i++) { // බුබුළු 10ක් ජනනය කිරීම
+            const bubble = document.createElement('div');
+            const size = bubbleSizes[Math.floor(Math.random() * bubbleSizes.length)];
 
-                // අහඹු ස්ථාන සහ සජීවිකරණ ප්‍රමාදයන් ජනනය කිරීම
-                const xPos = Math.random() * 100;
-                const yPos = Math.random() * 100;
-                const animDelay = Math.random() * 10;
+            // අහඹු ස්ථාන සහ සජීවිකරණ ප්‍රමාදයන් ජනනය කිරීම
+            const xPos = Math.random() * 100;
+            const yPos = Math.random() * 100;
+            const animDelay = Math.random() * 10;
 
-                bubble.className = `bubble w-${size} h-${size}`;
-                bubble.style.top = `${yPos}vh`;
-                bubble.style.left = `${xPos}vw`;
-                bubble.style.setProperty('--delay', animDelay);
+            bubble.className = `bubble w-${size} h-${size}`;
+            bubble.style.top = `${yPos}vh`;
+            bubble.style.left = `${xPos}vw`;
+            bubble.style.setProperty('--delay', animDelay);
 
-                container.appendChild(bubble);
-            }
-        };
+            container.appendChild(bubble);
+        }
+    };
 
-        // පිටු අතර සංචාලනය සඳහා ශ්‍රිතයකි.
-        const navigate = (page, finalScoreValue = 0) => {
-            currentPage = page;
-            if (page === 'scoreboard') {
-                finalScore = finalScoreValue;
-            }
-            renderPage();
-            updateNavButtons();
-        };
+    // පිටු අතර සංචාලනය සඳහා ශ්‍රිතයකි.
+    const navigate = (page, finalScoreValue = 0) => {
+        currentPage = page;
+        if (page === 'scoreboard') {
+            finalScore = finalScoreValue;
+        }
+        renderPage();
+        updateNavButtons();
+    };
 
-        // සංචාලන බොත්තම් වල පෙනුම යාවත්කාලීන කිරීම
-        const updateNavButtons = () => {
-            document.querySelectorAll('nav button').forEach(btn => {
-                btn.classList.remove('bg-white', 'text-purple-600', 'shadow');
-                btn.classList.add('text-gray-600');
-            });
-            const activeBtn = document.getElementById(`nav-${currentPage}`);
-            if (activeBtn) {
-                activeBtn.classList.remove('text-gray-600');
-                activeBtn.classList.add('bg-white', 'text-purple-600', 'shadow');
-            }
-        };
+    // සංචාලන බොත්තම් වල පෙනුම යාවත්කාලීන කිරීම
+    const updateNavButtons = () => {
+        document.querySelectorAll('nav button').forEach(btn => {
+            btn.classList.remove('bg-white', 'text-purple-600', 'shadow');
+            btn.classList.add('text-gray-600');
+        });
+        const activeBtn = document.getElementById(`nav-${currentPage}`);
+        if (activeBtn) {
+            activeBtn.classList.remove('text-gray-600');
+            activeBtn.classList.add('bg-white', 'text-purple-600', 'shadow');
+        }
+    };
 
-        // ගණිත ප්‍රකාශනයක් ආරක්ෂිතව ඇගයීමේ ශ්‍රිතයකි.
-        const evaluateExpression = (expression) => {
-            try {
-                const sanitizedExpression = expression.replace(/[^0-9+\-*/().]/g, '');
-                const evalExpression = sanitizedExpression.replace(/÷/g, '/').replace(/×/g, '*');
-                const safeEvaluator = new Function(`return (${evalExpression});`);
-                return safeEvaluator();
-            } catch (e) {
-                return NaN;
-            }
-        };
+    // ගණිත ප්‍රකාශනයක් ආරක්ෂිතව ඇගයීමේ ශ්‍රිතයකි.
+    const evaluateExpression = (expression) => {
+        try {
+            const sanitizedExpression = expression.replace(/[^0-9+\-*/().]/g, '');
+            const evalExpression = sanitizedExpression.replace(/÷/g, '/').replace(/×/g, '*');
+            const safeEvaluator = new Function(`return (${evalExpression});`);
+            return safeEvaluator();
+        } catch (e) {
+            return NaN;
+        }
+    };
 
-        // array එකක් මාරු කිරීමට උපකාරී වන ශ්‍රිතයකි.
-        const shuffleArray = (array) => {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
-            return array;
-        };
+    // array එකක් මාරු කිරීමට උපකාරී වන ශ්‍රිතයකි.
+    const shuffleArray = (array) => {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    };
 
-        // නව ගැටළුවක් උත්පාදනය කිරීමේ ශ්‍රිතයකි.
-        const generateNewGame = () => {
-            if (problemsPlayed >= totalProblems) {
-                handleGameEnd(score);
-                return;
-            }
+    // නව ගැටළුවක් උත්පාදනය කිරීමේ ශ්‍රිතයකි.
+    const generateNewGame = () => {
+        if (problemsPlayed >= totalProblems) {
+            // ක්‍රීඩාව අවසන් වූ පසු, ලකුණු පුවරුවට යාමට පෙර ප්‍රමාදය ඇති කරන්න
+            handleGameEnd(score);
+            return;
+        }
+        
+        const shuffledProblems = shuffleArray([...problems]);
+        currentProblem = shuffledProblems[Math.floor(Math.random() * shuffledProblems.length)];
+        expressionItems = shuffleArray([...currentProblem.items]);
+        history = [];
+        resultMessage = '';
+        isCorrect = null;
+        renderGameModal();
+    };
 
-            const shuffledProblems = shuffleArray([...problems]);
-            currentProblem = shuffledProblems[Math.floor(Math.random() * shuffledProblems.length)];
-            expressionItems = shuffleArray([...currentProblem.items]);
-            history = [];
-            resultMessage = '';
-            isCorrect = null;
-            renderGameModal();
-        };
+    // ක්‍රීඩාව අවසන් වූ විට ක්‍රියාත්මක වන ශ්‍රිතය
+    const handleGameEnd = (finalScoreValue) => {
+        const modalContainer = document.getElementById('game-modal-container');
+        const modalContent = document.getElementById('game-modal-content');
 
-        // ක්‍රීඩාව අවසන් වූ විට ක්‍රියාත්මක වන ශ්‍රිතය
-        const handleGameEnd = (finalScoreValue) => {
-            const modalContainer = document.getElementById('game-modal-container');
-            const modalContent = document.getElementById('game-modal-content');
-
-            // JavaScript interface එක හරහා Android app එකට ad එකක් පෙන්වීමට කතා කිරීම
-            if (typeof Android !== 'undefined' && Android !== null) {
+        // JavaScript interface එක හරහා Android app එකට ad එකක් පෙන්වීමට කතා කිරීමට පෙර තත්පර 5ක ප්‍රමාදයක් එකතු කිරීම
+        if (typeof Android !== 'undefined' && Android !== null) {
+            console.log("දැන්වීම පෙන්වීමට පෙර තත්පර 5ක ප්‍රමාදයක් ආරම්භ වේ.");
+            setTimeout(() => {
                 try {
                     Android.showAd();
                     console.log("Android JavaScript Interface වෙත දැන්වීම පෙන්වීමට සංඥාව යැවීය.");
                 } catch (error) {
                     console.error("දැන්වීම පෙන්වීමට උත්සාහ කිරීමේදී දෝෂයක් ඇති විය:", error);
                 }
-            } else {
-                console.warn("Android JavaScript Interface එක හඳුනාගත නොහැක. සාමාන්‍ය බ්‍රවුසරයක දෝෂයක් නැත.");
-            }
+            }, 5000); // තත්පර 5ක ප්‍රමාදය (5000 milliseconds)
+        } else {
+            console.warn("Android JavaScript Interface එක හඳුනාගත නොහැක. සාමාන්‍ය බ්‍රවුසරයක දෝෂයක් නැත.");
+        }
 
-            document.body.classList.remove('is-modal-active'); // මොඩලය අක්‍රිය වූ විට පන්තිය ඉවත් කිරීම
-            modalContent.classList.remove('scale-100', 'opacity-100');
-            modalContent.classList.add('scale-95', 'opacity-0');
-            
-            // දැන්වීම පෙන්වීමෙන් පසු තත්පර කිහිපයක ප්‍රමාදයක් තැබීම
-            setTimeout(() => {
-                modalContainer.classList.add('hidden');
-                navigate('scoreboard', finalScoreValue);
-            }, 300); // ඔබට අවශ්‍ය නම් මෙම ප්‍රමාදය වැඩි කළ හැක.
-        };
-
-        // අයිතමයක් මත click කිරීම හැසිරවීම
-        const handleItemClick = (item, clickedIndex) => {
-            history.push(item);
-            expressionItems = expressionItems.filter((_, i) => i !== clickedIndex);
-            renderGameModal();
-        };
-
-        // අවසාන පියවර ආපසු ගැනීම
-        const handleUndo = () => {
-            if (history.length > 0) {
-                const lastItem = history.pop();
-                expressionItems.push(lastItem);
-                renderGameModal();
-            }
-        };
-
-        // පරිශීලකයාගේ ප්‍රකාශනය පරීක්ෂා කිරීම
-        const handleCheck = () => {
-            const expression = history.join('');
-            const result = evaluateExpression(expression);
-            const modalContent = document.getElementById('game-modal-content');
-
-            if (result === currentProblem.target) {
-                isCorrect = true;
-                resultMessage = 'නිවැරදියි! 🎉';
-                score += 10;
-                modalContent.style.animation = 'correct-pop 1s forwards';
-            } else {
-                isCorrect = false;
-                resultMessage = 'වැරදියි. 😥';
-                score = Math.max(0, score - 2);
-                modalContent.style.animation = 'incorrect-shake 0.5s forwards';
-            }
-
-            renderGameModal();
-
-            setTimeout(() => {
-                modalContent.style.animation = '';
-                problemsPlayed++;
-                generateNewGame();
-            }, 1500);
-        };
-
-        // Home Page එකේ HTML කේතය
-        const renderHomePage = () => {
-            return `
-                <div class="text-center p-4">
-                    <h1 class="text-3xl sm:text-4xl font-extrabold text-blue-800 mb-4 animate-[fade-in-up_1s_ease-in-out]">ගණිත ක්‍රීඩාවට සාදරයෙන් පිළිගනිමු</h1>
-                    <p class="text-sm sm:text-lg text-gray-700 mb-8 animate-[fade-in-up_1s_ease-in-out_0.2s_forwards] opacity-0">
-                        ඔබට දුන් අංක සහ ගණිත කර්ම භාවිතයෙන් නිවැරදි ප්‍රකාශනයක් සාදා ඉලක්කගත අගය ලබා ගත හැකිදැයි බලමු.
-                    </p>
-                    <button id="start-game-btn" class="bg-gradient-to-r from-purple-500 to-indigo-600 text-white text-base sm:text-xl font-bold py-3 px-8 rounded-full shadow-lg hover:from-purple-600 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105 animate-[pulse_2s_infinite]">
-                        ක්‍රීඩාව ආරම්භ කරන්න
-                    </button>
-                </div>
-            `;
-        };
-
-        // Game Page එකේ HTML කේතය
-        const renderGamePage = () => {
-            return `
-                <div class="text-center p-4 fade-in-up">
-                    <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-6">ක්‍රීඩා මට්ටම්</h2>
-                    <p class="text-sm sm:text-base text-gray-600 mb-8">ඔබට කැමති මට්ටමක් තෝරා ක්‍රීඩා කළ හැක.</p>
-                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                        ${[1, 2, 3, 4, 5, 6].map(level => `
-                            <button class="start-math-btn bg-blue-500 text-white text-lg sm:text-xl font-bold py-4 rounded-xl shadow-lg hover:bg-blue-600 transform hover:scale-105 transition-transform duration-300">
-                                මට්ටම ${level}
-                            </button>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-        };
-
-        // Scoreboard Page එකේ HTML කේතය
-        const renderScoreboardPage = () => {
-            return `
-                <div class="text-center p-4 fade-in-up">
-                    <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-6">ලකුණු පුවරුව</h2>
-                    <p class="text-lg sm:text-xl text-gray-600 mb-4">ඔබගේ අවසන් ලකුණු:</p>
-                    <div class="text-4xl sm:text-6xl font-extrabold text-blue-600 mb-8 animate-[pulse_1s_ease-in-out]">${finalScore}</div>
-                    <button id="play-again-btn" class="bg-purple-500 text-white text-base sm:text-lg font-bold py-3 px-8 rounded-full shadow-lg hover:bg-purple-600 transform hover:scale-105 transition-transform duration-300">
-                        නැවත ක්‍රීඩා කරන්න
-                    </button>
-                </div>
-            `;
-        };
+        document.body.classList.remove('is-modal-active'); // මොඩලය අක්‍රිය වූ විට පන්තිය ඉවත් කිරීම
+        modalContent.classList.remove('scale-100', 'opacity-100');
+        modalContent.classList.add('scale-95', 'opacity-0');
         
-        // Modal එකේ අන්තර්ගතය render කරන ශ්‍රිතයකි.
-        const renderGameModal = () => {
-            const modalContainer = document.getElementById('game-modal-container');
-            const modalContent = document.getElementById('game-modal-content');
+        setTimeout(() => {
+            modalContainer.classList.add('hidden');
+            navigate('scoreboard', finalScoreValue);
+        }, 300);
+    };
 
-            // අන්තර්ගතය ජනනය කිරීම
-            const expressionItemButtons = expressionItems.map((item, index) => `
-                <button
-                    class="bg-white text-blue-800 text-xl sm:text-2xl font-bold rounded-xl shadow-md hover:bg-gray-100 transition-colors pop-in w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center"
-                    onclick="handleItemClick('${item}', ${index})"
-                >
-                    ${item}
+    // අයිතමයක් මත click කිරීම හැසිරවීම
+    const handleItemClick = (item, clickedIndex) => {
+        history.push(item);
+        expressionItems = expressionItems.filter((_, i) => i !== clickedIndex);
+        renderGameModal();
+    };
+
+    // අවසාන පියවර ආපසු ගැනීම
+    const handleUndo = () => {
+        if (history.length > 0) {
+            const lastItem = history.pop();
+            expressionItems.push(lastItem);
+            renderGameModal();
+        }
+    };
+
+    // පරිශීලකයාගේ ප්‍රකාශනය පරීක්ෂා කිරීම
+    const handleCheck = () => {
+        const expression = history.join('');
+        const result = evaluateExpression(expression);
+        const modalContent = document.getElementById('game-modal-content');
+
+        if (result === currentProblem.target) {
+            isCorrect = true;
+            resultMessage = 'නිවැරදියි! 🎉';
+            score += 10;
+            modalContent.style.animation = 'correct-pop 1s forwards';
+        } else {
+            isCorrect = false;
+            resultMessage = 'වැරදියි. 😥';
+            score = Math.max(0, score - 2);
+            modalContent.style.animation = 'incorrect-shake 0.5s forwards';
+        }
+
+        renderGameModal();
+        
+        // ගැටලුව අවසන් වූ පසු ඊලඟ ගැටලුවට හෝ ක්‍රීඩාව අවසන් කිරීමට ඉදිරියට යන්න
+        setTimeout(() => {
+            modalContent.style.animation = '';
+            problemsPlayed++;
+            generateNewGame();
+        }, 1000); // තත්පර 1ක කෙටි ප්‍රමාදයක් තබා ඇත
+    };
+
+    // Home Page එකේ HTML කේතය
+    const renderHomePage = () => {
+        return `
+            <div class="text-center p-4">
+                <h1 class="text-3xl sm:text-4xl font-extrabold text-blue-800 mb-4 animate-[fade-in-up_1s_ease-in-out]">ගණිත ක්‍රීඩාවට සාදරයෙන් පිළිගනිමු</h1>
+                <p class="text-sm sm:text-lg text-gray-700 mb-8 animate-[fade-in-up_1s_ease-in-out_0.2s_forwards] opacity-0">
+                    ඔබට දුන් අංක සහ ගණිත කර්ම භාවිතයෙන් නිවැරදි ප්‍රකාශනයක් සාදා ඉලක්කගත අගය ලබා ගත හැකිදැයි බලමු.
+                </p>
+                <button id="start-game-btn" class="bg-gradient-to-r from-purple-500 to-indigo-600 text-white text-base sm:text-xl font-bold py-3 px-8 rounded-full shadow-lg hover:from-purple-600 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105 animate-[pulse_2s_infinite]">
+                    ක්‍රීඩාව ආරම්භ කරන්න
                 </button>
-            `).join('');
+            </div>
+        `;
+    };
 
-            const historySpans = history.map((item) => `
-                <span class="bg-white text-purple-600 text-lg sm:text-xl font-bold px-3 py-1 sm:px-4 sm:py-2 rounded-lg shadow-md pop-in">
-                    ${item}
-                </span>
-            `).join('');
+    // Game Page එකේ HTML කේතය
+    const renderGamePage = () => {
+        return `
+            <div class="text-center p-4 fade-in-up">
+                <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-6">ක්‍රීඩා මට්ටම්</h2>
+                <p class="text-sm sm:text-base text-gray-600 mb-8">ඔබට කැමති මට්ටමක් තෝරා ක්‍රීඩා කළ හැක.</p>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                    ${[1, 2, 3, 4, 5, 6].map(level => `
+                        <button class="start-math-btn bg-blue-500 text-white text-lg sm:text-xl font-bold py-4 rounded-xl shadow-lg hover:bg-blue-600 transform hover:scale-105 transition-transform duration-300">
+                            මට්ටම ${level}
+                        </button>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    };
 
-            const resultMessageClass = `text-center font-bold text-md sm:text-xl mt-4 ${isCorrect ? 'text-green-600' : 'text-red-600'} pop-in`;
-            
-            modalContent.innerHTML = `
-                <button
-                    class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
-                    onclick="handleGameEnd(0)"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 sm:h-8 sm:w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
+    // Scoreboard Page එකේ HTML කේතය
+    const renderScoreboardPage = () => {
+        return `
+            <div class="text-center p-4 fade-in-up">
+                <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-6">ලකුණු පුවරුව</h2>
+                <p class="text-lg sm:text-xl text-gray-600 mb-4">ඔබගේ අවසන් ලකුණු:</p>
+                <div class="text-4xl sm:text-6xl font-extrabold text-blue-600 mb-8 animate-[pulse_1s_ease-in-out]">${finalScore}</div>
+                <button id="play-again-btn" class="bg-purple-500 text-white text-base sm:text-lg font-bold py-3 px-8 rounded-full shadow-lg hover:bg-purple-600 transform hover:scale-105 transition-transform duration-300">
+                    නැවත ක්‍රීඩා කරන්න
                 </button>
+            </div>
+        `;
+    };
+    
+    // Modal එකේ අන්තර්ගතය render කරන ශ්‍රිතයකි.
+    const renderGameModal = () => {
+        const modalContainer = document.getElementById('game-modal-container');
+        const modalContent = document.getElementById('game-modal-content');
 
-                <h2 class="text-2xl sm:text-3xl font-extrabold text-blue-800 mb-2 text-center">ගණිත ප්‍රශ්නය</h2>
-                <p class="text-sm sm:text-lg font-bold text-gray-700 mb-4 text-center">ලකුණු: ${score}</p>
-                <div class="flex flex-col items-center p-4 bg-gray-100 rounded-2xl mb-6 shadow-inner w-full">
-                    <p class="text-lg sm:text-xl font-semibold text-gray-800 text-center">
-                        ඉලක්කය: <span class="text-2xl sm:text-3xl font-extrabold text-purple-600">${currentProblem.target}</span>
-                    </p>
-                </div>
+        // අන්තර්ගතය ජනනය කිරීම
+        const expressionItemButtons = expressionItems.map((item, index) => `
+            <button
+                class="bg-white text-blue-800 text-xl sm:text-2xl font-bold rounded-xl shadow-md hover:bg-gray-100 transition-colors pop-in w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center"
+                onclick="handleItemClick('${item}', ${index})"
+            >
+                ${item}
+            </button>
+        `).join('');
 
-                <div class="w-full flex flex-wrap justify-center gap-2 sm:gap-4 p-4 bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl mb-6">
-                    ${expressionItemButtons}
-                </div>
+        const historySpans = history.map((item) => `
+            <span class="bg-white text-purple-600 text-lg sm:text-xl font-bold px-3 py-1 sm:px-4 sm:py-2 rounded-lg shadow-md pop-in">
+                ${item}
+            </span>
+        `).join('');
 
-                <div class="w-full h-20 sm:h-24 bg-gray-200 border-2 border-gray-300 rounded-lg flex flex-wrap justify-center items-center gap-2 p-2 mb-6">
-                    ${historySpans}
-                </div>
+        const resultMessageClass = `text-center font-bold text-md sm:text-xl mt-4 ${isCorrect ? 'text-green-600' : 'text-red-600'} pop-in`;
+        
+        modalContent.innerHTML = `
+            <button
+                class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+                onclick="handleGameEnd(0)"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 sm:h-8 sm:w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
 
-                <div class="flex justify-between w-full gap-4">
-                    <button class="btn-game bg-gray-500 hover:bg-gray-600" onclick="handleUndo()" ${history.length === 0 ? 'disabled' : ''}>
-                        ආපසු ගන්න
-                    </button>
-                    <button class="btn-game bg-green-500 hover:bg-green-600" onclick="handleCheck()">
-                        පරීක්ෂා කරන්න
-                    </button>
-                </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-blue-800 mb-2 text-center">ගණිත ප්‍රශ්නය</h2>
+            <p class="text-sm sm:text-lg font-bold text-gray-700 mb-4 text-center">ලකුණු: ${score}</p>
+            <div class="flex flex-col items-center p-4 bg-gray-100 rounded-2xl mb-6 shadow-inner w-full">
+                <p class="text-lg sm:text-xl font-semibold text-gray-800 text-center">
+                    ඉලක්කය: <span class="text-2xl sm:text-3xl font-extrabold text-purple-600">${currentProblem.target}</span>
+                </p>
+            </div>
 
-                ${resultMessage ? `<p class="${resultMessageClass}">${resultMessage}</p>` : ''}
-            `;
+            <div class="w-full flex flex-wrap justify-center gap-2 sm:gap-4 p-4 bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl mb-6">
+                ${expressionItemButtons}
+            </div>
 
-            // මොඩල් එක දර්ශනය කිරීම සහ සජීවිකරණය (animation) කිරීම
-            document.body.classList.add('is-modal-active'); // මොඩලය ක්‍රියාත්මක වූ විට පන්තිය එකතු කිරීම
-            modalContainer.classList.remove('hidden');
-            setTimeout(() => {
-                modalContainer.classList.add('flex');
-                modalContent.classList.remove('scale-95', 'opacity-0');
-                modalContent.classList.add('scale-100', 'opacity-100');
-            }, 10);
-        };
+            <div class="w-full h-20 sm:h-24 bg-gray-200 border-2 border-gray-300 rounded-lg flex flex-wrap justify-center items-center gap-2 p-2 mb-6">
+                ${historySpans}
+            </div>
 
-        // පිටුව render කරන ප්‍රධාන ශ්‍රිතය
-        const renderPage = () => {
-            const contentDiv = document.getElementById('content');
-            contentDiv.classList.add('opacity-0');
+            <div class="flex justify-between w-full gap-4">
+                <button class="btn-game bg-gray-500 hover:bg-gray-600" onclick="handleUndo()" ${history.length === 0 ? 'disabled' : ''}>
+                    ආපසු ගන්න
+                </button>
+                <button class="btn-game bg-green-500 hover:bg-green-600" onclick="handleCheck()">
+                    පරීක්ෂා කරන්න
+                </button>
+            </div>
 
-            setTimeout(() => {
-                switch(currentPage) {
-                    case 'home':
-                        contentDiv.innerHTML = renderHomePage();
-                        document.getElementById('start-game-btn').addEventListener('click', () => navigate('game'));
-                        break;
-                    case 'game':
-                        contentDiv.innerHTML = renderGamePage();
-                        document.querySelectorAll('.start-math-btn').forEach(btn => {
-                            btn.addEventListener('click', () => {
-                                score = 0;
-                                problemsPlayed = 0;
-                                generateNewGame();
-                            });
+            ${resultMessage ? `<p class="${resultMessageClass}">${resultMessage}</p>` : ''}
+        `;
+
+        // මොඩල් එක දර්ශනය කිරීම සහ සජීවිකරණය (animation) කිරීම
+        document.body.classList.add('is-modal-active'); // මොඩලය ක්‍රියාත්මක වූ විට පන්තිය එකතු කිරීම
+        modalContainer.classList.remove('hidden');
+        setTimeout(() => {
+            modalContainer.classList.add('flex');
+            modalContent.classList.remove('scale-95', 'opacity-0');
+            modalContent.classList.add('scale-100', 'opacity-100');
+        }, 10);
+    };
+
+    // පිටුව render කරන ප්‍රධාන ශ්‍රිතය
+    const renderPage = () => {
+        const contentDiv = document.getElementById('content');
+        contentDiv.classList.add('opacity-0');
+
+        setTimeout(() => {
+            switch(currentPage) {
+                case 'home':
+                    contentDiv.innerHTML = renderHomePage();
+                    document.getElementById('start-game-btn').addEventListener('click', () => navigate('game'));
+                    break;
+                case 'game':
+                    contentDiv.innerHTML = renderGamePage();
+                    document.querySelectorAll('.start-math-btn').forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            score = 0;
+                            problemsPlayed = 0;
+                            generateNewGame();
                         });
-                        break;
-                    case 'scoreboard':
-                        contentDiv.innerHTML = renderScoreboardPage();
-                        document.getElementById('play-again-btn').addEventListener('click', () => navigate('game'));
-                        break;
-                }
-                contentDiv.classList.remove('opacity-0');
-            }, 300);
-        };
+                    });
+                    break;
+                case 'scoreboard':
+                    contentDiv.innerHTML = renderScoreboardPage();
+                    document.getElementById('play-again-btn').addEventListener('click', () => navigate('game'));
+                    break;
+            }
+            contentDiv.classList.remove('opacity-0');
+        }, 300);
+    };
 
-        // වෙබ් අඩවිය load වූ විට ආරම්භ කරන ශ්‍රිතය
-        window.onload = function() {
-            // බුබුළු ජනනය කිරීම
-            generateBubbles();
+    // වෙබ් අඩවිය load වූ විට ආරම්භ කරන ශ්‍රිතය
+    window.onload = function() {
+        // බුබුළු ජනනය කිරීම
+        generateBubbles();
 
-            // සංචාලන බොත්තම් වලට event listeners එකතු කිරීම
-            document.getElementById('nav-home').addEventListener('click', () => navigate('home'));
-            document.getElementById('nav-game').addEventListener('click', () => navigate('game'));
-            document.getElementById('nav-scoreboard').addEventListener('click', () => navigate('scoreboard'));
+        // සංචාලන බොත්තම් වලට event listeners එකතු කිරීම
+        document.getElementById('nav-home').addEventListener('click', () => navigate('home'));
+        document.getElementById('nav-game').addEventListener('click', () => navigate('game'));
+        document.getElementById('nav-scoreboard').addEventListener('click', () => navigate('scoreboard'));
 
-            // මුල් පිටුව render කිරීම
-            navigate('home');
-        };
-    </script>
+        // මුල් පිටුව render කිරීම
+        navigate('home');
+    };
+</script>
+
 </body>
 </html>
