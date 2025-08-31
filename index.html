@@ -103,7 +103,7 @@
 </head>
 <body class="bg-gray-100 font-sans antialiased">
     <div class="bubble-container" id="bubble-container">
-        </div>
+    </div>
     <div id="app-container" class="min-h-screen flex items-center justify-center p-4 sm:p-8 relative z-10">
         <div class="w-full max-w-2xl main-card rounded-3xl shadow-2xl p-6 sm:p-10 relative overflow-hidden">
             <nav class="flex justify-center space-x-4 mb-8">
@@ -119,7 +119,7 @@
             </nav>
 
             <div id="content" class="fade-in-up">
-                </div>
+            </div>
         </div>
     </div>
     <div id="game-modal-container" class="fixed inset-0 hidden items-center justify-center z-50 modal-overlay p-4 sm:p-8">
@@ -246,20 +246,17 @@
             const modalContainer = document.getElementById('game-modal-container');
             const modalContent = document.getElementById('game-modal-content');
 
-            // --- AppsGeyser දැන්වීම් කේතය මෙතනින් ආරම්භ වේ ---
-            // මෙම කොටස ක්‍රීඩාව අවසන් වූ පසු දැන්වීමක් පෙන්වීමට යොදාගනී.
-            console.log("ක්‍රීඩාව අවසන් වී දැන්වීම පෙන්වීමට උත්සාහ කරයි.");
-            if (typeof appsgeyser !== 'undefined' && appsgeyser !== null) {
+            // JavaScript interface එක හරහා Android app එකට ad එකක් පෙන්වීමට කතා කිරීම
+            if (typeof Android !== 'undefined' && Android !== null) {
                 try {
-                    appsgeyser.showAdMobInterstitialAd();
-                    console.log("AppsGeyser වෙත දැන්වීම පෙන්වීමට සංඥාව යැවීය.");
+                    Android.showAd();
+                    console.log("Android JavaScript Interface වෙත දැන්වීම පෙන්වීමට සංඥාව යැවීය.");
                 } catch (error) {
                     console.error("දැන්වීම පෙන්වීමට උත්සාහ කිරීමේදී දෝෂයක් ඇති විය:", error);
                 }
             } else {
-                console.warn("AppsGeyser JavaScript Interface එක හඳුනාගත නොහැක. සාමාන්‍ය බ්‍රවුසරයක දෝෂයක් නැත.");
+                console.warn("Android JavaScript Interface එක හඳුනාගත නොහැක. සාමාන්‍ය බ්‍රවුසරයක දෝෂයක් නැත.");
             }
-            // --- AppsGeyser දැන්වීම් කේතය මෙතනින් අවසන් වේ ---
 
             document.body.classList.remove('is-modal-active'); // මොඩලය අක්‍රිය වූ විට පන්තිය ඉවත් කිරීම
             modalContent.classList.remove('scale-100', 'opacity-100');
