@@ -233,27 +233,29 @@
             const modalContainer = document.getElementById('game-modal-container');
             const modalContent = document.getElementById('game-modal-content');
 
-            if (typeof Android !== 'undefined' && Android !== null) {
-                console.log("දැන්වීම පෙන්වීමට පෙර තත්පර 5ක ප්‍රමාදයක් ආරම්භ වේ.");
-                setTimeout(() => {
-                    try {
-                        // ⚠️ මෙහි `showRewardedAd()` ලෙස නිවැරදි කර ඇත.
-                        Android.showRewardedAd();
-                        console.log("Android JavaScript Interface වෙත දැන්වීම පෙන්වීමට සංඥාව යැවීය.");
-                    } catch (error) {
-                        console.error("දැන්වීම පෙන්වීමට උත්සාහ කිරීමේදී දෝෂයක් ඇති විය:", error);
-                    }
-                }, 5000); // තත්පර 5ක ප්‍රමාදය
-            } else {
-                console.warn("Android JavaScript Interface එක හඳුනාගත නොහැක. සාමාන්‍ය බ්‍රවුසරයක දෝෂයක් නැත.");
-            }
-
             document.body.classList.remove('is-modal-active');
             modalContent.classList.remove('scale-100', 'opacity-100');
             modalContent.classList.add('scale-95', 'opacity-0');
 
             setTimeout(() => {
                 modalContainer.classList.add('hidden');
+
+                // සෑම මට්ටම් 3කට වරක් Interstitial ad එකක් පෙන්වන්න.
+                if (problemsPlayed > 0 && problemsPlayed % 3 === 0) {
+                    console.log("මට්ටම් 3ක් අවසන්. Interstitial ad පෙන්වීමට සූදානම්.");
+                    if (typeof Android !== 'undefined' && Android !== null) {
+                        try {
+                            Android.showInterstitialAd();
+                            console.log("Android JavaScript Interface වෙත Interstitial ad පෙන්වීමට සංඥාව යැවීය.");
+                        } catch (error) {
+                            console.error("Interstitial ad පෙන්වීමට උත්සාහ කිරීමේදී දෝෂයක් ඇති විය:", error);
+                        }
+                    } else {
+                        console.warn("Android JavaScript Interface එක හඳුනාගත නොහැක. සාමාන්‍ය බ්‍රවුසරයක දෝෂයක් නැත.");
+                    }
+                }
+                
+                // අවසන් වූ පසු ලකුණු පුවරුවට යන්න
                 navigate('scoreboard', finalScoreValue);
             }, 300);
         };
@@ -293,12 +295,35 @@
             }
 
             renderGameModal();
+            
             setTimeout(() => {
                 modalContent.style.animation = '';
                 problemsPlayed++;
-                generateNewGame();
+                
+                // ක්‍රීඩාව අවසන් නම් පමණක් handleGameEnd ශ්‍රිතය අමතන්න
+                if (problemsPlayed >= totalProblems) {
+                    handleGameEnd(score);
+                } else {
+                    // ක්‍රීඩාව අවසන් නැත්නම්, ඊළඟ ප්‍රශ්නයට යන්න
+                    generateNewGame();
+                }
+
             }, 1000);
         };
+
+        // Rewarded Ad එක පෙන්වන ශ්‍රිතය
+        const showRewardedAd = () => {
+            if (typeof Android !== 'undefined' && Android !== null) {
+                try {
+                    Android.showRewardedAd();
+                    console.log("Android JavaScript Interface වෙත Rewarded ad පෙන්වීමට සංඥාව යැවීය.");
+                } catch (error) {
+                    console.error("Rewarded ad පෙන්වීමට උත්සාහ කිරීමේදී දෝෂයක් ඇති විය:", error);
+                }
+            } else {
+                console.warn("Android JavaScript Interface එක හඳුනාගත නොහැක. සාමාන්‍ය බ්‍රවුසරයක දෝෂයක් නැත.");
+            }
+        }
 
         // Home Page එකේ HTML කේතය
         const renderHomePage = () => {
@@ -368,7 +393,7 @@
             modalContent.innerHTML = `
                 <button
                     class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
-                    onclick="handleGameEnd(0)"
+                    onclick="handleGameEnd(score)"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 sm:h-8 sm:w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -396,6 +421,15 @@
                     </button>
                 </div>
                 ${resultMessage ? `<p class="${resultMessageClass}">${resultMessage}</p>` : ''}
+                ${isCorrect ? `<div class="mt-6 text-center">
+                    <p class="text-base sm:text-lg font-bold text-gray-700 mb-2">ඔබේ ලකුණු දෙගුණ කර ගන්න!</p>
+                    <button class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded-full shadow-lg transform hover:scale-105 transition-transform duration-300" onclick="showRewardedAd()">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline-block mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.173l-4.24-4.24a1 1 0 00-1.414 1.414L13.338 12l-4.24 4.24a1 1 0 001.414 1.414l4.24-4.24a1 1 0 000-1.414z" />
+                        </svg>
+                        වීඩියෝවක් බලන්න
+                    </button>
+                </div>` : ''}
             `;
             
             // මොඩල් එක දර්ශනය කිරීම සහ සජීවිකරණය (animation) කිරීම
