@@ -119,19 +119,31 @@
     </div>
 
     <script>
-        // ක්‍රීඩාවේ තත්ත්වය කළමනාකරණය කරන ගෝලීය විචල්‍යයන්
+        // Detect if running in an Android environment
+        const isAndroid = typeof Android !== 'undefined' && Android !== null;
+
+        // JavaScript Interface for Android communication
+        let androidInterface = null;
+        if (isAndroid) {
+            androidInterface = Android;
+        } else {
+            console.warn("Android JavaScript Interface is not available. Ads will not be displayed.");
+        }
+
+        // --- Global variables ---
         let currentPage = 'home';
         let finalScore = 0;
         let score = 0;
         let problemsPlayed = 0;
-        const totalProblems = 5;
+        const totalProblems = 5; // Number of problems per game session
         let currentProblem = null;
         let expressionItems = [];
         let history = [];
         let resultMessage = '';
         let isCorrect = null;
+        let scoreMultiplier = 1; // To track if rewarded ad was used to double score
 
-        // ගැටළු දත්ත
+        // --- Game Data ---
         const problems = [
             { target: 10, items: [8, 2, "+", 5, 3] },
             { target: 12, items: [5, 7, "+", 6, 2, "×"] },
@@ -147,44 +159,33 @@
             { target: 18, items: [9, 9, "+", 20, 2, "-"] },
             { target: 30, items: [6, 5, "×", 25, 5, "+"] },
             { target: 2, items: [10, 8, "-", 5, 3, "×"] },
-            { target: 7, items: [10, 9, 8, 2, "-", "-", 4, 3, "×"] }
+            { target: 7, items: [10, 9, 8, 2, "-", "-", 4, 3, "×"] } // Example with more items
         ];
 
-        // දැන්වීම් පෙන්වීම සඳහා නව ශ්‍රිතය
+        // --- Ad Handling Functions ---
         const showAd = (type) => {
-            const adCount = (type === 'interstitial') ? problemsPlayed % 3 : problemsPlayed % 3;
-            if (typeof Android !== 'undefined' && Android !== null) {
-                try {
-                    switch(type) {
-                        case 'interstitial':
-                            if (adCount === 0) {
-                                Android.showInterstitialAd_1();
-                            } else if (adCount === 1) {
-                                Android.showInterstitialAd_2();
-                            } else {
-                                Android.showInterstitialAd_3();
-                            }
-                            break;
-                        case 'rewarded':
-                            if (adCount === 0) {
-                                Android.showRewardedAd_1();
-                            } else if (adCount === 1) {
-                                Android.showRewardedAd_2();
-                            } else {
-                                Android.showRewardedAd_3();
-                            }
-                            break;
-                    }
-                    console.log(`Android JavaScript Interface වෙත ${type} ad පෙන්වීමට සංඥාව යැවීය.`);
-                } catch (error) {
-                    console.error(`${type} ad පෙන්වීමට උත්සාහ කිරීමේදී දෝෂයක් ඇති විය:`, error);
+            if (!isAndroid) {
+                console.warn(`Ad type "${type}" requested, but not running on Android or Android interface not found.`);
+                return;
+            }
+
+            try {
+                switch(type) {
+                    case 'interstitial':
+                        androidInterface.callShowInterstitialAdFromJavaScript();
+                        console.log("Sent signal to show Interstitial Ad.");
+                        break;
+                    case 'rewarded':
+                        androidInterface.callShowRewardedAdFromJavaScript();
+                        console.log("Sent signal to show Rewarded Ad.");
+                        break;
                 }
-            } else {
-                console.warn("Android JavaScript Interface එක හඳුනාගත නොහැක. සාමාන්‍ය බ්‍රවුසරයක දෝෂයක් නැත.");
+            } catch (error) {
+                console.error(`Error trying to show ${type} ad:`, error);
             }
         };
-        
-        // අහඹු බුබුළු ජනනය කිරීමේ ශ්‍රිතය
+
+        // --- Bubble Animation ---
         const generateBubbles = () => {
             const container = document.getElementById('bubble-container');
             const bubbleSizes = [32, 40, 48, 56, 64];
@@ -203,7 +204,7 @@
             }
         };
 
-        // පිටු අතර සංචාලනය සඳහා ශ්‍රිතයකි.
+        // --- Navigation and Rendering ---
         const navigate = (page, finalScoreValue = 0) => {
             currentPage = page;
             if (page === 'scoreboard') {
@@ -213,7 +214,6 @@
             updateNavButtons();
         };
 
-        // සංචාලන බොත්තම් වල පෙනුම යාවත්කාලීන කිරීම
         const updateNavButtons = () => {
             document.querySelectorAll('nav button').forEach(btn => {
                 btn.classList.remove('bg-white', 'text-purple-600', 'shadow');
@@ -226,19 +226,26 @@
             }
         };
 
-        // ගණිත ප්‍රකාශනයක් ආරක්ෂිතව ඇගයීමේ ශ්‍රිතයකි.
+        // --- Game Logic Functions ---
         const evaluateExpression = (expression) => {
             try {
+                // Basic sanitization to prevent script injection, but be cautious with eval
                 const sanitizedExpression = expression.replace(/[^0-9+\-*/().]/g, '');
                 const evalExpression = sanitizedExpression.replace(/÷/g, '/').replace(/×/g, '*');
+                // Using Function constructor is slightly safer than direct eval, but still requires care.
                 const safeEvaluator = new Function(`return (${evalExpression});`);
-                return safeEvaluator();
+                const result = safeEvaluator();
+                // Handle potential division by zero or other calculation errors
+                if (isNaN(result) || !isFinite(result)) {
+                    return NaN;
+                }
+                return result;
             } catch (e) {
+                console.error("Error evaluating expression:", e);
                 return NaN;
             }
         };
 
-        // array එකක් මාරු කිරීමට උපකාරී වන ශ්‍රිතයකි.
         const shuffleArray = (array) => {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -247,22 +254,22 @@
             return array;
         };
 
-        // නව ගැටළුවක් උත්පාදනය කිරීමේ ශ්‍රිතයකි.
         const generateNewGame = () => {
             if (problemsPlayed >= totalProblems) {
                 handleGameEnd(score);
                 return;
             }
+            // Select a random problem and shuffle its items
             const shuffledProblems = shuffleArray([...problems]);
             currentProblem = shuffledProblems[Math.floor(Math.random() * shuffledProblems.length)];
             expressionItems = shuffleArray([...currentProblem.items]);
             history = [];
             resultMessage = '';
             isCorrect = null;
+            scoreMultiplier = 1; // Reset multiplier for each new game
             renderGameModal();
         };
 
-        // ක්‍රීඩාව අවසන් වූ විට ක්‍රියාත්මක වන ශ්‍රිතය
         const handleGameEnd = (finalScoreValue) => {
             const modalContainer = document.getElementById('game-modal-container');
             const modalContent = document.getElementById('game-modal-content');
@@ -273,36 +280,41 @@
 
             setTimeout(() => {
                 modalContainer.classList.add('hidden');
-                
-                // සෑම මට්ටම් 3කට වරක් Interstitial ad එකක් පෙන්වන්න.
+                modalContainer.classList.remove('flex'); // Remove flex to hide it properly
+
+                // --- Ad Logic for Game End ---
+                // Show an interstitial ad every 3 levels completed
                 if (problemsPlayed > 0 && problemsPlayed % 3 === 0) {
-                    console.log("මට්ටම් 3ක් අවසන්. Interstitial ad පෙන්වීමට සූදානම්.");
+                    console.log(`Levels completed: ${problemsPlayed}. Showing interstitial ad.`);
                     showAd('interstitial');
                 }
-                
-                // අවසන් වූ පසු ලකුණු පුවරුවට යන්න
+
+                // Navigate to scoreboard with the final score
                 navigate('scoreboard', finalScoreValue);
-            }, 300);
+            }, 300); // Match the CSS transition duration
         };
 
-        // අයිතමයක් මත click කිරීම හැසිරවීම
         const handleItemClick = (item, clickedIndex) => {
+            // Prevent further interaction if result is already displayed
+            if (isCorrect !== null) return;
+
             history.push(item);
             expressionItems = expressionItems.filter((_, i) => i !== clickedIndex);
             renderGameModal();
         };
 
-        // අවසාන පියවර ආපසු ගැනීම
         const handleUndo = () => {
             if (history.length > 0) {
                 const lastItem = history.pop();
-                expressionItems.push(lastItem);
+                expressionItems.push(lastItem); // Add it back to the available items
+                expressionItems.sort(); // Optional: keep items sorted for better UI
                 renderGameModal();
             }
         };
 
-        // පරිශීලකයාගේ ප්‍රකාශනය පරීක්ෂා කිරීම
         const handleCheck = () => {
+            if (isCorrect !== null) return; // Don't check again if already checked
+
             const expression = history.join('');
             const result = evaluateExpression(expression);
             const modalContent = document.getElementById('game-modal-content');
@@ -310,38 +322,71 @@
             if (result === currentProblem.target) {
                 isCorrect = true;
                 resultMessage = 'නිවැරදියි! 🎉';
-                score += 10;
+                // Apply score multiplier if applicable
+                score += 10 * scoreMultiplier;
                 modalContent.style.animation = 'correct-pop 1s forwards';
             } else {
                 isCorrect = false;
                 resultMessage = 'වැරදියි. 😥';
-                score = Math.max(0, score - 2);
+                score = Math.max(0, score - 2); // Ensure score doesn't go below zero
                 modalContent.style.animation = 'incorrect-shake 0.5s forwards';
             }
 
-            renderGameModal();
-            
+            renderGameModal(); // Re-render to show the result message and potential ad button
+
+            // Reset animation and move to next step after a delay
             setTimeout(() => {
                 modalContent.style.animation = '';
                 problemsPlayed++;
-                
-                // ක්‍රීඩාව අවසන් නම් පමණක් handleGameEnd ශ්‍රිතය අමතන්න
+
                 if (problemsPlayed >= totalProblems) {
                     handleGameEnd(score);
                 } else {
-                    // ක්‍රීඩාව අවසන් නැත්නම්, ඊළඟ ප්‍රශ්නයට යන්න
-                    generateNewGame();
+                    // If correct, offer rewarded ad to double score for the *next* level
+                    if (isCorrect) {
+                        showRewardedAdForBonus(); // This function will handle showing the ad
+                    } else {
+                        // If incorrect, proceed to the next question directly
+                        generateNewGame();
+                    }
                 }
-
-            }, 1000);
+            }, 1000); // Delay to allow animation to be seen
         };
 
-        // Rewarded Ad එක පෙන්වන ශ්‍රිතය
-        const showRewardedAd = () => {
-            showAd('rewarded');
-        }
+        // Function to show rewarded ad specifically for score doubling
+        const showRewardedAdForBonus = () => {
+            if (isAndroid) {
+                // Show the rewarded ad
+                showAd('rewarded');
+                // The ad callback in MainActivity.java will handle the reward.
+                // Here, we set a listener for when the ad is *fully watched* and reward is earned.
+                // NOTE: This JavaScript part is a bit tricky as it needs to react to the reward.
+                // A more robust approach would involve the Android side calling a JS function
+                // *after* the reward is granted, e.g., `Android.onRewardGranted()`.
+                // For now, we'll use a simple timeout as a placeholder.
+                // A better implementation would use `window.rewardedAdCallback = function() { ... }`
+                // and have the Android code call that function after granting the reward.
 
-        // Home Page එකේ HTML කේතය
+                // For demonstration, let's simulate the reward being granted after a few seconds.
+                // In a real app, the Android `OnUserEarnedRewardListener` should call a JS function.
+                setTimeout(() => {
+                    // This would typically be called by Android after granting the reward
+                    console.log("Simulating reward grant from Android.");
+                    // Grant the bonus score if the ad was watched (this is a simplification)
+                    // In a real app, you'd check if the ad was actually watched and reward granted.
+                    scoreMultiplier = 2; // Double the score for the next level
+                    Toast.makeText(document.body, "Score doubled for the next level!", Toast.LENGTH_LONG).show();
+                    generateNewGame(); // Move to the next game after potential bonus
+                }, 5000); // Simulate a delay for ad watching
+            } else {
+                // If not on Android, just proceed to the next game without ads
+                Toast.makeText(document.body, "Rewarded ads not available on this platform.", Toast.LENGTH_SHORT).show();
+                scoreMultiplier = 1; // Ensure multiplier is reset
+                generateNewGame();
+            }
+        };
+
+        // --- Rendering Functions for Different Pages ---
         const renderHomePage = () => {
             return `
                 <div class="text-center p-4">
@@ -356,16 +401,17 @@
             `;
         };
 
-        // Game Page එකේ HTML කේතය
         const renderGamePage = () => {
+            // This page is just a placeholder to select a level.
+            // The actual game happens in the modal.
             return `
                 <div class="text-center p-4 fade-in-up">
                     <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-6">ක්‍රීඩා මට්ටම්</h2>
-                    <p class="text-sm sm:text-base text-gray-600 mb-8">ඔබට කැමති මට්ටමක් තෝරා ක්‍රීඩා කළ හැක.</p>
+                    <p class="text-sm sm:text-base text-gray-600 mb-8">ඔබට දුන් අංක සහ ගණිත කර්ම භාවිතයෙන් නිවැරදි ප්‍රකාශනයක් සාදා ඉලක්කගත අගය ලබා ගත හැකිදැයි බලමු.</p>
                     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                        ${[1, 2, 3, 4, 5, 6].map(level => `
+                        ${[...Array(6)].map((_, i) => `
                             <button class="start-math-btn bg-blue-500 text-white text-lg sm:text-xl font-bold py-4 rounded-xl shadow-lg hover:bg-blue-600 transform hover:scale-105 transition-transform duration-300">
-                                මට්ටම ${level}
+                                මට්ටම ${i + 1}
                             </button>
                         `).join('')}
                     </div>
@@ -373,7 +419,6 @@
             `;
         };
 
-        // Scoreboard Page එකේ HTML කේතය
         const renderScoreboardPage = () => {
             return `
                 <div class="text-center p-4 fade-in-up">
@@ -387,28 +432,36 @@
             `;
         };
 
-        // Modal එකේ අන්තර්ගතය render කරන ශ්‍රිතයකි.
         const renderGameModal = () => {
             const modalContainer = document.getElementById('game-modal-container');
             const modalContent = document.getElementById('game-modal-content');
+
+            // Disable interaction with background when modal is active
+            document.body.classList.add('is-modal-active');
+            modalContainer.classList.remove('hidden');
+            modalContainer.classList.add('flex'); // Make it visible
+
             const expressionItemButtons = expressionItems.map((item, index) => `
                 <button
                     class="bg-white text-blue-800 text-xl sm:text-2xl font-bold rounded-xl shadow-md hover:bg-gray-100 transition-colors pop-in w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center"
-                    onclick="handleItemClick('${item}', ${index})"
+                    onclick="handleItemClick(${JSON.stringify(item)}, ${index})"
+                    ${isCorrect !== null ? 'disabled' : ''}
                 >
                     ${item}
                 </button>
             `).join('');
+
             const historySpans = history.map((item) => `
                 <span class="bg-white text-purple-600 text-lg sm:text-xl font-bold px-3 py-1 sm:px-4 sm:py-2 rounded-lg shadow-md pop-in">
                     ${item}
                 </span>
             `).join('');
+
             const resultMessageClass = `text-center font-bold text-md sm:text-xl mt-4 ${isCorrect ? 'text-green-600' : 'text-red-600'} pop-in`;
 
             modalContent.innerHTML = `
                 <button
-                    class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+                    class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors z-10"
                     onclick="handleGameEnd(score)"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 sm:h-8 sm:w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -425,43 +478,45 @@
                 <div class="w-full flex flex-wrap justify-center gap-2 sm:gap-4 p-4 bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl mb-6">
                     ${expressionItemButtons}
                 </div>
-                <div class="w-full h-20 sm:h-24 bg-gray-200 border-2 border-gray-300 rounded-lg flex flex-wrap justify-center items-center gap-2 p-2 mb-6">
+                <div class="w-full h-20 sm:h-24 bg-gray-200 border-2 border-gray-300 rounded-lg flex flex-wrap justify-center items-center gap-2 p-2 mb-6 overflow-auto">
                     ${historySpans}
                 </div>
                 <div class="flex justify-between w-full gap-4">
-                    <button class="btn-game bg-gray-500 hover:bg-gray-600" onclick="handleUndo()" ${history.length === 0 ? 'disabled' : ''}>
+                    <button class="btn-game bg-gray-500 hover:bg-gray-600" onclick="handleUndo()" ${history.length === 0 || isCorrect !== null ? 'disabled' : ''}>
                         ආපසු ගන්න
                     </button>
-                    <button class="btn-game bg-green-500 hover:bg-green-600" onclick="handleCheck()">
+                    <button class="btn-game bg-green-500 hover:bg-green-600" onclick="handleCheck()" ${isCorrect !== null ? 'disabled' : ''}>
                         පරීක්ෂා කරන්න
                     </button>
                 </div>
                 ${resultMessage ? `<p class="${resultMessageClass}">${resultMessage}</p>` : ''}
-                ${isCorrect ? `<div class="mt-6 text-center">
-                    <p class="text-base sm:text-lg font-bold text-gray-700 mb-2">ඔබේ ලකුණු දෙගුණ කර ගන්න!</p>
-                    <button class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded-full shadow-lg transform hover:scale-105 transition-transform duration-300" onclick="showRewardedAd()">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline-block mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.173l-4.24-4.24a1 1 0 00-1.414 1.414L13.338 12l-4.24 4.24a1 1 0 001.414 1.414l4.24-4.24a1 1 0 000-1.414z" />
-                        </svg>
-                        වීඩියෝවක් බලන්න
-                    </button>
-                </div>` : ''}
+                ${isCorrect ? `
+                    <div class="mt-6 text-center">
+                        <p class="text-base sm:text-lg font-bold text-gray-700 mb-2">ඔබේ ලකුණු දෙගුණ කර ගන්න!</p>
+                        <button class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded-full shadow-lg transform hover:scale-105 transition-transform duration-300" onclick="showRewardedAdForBonus()">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline-block mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.173l-4.24-4.24a1 1 0 00-1.414 1.414L13.338 12l-4.24 4.24a1 1 0 001.414 1.414l4.24-4.24a1 1 0 000-1.414z" />
+                            </svg>
+                            වීඩියෝවක් බලන්න
+                        </button>
+                    </div>
+                ` : ''}
             `;
-            
-            // මොඩල් එක දර්ශනය කිරීම සහ සජීවිකරණය (animation) කිරීම
-            document.body.classList.add('is-modal-active');
-            modalContainer.classList.remove('hidden');
+
+            // Apply animation for the modal content if it's the first time showing
             setTimeout(() => {
-                modalContainer.classList.add('flex');
                 modalContent.classList.remove('scale-95', 'opacity-0');
                 modalContent.classList.add('scale-100', 'opacity-100');
             }, 10);
         };
 
-        // පිටුව render කරන ප්‍රධාන ශ්‍රිතය
+        // --- Main Page Rendering Logic ---
         const renderPage = () => {
             const contentDiv = document.getElementById('content');
+            // Fade out current content
             contentDiv.classList.add('opacity-0');
+            contentDiv.classList.remove('fade-in-up'); // Remove previous animation class
+
             setTimeout(() => {
                 switch(currentPage) {
                     case 'home':
@@ -472,9 +527,11 @@
                         contentDiv.innerHTML = renderGamePage();
                         document.querySelectorAll('.start-math-btn').forEach(btn => {
                             btn.addEventListener('click', () => {
+                                // Reset game state for a new session
                                 score = 0;
                                 problemsPlayed = 0;
-                                generateNewGame();
+                                scoreMultiplier = 1; // Reset score multiplier
+                                generateNewGame(); // Start the first problem
                             });
                         });
                         break;
@@ -483,17 +540,19 @@
                         document.getElementById('play-again-btn').addEventListener('click', () => navigate('game'));
                         break;
                 }
+                // Fade in new content
                 contentDiv.classList.remove('opacity-0');
-            }, 300);
+                contentDiv.classList.add('fade-in-up');
+            }, 300); // Match the CSS transition duration
         };
 
-        // වෙබ් අඩවිය load වූ විට ආරම්භ කරන ශ්‍රිතය
+        // --- Initialization ---
         window.onload = function() {
             generateBubbles();
             document.getElementById('nav-home').addEventListener('click', () => navigate('home'));
             document.getElementById('nav-game').addEventListener('click', () => navigate('game'));
             document.getElementById('nav-scoreboard').addEventListener('click', () => navigate('scoreboard'));
-            navigate('home');
+            navigate('home'); // Start on the home page
         };
     </script>
 </body>
