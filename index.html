@@ -150,6 +150,40 @@
             { target: 7, items: [10, 9, 8, 2, "-", "-", 4, 3, "×"] }
         ];
 
+        // දැන්වීම් පෙන්වීම සඳහා නව ශ්‍රිතය
+        const showAd = (type) => {
+            const adCount = (type === 'interstitial') ? problemsPlayed % 3 : problemsPlayed % 3;
+            if (typeof Android !== 'undefined' && Android !== null) {
+                try {
+                    switch(type) {
+                        case 'interstitial':
+                            if (adCount === 0) {
+                                Android.showInterstitialAd_1();
+                            } else if (adCount === 1) {
+                                Android.showInterstitialAd_2();
+                            } else {
+                                Android.showInterstitialAd_3();
+                            }
+                            break;
+                        case 'rewarded':
+                            if (adCount === 0) {
+                                Android.showRewardedAd_1();
+                            } else if (adCount === 1) {
+                                Android.showRewardedAd_2();
+                            } else {
+                                Android.showRewardedAd_3();
+                            }
+                            break;
+                    }
+                    console.log(`Android JavaScript Interface වෙත ${type} ad පෙන්වීමට සංඥාව යැවීය.`);
+                } catch (error) {
+                    console.error(`${type} ad පෙන්වීමට උත්සාහ කිරීමේදී දෝෂයක් ඇති විය:`, error);
+                }
+            } else {
+                console.warn("Android JavaScript Interface එක හඳුනාගත නොහැක. සාමාන්‍ය බ්‍රවුසරයක දෝෂයක් නැත.");
+            }
+        };
+        
         // අහඹු බුබුළු ජනනය කිරීමේ ශ්‍රිතය
         const generateBubbles = () => {
             const container = document.getElementById('bubble-container');
@@ -239,20 +273,11 @@
 
             setTimeout(() => {
                 modalContainer.classList.add('hidden');
-
+                
                 // සෑම මට්ටම් 3කට වරක් Interstitial ad එකක් පෙන්වන්න.
                 if (problemsPlayed > 0 && problemsPlayed % 3 === 0) {
                     console.log("මට්ටම් 3ක් අවසන්. Interstitial ad පෙන්වීමට සූදානම්.");
-                    if (typeof Android !== 'undefined' && Android !== null) {
-                        try {
-                            Android.showInterstitialAd();
-                            console.log("Android JavaScript Interface වෙත Interstitial ad පෙන්වීමට සංඥාව යැවීය.");
-                        } catch (error) {
-                            console.error("Interstitial ad පෙන්වීමට උත්සාහ කිරීමේදී දෝෂයක් ඇති විය:", error);
-                        }
-                    } else {
-                        console.warn("Android JavaScript Interface එක හඳුනාගත නොහැක. සාමාන්‍ය බ්‍රවුසරයක දෝෂයක් නැත.");
-                    }
+                    showAd('interstitial');
                 }
                 
                 // අවසන් වූ පසු ලකුණු පුවරුවට යන්න
@@ -313,16 +338,7 @@
 
         // Rewarded Ad එක පෙන්වන ශ්‍රිතය
         const showRewardedAd = () => {
-            if (typeof Android !== 'undefined' && Android !== null) {
-                try {
-                    Android.showRewardedAd();
-                    console.log("Android JavaScript Interface වෙත Rewarded ad පෙන්වීමට සංඥාව යැවීය.");
-                } catch (error) {
-                    console.error("Rewarded ad පෙන්වීමට උත්සාහ කිරීමේදී දෝෂයක් ඇති විය:", error);
-                }
-            } else {
-                console.warn("Android JavaScript Interface එක හඳුනාගත නොහැක. සාමාන්‍ය බ්‍රවුසරයක දෝෂයක් නැත.");
-            }
+            showAd('rewarded');
         }
 
         // Home Page එකේ HTML කේතය
