@@ -52,6 +52,12 @@
             50% { transform: scale(1.05); }
         }
 
+        /* pop-in animation එක */
+        @keyframes pop-in {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
         /* බුබුළු සජීවිකරණය සඳහා CSS */
         .bubble-container {
             position: fixed;
@@ -99,6 +105,11 @@
         h1, h2 {
             text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
         }
+
+        /* pop-in animation සඳහා class */
+        .pop-in {
+            animation: pop-in 0.5s ease-out forwards;
+        }
     </style>
 </head>
 <body class="bg-gray-100 font-sans antialiased">
@@ -152,31 +163,40 @@
 
         // දැන්වීම් පෙන්වීම සඳහා නව ශ්‍රිතය
         const showAd = (type) => {
-            if (typeof Android !== 'undefined' && Android !== null) {
+            // Android JavaScript Interface එක හඳුනාගත නොහැකි නම්, කිසිවක් නොකරන්න
+            if (typeof Android === 'undefined' || Android === null) {
+                console.warn("Android JavaScript Interface එක හඳුනාගත නොහැක. Ad පෙන්වීම මඟ හැරේ.");
+                return;
+            }
+
+            const adCount = (type === 'interstitial') ? problemsPlayed % 3 : problemsPlayed % 3;
                 try {
                     switch(type) {
                         case 'interstitial':
-                            Android.showInterstitialAd();
+                            if (adCount === 0) {
+                                Android.showInterstitialAd_1();
+                            } else if (adCount === 1) {
+                                Android.showInterstitialAd_2();
+                            } else {
+                                Android.showInterstitialAd_3();
+                            }
                             break;
                         case 'rewarded':
-                            Android.showRewardedAd();
+                            if (adCount === 0) {
+                                Android.showRewardedAd_1();
+                            } else if (adCount === 1) {
+                                Android.showRewardedAd_2();
+                            } else {
+                                Android.showRewardedAd_3();
+                            }
                             break;
                     }
                     console.log(`Android JavaScript Interface වෙත ${type} ad පෙන්වීමට සංඥාව යැවීය.`);
                 } catch (error) {
                     console.error(`${type} ad පෙන්වීමට උත්සාහ කිරීමේදී දෝෂයක් ඇති විය:`, error);
                 }
-            } else {
-                console.warn("Android JavaScript Interface එක හඳුනාගත නොහැක. සාමාන්‍ය බ්‍රවුසරයක දෝෂයක් නැත.");
-            }
         };
-        
-        // Rewarded Ad එක නැරඹීමෙන් පසු ලකුණු යාවත්කාලීන කිරීමේ ශ්‍රිතය
-        function rewardUser(amount) {
-            score += amount;
-            renderGameModal(); // Update the score display in the modal
-        }
-
+       
         // අහඹු බුබුළු ජනනය කිරීමේ ශ්‍රිතය
         const generateBubbles = () => {
             const container = document.getElementById('bubble-container');
@@ -227,6 +247,7 @@
                 const safeEvaluator = new Function(`return (${evalExpression});`);
                 return safeEvaluator();
             } catch (e) {
+                console.error("Expression evaluation error:", e);
                 return NaN;
             }
         };
@@ -266,13 +287,13 @@
 
             setTimeout(() => {
                 modalContainer.classList.add('hidden');
-                
-                // සෑම මට්ටම් 5කට වරක් Interstitial ad එකක් පෙන්වන්න.
-                if (problemsPlayed > 0 && problemsPlayed % 5 === 0) {
-                    console.log("මට්ටම් 5ක් අවසන්. Interstitial ad පෙන්වීමට සූදානම්.");
+                
+                // සෑම මට්ටම් 3කට වරක් Interstitial ad එකක් පෙන්වන්න.
+                if (problemsPlayed > 0 && problemsPlayed % 3 === 0) {
+                    console.log("මට්ටම් 3ක් අවසන්. Interstitial ad පෙන්වීමට සූදානම්.");
                     showAd('interstitial');
                 }
-                
+                
                 // අවසන් වූ පසු ලකුණු පුවරුවට යන්න
                 navigate('scoreboard', finalScoreValue);
             }, 300);
@@ -313,11 +334,11 @@
             }
 
             renderGameModal();
-            
+            
             setTimeout(() => {
                 modalContent.style.animation = '';
                 problemsPlayed++;
-                
+                
                 // ක්‍රීඩාව අවසන් නම් පමණක් handleGameEnd ශ්‍රිතය අමතන්න
                 if (problemsPlayed >= totalProblems) {
                     handleGameEnd(score);
@@ -435,3 +456,59 @@
                     <button class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded-full shadow-lg transform hover:scale-105 transition-transform duration-300" onclick="showRewardedAd()">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline-block mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.173l-4.24-4.24a1 1 0 00-1.414 1.414L13.338 12l-4.24 4.24a1 1 0 001.414 1.414l4.24-4.24a1 1 0 000-1.414z" />
+                        </svg>
+                        වීඩියෝවක් බලන්න
+                    </button>
+                </div>` : ''}
+            `;
+            
+            // මොඩල් එක දර්ශනය කිරීම සහ සජීවිකරණය (animation) කිරීම
+            document.body.classList.add('is-modal-active');
+            modalContainer.classList.remove('hidden');
+            setTimeout(() => {
+                modalContainer.classList.add('flex');
+                modalContent.classList.remove('scale-95', 'opacity-0');
+                modalContent.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        };
+
+        // පිටුව render කරන ප්‍රධාන ශ්‍රිතය
+        const renderPage = () => {
+            const contentDiv = document.getElementById('content');
+            contentDiv.classList.add('opacity-0');
+            setTimeout(() => {
+                switch(currentPage) {
+                    case 'home':
+                        contentDiv.innerHTML = renderHomePage();
+                        document.getElementById('start-game-btn').addEventListener('click', () => navigate('game'));
+                        break;
+                    case 'game':
+                        contentDiv.innerHTML = renderGamePage();
+                        document.querySelectorAll('.start-math-btn').forEach(btn => {
+                            btn.addEventListener('click', () => {
+                                score = 0;
+                                problemsPlayed = 0;
+                                generateNewGame();
+                            });
+                        });
+                        break;
+                    case 'scoreboard':
+                        contentDiv.innerHTML = renderScoreboardPage();
+                        document.getElementById('play-again-btn').addEventListener('click', () => navigate('game'));
+                        break;
+                }
+                contentDiv.classList.remove('opacity-0');
+            }, 300);
+        };
+
+        // වෙබ් අඩවිය load වූ විට ආරම්භ කරන ශ්‍රිතය
+        window.onload = function() {
+            generateBubbles();
+            document.getElementById('nav-home').addEventListener('click', () => navigate('home'));
+            document.getElementById('nav-game').addEventListener('click', () => navigate('game'));
+            document.getElementById('nav-scoreboard').addEventListener('click', () => navigate('scoreboard'));
+            navigate('home');
+        };
+    </script>
+</body>
+</html>
