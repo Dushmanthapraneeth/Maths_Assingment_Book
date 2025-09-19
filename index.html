@@ -167,25 +167,19 @@
             margin-top: 24px;
         }
 
-        .ad-button {
+        .next-level-button {
+            background-color: #10b981; /* Green */
+            color: white;
             padding: 12px 24px;
             border-radius: 9999px;
             font-weight: 700;
             transition: all 0.3s ease;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-
-        .ad-button:hover {
+        .next-level-button:hover {
+            background-color: #059669;
             transform: translateY(-2px);
             box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
-        }
-
-        #next-level-button {
-            background-color: #10b981; /* Green */
-            color: white;
-        }
-        #next-level-button:hover {
-            background-color: #059669;
         }
     </style>
 </head>
@@ -209,17 +203,9 @@
             <h2 id="modal-title" class="text-3xl font-bold mb-4"></h2>
             <p id="modal-message" class="text-lg text-gray-700 mb-2"></p>
             <p id="modal-score" class="text-2xl font-bold text-gray-800 mb-4"></p>
-            <div class="button-group">
-                <button id="show-interstitial-ad" class="ad-button bg-blue-500 hover:bg-blue-600 text-white">
-                    දැන්වීමක් බලන්න
-                </button>
-                <button id="show-rewarded-ad" class="ad-button bg-purple-500 hover:bg-purple-600 text-white">
-                    ත්‍යාග සහිත දැන්වීමක් බලන්න
-                </button>
-                <button id="next-level-button" class="ad-button bg-green-500 hover:bg-green-600 text-white">
-                    ඊළඟ මට්ටම
-                </button>
-            </div>
+            <button id="next-level-button" class="next-level-button">
+                ඊළඟ මට්ටම
+            </button>
         </div>
     </div>
 
@@ -233,8 +219,6 @@
         const modalMessage = document.getElementById('modal-message');
         const modalScore = document.getElementById('modal-score');
         const nextLevelButton = document.getElementById('next-level-button');
-        const showInterstitialAdButton = document.getElementById('show-interstitial-ad');
-        const showRewardedAdButton = document.getElementById('show-rewarded-ad');
 
         // Game State Variables
         let firstCard = null;
@@ -242,7 +226,7 @@
         let matchesFound = 0;
         let totalScore = 0;
         let currentLevel = 0;
-        let rewardedAdWatched = false; // ත්‍යාග සහිත දැන්වීම නැරඹුවාද යන්න පරීක්ෂා කිරීමට
+        let interstitialAdCount = 0; // නව Interstitial Ad ගණන සඳහා state variable එක
 
         // 10 levels of game data
         const levels = [
@@ -370,8 +354,8 @@
             const currentPairs = levels[currentLevel];
             let items = [];
             currentPairs.forEach(p => {
-                items.push({ id: p.id, left: p.left, type: 'left' });
-                items.push({ id: p.id, right: p.right, type: 'right' });
+                items.push({ id: p.id, text: p.left, type: 'left' });
+                items.push({ id: p.id, text: p.right, type: 'right' });
             });
 
             const shuffledItems = shuffle(items);
@@ -433,7 +417,7 @@
             }
 
             if (matchesFound === levels[currentLevel].length) {
-                showNextLevelModal();
+                handleNextLevelAdLogic();
             }
         }
 
@@ -459,47 +443,49 @@
             [firstCard, lockBoard] = [null, false];
         }
 
+        function handleNextLevelAdLogic() {
+            // Interstitial Ads 3කට පසු Rewarded Ad එකක් පෙන්වයි
+            if (interstitialAdCount < 3) {
+                interstitialAdCount++;
+                showInterstitialAd();
+            } else {
+                interstitialAdCount = 0; // Rewarded Ad එකෙන් පසු ගණන නැවත 0 කරයි
+                showRewardedAd();
+            }
+        }
+
         // Interstitial Ad එක පෙන්වීමට Android වෙත කැඳවයි
         function showInterstitialAd() {
+            console.log("Interstitial Ad එක පෙන්වීමට උත්සාහ කරයි.");
             if (typeof Android !== 'undefined' && Android.showInterstitialAdFromJs) {
                 Android.showInterstitialAdFromJs();
             } else {
                 console.warn('Android.showInterstitialAdFromJs is not available.');
-                // දැන්වීම් නොමැතිව ඊළඟ මට්ටම පෙන්වයි.
-                nextLevel();
+                showNextLevelModal();
             }
         }
 
         // Rewarded Ad එක පෙන්වීමට Android වෙත කැඳවයි
         function showRewardedAd() {
+            console.log("Rewarded Ad එක පෙන්වීමට උත්සාහ කරයි.");
             if (typeof Android !== 'undefined' && Android.showRewardedAdFromJs) {
                 Android.showRewardedAdFromJs();
-                // බොත්තම disable කරන්න
-                showRewardedAdButton.disabled = true;
-                showRewardedAdButton.textContent = 'පැටවේ...';
             } else {
                 console.warn('Android.showRewardedAdFromJs is not available.');
-                // ත්‍යාගය නොමැතිව ඊළඟ මට්ටම පෙන්වයි.
-                nextLevel();
+                showNextLevelModal();
             }
+        }
+
+        // Interstitial Ad එක අවසන් වූ පසු Android මගින් කැඳවන ශ්‍රිතය
+        function onInterstitialAdClosed() {
+            console.log("Interstitial Ad එක අවසන් විය.");
+            showNextLevelModal();
         }
 
         // Rewarded Ad එක සාර්ථකව අවසන් වූ පසු Android මගින් කැඳවන ශ්‍රිතය
         function onRewardedAdCompleted() {
-            console.log("Rewarded ad completed. User gets a bonus.");
-            totalScore += 20; // උදාහරණයක් ලෙස ලකුණු 20ක් එකතු කරයි
-            modalScore.textContent = `මුළු ලකුණු: ${totalScore}`;
-            rewardedAdWatched = true;
-            showRewardedAdButton.disabled = false;
-            showRewardedAdButton.textContent = 'ත්‍යාග සහිත දැන්වීමක් බලන්න';
-        }
-
-        // ඊළඟ මට්ටමට යෑමේ ශ්‍රිතය
-        function nextLevel() {
-            currentLevel++;
-            gameModal.classList.add('hidden');
-            loadLevel();
-            rewardedAdWatched = false;
+            console.log("Rewarded Ad සාර්ථකව අවසන් විය.");
+            showNextLevelModal();
         }
 
         function showNextLevelModal() {
@@ -508,9 +494,11 @@
             modalScore.textContent = `මුළු ලකුණු: ${totalScore}`;
             gameModal.classList.remove('hidden');
 
-            nextLevelButton.onclick = nextLevel;
-            showInterstitialAdButton.onclick = showInterstitialAd;
-            showRewardedAdButton.onclick = showRewardedAd;
+            nextLevelButton.onclick = () => {
+                currentLevel++;
+                gameModal.classList.add('hidden');
+                loadLevel();
+            };
         }
 
         function showFinalGameCompleteModal() {
@@ -519,15 +507,13 @@
             modalScore.textContent = `මුළු ලකුණු: ${totalScore}`;
             nextLevelButton.textContent = 'නැවත ක්‍රීඩා කරන්න';
             gameModal.classList.remove('hidden');
-            
+
             nextLevelButton.onclick = () => {
                 currentLevel = 0;
                 totalScore = 0;
                 gameModal.classList.add('hidden');
                 loadLevel();
             };
-            showInterstitialAdButton.onclick = showInterstitialAd;
-            showRewardedAdButton.onclick = showRewardedAd;
         }
 
         window.onload = loadLevel;
