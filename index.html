@@ -103,9 +103,8 @@
 
         /* Disable pointer events for buttons when modal is active */
         .modal-active button:not(.btn-game, #nav-home, #nav-game, #nav-scoreboard, .start-math-btn) {
-             pointer-events: none;
+            pointer-events: none;
         }
-
     </style>
 </head>
 <body class="bg-gray-100 font-sans antialiased">
@@ -179,9 +178,7 @@
             try {
                 switch(type) {
                     case 'interstitial':
-                        // You'd need to implement interstitial ads in your Android activity
-                        // and expose a method like this.
-                        // For now, this is a placeholder.
+                        // This calls the Java method that handles showing the interstitial ad.
                         if (typeof Android.showInterstitialAdFromJs === 'function') {
                             Android.showInterstitialAdFromJs();
                             console.log("Called Android.showInterstitialAdFromJs()");
@@ -321,11 +318,16 @@
                 modalContainer.classList.add('hidden');
                 modalContainer.classList.remove('flex');
 
-                // Show an interstitial ad after every 'totalProblems' (e.g., 5) problems if conditions met
-                const adFrequency = 1; // Show ad after every game session (adjust as needed)
+                // Show an interstitial ad after every 3 problems
+                const adFrequency = 3; 
                 if (problemsPlayed > 0 && problemsPlayed % adFrequency === 0) {
-                    console.log("Game session ended. Showing interstitial ad if conditions met.");
-                    showAd('interstitial');
+                    console.log("Game session ended. Showing interstitial ad.");
+                    // Android යෙදුමේ showInterstitialAdFromJs() ශ්‍රිතය අමතන්න
+                    if (typeof Android !== 'undefined' && Android !== null && typeof Android.showInterstitialAdFromJs === 'function') {
+                        Android.showInterstitialAdFromJs();
+                    } else {
+                        console.warn("Android JavaScript interface not found or function not available.");
+                    }
                 }
 
                 // Navigate to the scoreboard page
@@ -402,7 +404,6 @@
             }, 1000); // Match animation duration
         };
 
-
         // Render the content of the game modal
         const renderGameModal = () => {
             const modalContainer = document.getElementById('game-modal-container');
@@ -458,8 +459,7 @@
                     </button>
                 </div>
                 ${resultMessage ? `<p class="${resultMessageClass}">${resultMessage}</p>` : ''}
-                
-                ${isCorrect === true ? `
+                                ${isCorrect === true ? `
                 <div class="mt-6 text-center">
                     <p class="text-base sm:text-lg font-bold text-gray-700 mb-2">ඔබේ ලකුණු දෙගුණ කර ගන්න!</p>
                     <button class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded-full shadow-lg transform hover:scale-105 transition-transform duration-300" onclick="showRewardedAd()">
@@ -470,7 +470,6 @@
                     </button>
                 </div>` : ''}
             `;
-
             // Show the modal with animation
             document.body.classList.add('is-modal-active');
             modalContainer.classList.remove('hidden');
