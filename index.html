@@ -13,9 +13,9 @@
             --secondary-color: #8bc34a; /* Lime green */
             --bg-color-1: #212121; /* Dark grey */
             --bg-color-2: #424242; /* Medium dark grey */
-            --card-bg: #424242; /* Medium dark grey for cards */
+            --card-bg: #505050; /* Medium dark grey for cards */
             --text-color: #e0e0e0; /* Light grey text */
-            --correct-color: #4caf50; /* Vibrant green for correct */
+            --correct-color: #8BC34A; /* Vibrant green for correct */
             --wrong-color: #f44336; /* Red for wrong */
             --shadow-light: rgba(0, 0, 0, 0.3);
             --shadow-medium: rgba(0, 0, 0, 0.6);
@@ -446,8 +446,8 @@
 
         function handleNextLevelButtonPress() {
             interstitialAdCount++;
-            // සෑම 2වන ක්ලික් එකකටම පසු Rewarded Ad එකක් පෙන්වයි, අනෙක්වා interstitial
-            if (interstitialAdCount % 2 === 0) {
+            // සෑම 3වන ක්ලික් එකකටම පසු Rewarded Ad එකක් පෙන්වයි, අනෙක්වා interstitial
+            if (interstitialAdCount % 3 === 0) {
                 showRewardedAd();
             } else {
                 showInterstitialAd();
@@ -510,7 +510,7 @@
             modalMessage.textContent = 'ඔබ සියලු මට්ටම් සම්පූර්ණ කර ඇත!';
             modalScore.textContent = `මුළු ලකුණු: ${totalScore}`;
             nextLevelButton.textContent = 'නැවත ක්‍රීඩා කරන්න';
-            gameModal.classList.remove('hidden');
+            gameModal.classList.add('hidden');
 
             nextLevelButton.onclick = () => {
                 currentLevel = 0;
