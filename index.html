@@ -445,13 +445,12 @@
         }
 
         function handleNextLevelButtonPress() {
-            // Interstitial Ads 3කට පසු Rewarded Ad එකක් පෙන්වයි
-            if (interstitialAdCount < 3) {
-                interstitialAdCount++;
-                showInterstitialAd();
-            } else {
-                interstitialAdCount = 0; // Rewarded Ad එකෙන් පසු ගණන නැවත 0 කරයි
+            interstitialAdCount++;
+            // සෑම 5වන ක්ලික් එකකටම පසු Rewarded Ad එකක් පෙන්වයි, අනෙක්වා interstitial
+            if (interstitialAdCount % 5 === 0) {
                 showRewardedAd();
+            } else {
+                showInterstitialAd();
             }
         }
 
