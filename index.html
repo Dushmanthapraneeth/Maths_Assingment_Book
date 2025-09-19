@@ -418,7 +418,7 @@
             }
 
             if (matchesFound === levels[currentLevel].length) {
-                handleNextLevelAdLogic();
+                showNextLevelModal(); // මට්ටම අවසන් වූ විට Modal එක පෙන්වයි
             }
         }
 
@@ -444,7 +444,7 @@
             [firstCard, lockBoard] = [null, false];
         }
 
-        function handleNextLevelAdLogic() {
+        function handleNextLevelButtonPress() {
             // Interstitial Ads 3කට පසු Rewarded Ad එකක් පෙන්වයි
             if (interstitialAdCount < 3) {
                 interstitialAdCount++;
@@ -455,6 +455,12 @@
             }
         }
 
+        function proceedToNextLevel() {
+            currentLevel++;
+            gameModal.classList.add('hidden');
+            loadLevel();
+        }
+
         // Interstitial Ad එක පෙන්වීමට Android වෙත කැඳවයි
         function showInterstitialAd() {
             console.log("Interstitial Ad එක පෙන්වීමට උත්සාහ කරයි.");
@@ -463,7 +469,7 @@
                 Android.showInterstitialAdFromJs();
             } else {
                 console.warn('Android.showInterstitialAdFromJs is not available. Proceeding without ad.');
-                showNextLevelModal(); // කෙලින්ම modal එක පෙන්වයි
+                proceedToNextLevel(); // කෙලින්ම ඊළඟ මට්ටමට යයි
             }
         }
 
@@ -475,20 +481,20 @@
                 Android.showRewardedAdFromJs();
             } else {
                 console.warn('Android.showRewardedAdFromJs is not available. Proceeding without ad.');
-                showNextLevelModal(); // කෙලින්ම modal එක පෙන්වයි
+                proceedToNextLevel(); // කෙලින්ම ඊළඟ මට්ටමට යයි
             }
         }
 
         // Interstitial Ad එක අවසන් වූ පසු Android මගින් කැඳවන ශ්‍රිතය
         function onInterstitialAdClosed() {
             console.log("Interstitial Ad එක අවසන් විය.");
-            showNextLevelModal();
+            proceedToNextLevel();
         }
 
         // Rewarded Ad එක සාර්ථකව අවසන් වූ පසු Android මගින් කැඳවන ශ්‍රිතය
         function onRewardedAdCompleted() {
             console.log("Rewarded Ad සාර්ථකව අවසන් විය.");
-            showNextLevelModal();
+            proceedToNextLevel();
         }
 
         function showNextLevelModal() {
@@ -497,11 +503,7 @@
             modalScore.textContent = `මුළු ලකුණු: ${totalScore}`;
             gameModal.classList.remove('hidden');
 
-            nextLevelButton.onclick = () => {
-                currentLevel++;
-                gameModal.classList.add('hidden');
-                loadLevel();
-            };
+            nextLevelButton.onclick = handleNextLevelButtonPress; // බොත්තම ඔබන විට දැන්වීම් පෙන්වයි
         }
 
         function showFinalGameCompleteModal() {
