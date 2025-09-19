@@ -136,6 +136,7 @@
         let history = []; // Items selected for the current expression
         let resultMessage = ''; // Message to display after checking (e.g., "Correct!", "Incorrect")
         let isCorrect = null; // Boolean to track if the last answer was correct
+        let interstitialAdCount = 0; // Interstitial ads ගණන ගණන් කිරීමට අලුත් විචල්‍යයක්
 
         // --- Game Data ---
         const problems = [
@@ -163,13 +164,11 @@
                 console.warn("Android JavaScript Interface not found. Skipping ad display.");
                 return;
             }
-
             console.log(`Attempting to show ${type} ad.`);
 
             try {
                 switch(type) {
                     case 'interstitial':
-                        // This calls the Java method that handles showing the interstitial ad.
                         if (typeof Android.showInterstitialAdFromJs === 'function') {
                             Android.showInterstitialAdFromJs();
                             console.log("Called Android.showInterstitialAdFromJs()");
@@ -178,9 +177,8 @@
                         }
                         break;
                     case 'rewarded':
-                        // This calls the Java method that handles showing the rewarded ad.
                         if (typeof Android.showRewardedAdFromJs === 'function') {
-                            Android.showRewardedAdFromJs("default_reward"); // Pass a default reward type if needed
+                            Android.showRewardedAdFromJs();
                             console.log("Called Android.showRewardedAdFromJs()");
                         } else {
                             console.warn("Android.showRewardedAdFromJs() function not available.");
@@ -192,10 +190,14 @@
             }
         };
 
-        // Function to trigger showing a rewarded ad from JavaScript
-        const showRewardedAd = () => {
-            showAd('rewarded');
-        };
+        // Rewarded ad එක සාර්ථකව අවසන් වූ පසු Android එකෙන් කැඳවන ශ්‍රිතය
+        function onRewardedAdCompleted() {
+            // ලකුණු දෙගුණ කරමු
+            finalScore = finalScore * 2;
+            console.log("Reward received. New final score: " + finalScore);
+            // Scoreboard එක නැවත render කරමු
+            navigate('scoreboard', finalScore);
+        }
 
         // --- Navigation and Rendering ---
 
@@ -309,17 +311,21 @@
                 modalContainer.classList.add('hidden');
                 modalContainer.classList.remove('flex');
 
-                // දැන්, ක්‍රීඩා වාරයක් අවසන් වූ සෑම විටම Interstitial ad එක පෙන්වනු ඇත.
-                // කලින් තිබූ if condition එක ඉවත් කර ඇත.
-                console.log("Game session ended. Showing interstitial ad.");
-                // Android යෙදුමේ showInterstitialAdFromJs() ශ්‍රිතය අමතන්න
+                // Interstitial ad එකක් පෙන්වීමට
                 if (typeof Android !== 'undefined' && Android !== null && typeof Android.showInterstitialAdFromJs === 'function') {
-                    Android.showInterstitialAdFromJs();
-                } else {
-                    console.warn("Android JavaScript interface not found or function not available.");
+                    showAd('interstitial');
+                    interstitialAdCount++; // Ad එකක් පෙන්වූ පසු counter එක වැඩි කරන්න
+                    console.log("Interstitial ads shown: " + interstitialAdCount);
+
+                    // සෑම Interstitial ads 3කට වරක්ම Rewarded ad එකක් පෙන්වීමට
+                    const adFrequency = 3;
+                    if (interstitialAdCount > 0 && interstitialAdCount % adFrequency === 0) {
+                        console.log("Showing rewarded ad now.");
+                        showAd('rewarded');
+                    }
                 }
 
-                // Navigate to the scoreboard page
+                // Scoreboard page එකට යන්න
                 navigate('scoreboard', finalScoreValue);
             }, 300); // Duration of the modal's exit animation
         };
