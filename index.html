@@ -457,22 +457,24 @@
         // Interstitial Ad එක පෙන්වීමට Android වෙත කැඳවයි
         function showInterstitialAd() {
             console.log("Interstitial Ad එක පෙන්වීමට උත්සාහ කරයි.");
+            // Android object එක තිබේදැයි පරීක්ෂා කර, නැතිනම් ඊලඟ මට්ටමට යයි
             if (typeof Android !== 'undefined' && Android.showInterstitialAdFromJs) {
                 Android.showInterstitialAdFromJs();
             } else {
-                console.warn('Android.showInterstitialAdFromJs is not available.');
-                showNextLevelModal();
+                console.warn('Android.showInterstitialAdFromJs is not available. Proceeding without ad.');
+                showNextLevelModal(); // කෙලින්ම modal එක පෙන්වයි
             }
         }
 
         // Rewarded Ad එක පෙන්වීමට Android වෙත කැඳවයි
         function showRewardedAd() {
             console.log("Rewarded Ad එක පෙන්වීමට උත්සාහ කරයි.");
+            // Android object එක තිබේදැයි පරීක්ෂා කර, නැතිනම් ඊලඟ මට්ටමට යයි
             if (typeof Android !== 'undefined' && Android.showRewardedAdFromJs) {
                 Android.showRewardedAdFromJs();
             } else {
-                console.warn('Android.showRewardedAdFromJs is not available.');
-                showNextLevelModal();
+                console.warn('Android.showRewardedAdFromJs is not available. Proceeding without ad.');
+                showNextLevelModal(); // කෙලින්ම modal එක පෙන්වයි
             }
         }
 
