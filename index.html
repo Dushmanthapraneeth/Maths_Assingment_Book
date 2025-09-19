@@ -1,577 +1,458 @@
 <!DOCTYPE html>
 <html lang="si">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ගණිත ක්‍රීඩාව</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ගැලපෙන යුගල සොයන්න</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Sinhala:wght@400;600;700&display=swap');
+
+        :root {
+            --primary-color: #3949ab;
+            --secondary-color: #42a5f5;
+            --bg-color-1: #e3f2fd;
+            --bg-color-2: #bbdefb;
+            --card-bg: #ffffff;
+            --text-color: #1a237e;
+            --correct-color: #1e88e5;
+            --wrong-color: #ff7043;
+            --shadow-light: rgba(0, 0, 0, 0.1);
+            --shadow-medium: rgba(0, 0, 0, 0.2);
+        }
+
         body {
-            font-family: 'Inter', sans-serif;
-            background: #eef2ff;
+            font-family: 'Noto Sans Sinhala', 'Poppins', sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--bg-color-1), var(--bg-color-2));
+            color: var(--text-color);
+            transition: background 0.5s ease;
         }
 
-        .main-card {
-            background: rgba(255, 255, 255, 0.5);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            transition: opacity 0.3s ease, transform 0.3s ease;
+        .quiz-container {
+            background: var(--card-bg);
+            border-radius: 25px;
+            box-shadow: 0 15px 40px var(--shadow-medium);
+            padding: 40px;
+            max-width: 750px;
+            width: 100%;
+            transform: perspective(1000px) rotateY(0deg);
+            transition: transform 0.5s ease;
         }
 
-        .is-modal-active .main-card {
-            pointer-events: none;
-            opacity: 0.5;
-            transform: scale(0.95);
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 25px;
+            font-weight: 700;
+            text-shadow: 1px 1px 2px var(--shadow-light);
         }
 
-        @keyframes correct-pop {
-            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-            50% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
-            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        .score-display-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            text-align: center;
+            color: var(--text-color);
+            font-weight: 600;
+            margin-bottom: 25px;
+            padding: 10px;
+            background: var(--bg-color-1);
+            border-radius: 15px;
+            box-shadow: 0 5px 15px var(--shadow-light);
         }
 
-        @keyframes incorrect-shake {
-            0% { transform: translateX(0); }
-            20% { transform: translateX(-5px) rotate(-1deg); }
-            40% { transform: translateX(5px) rotate(1deg); }
-            60% { transform: translateX(-5px) rotate(-1deg); }
-            80% { transform: translateX(5px) rotate(1deg); }
-            100% { transform: translateX(0); }
+        #score-display, #wrong-attempts-display {
+            font-size: 1.2em;
         }
 
-        @keyframes fade-in-up {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        #level-display {
+            font-size: 1.2em;
+            color: var(--primary-color);
+            font-weight: 700;
         }
 
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
+        .card-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            justify-items: center;
+            margin-top: 20px;
         }
 
-        @keyframes pop-in {
-            from { opacity: 0; transform: scale(0.8); }
-            to { opacity: 1; transform: scale(1); }
+        .card {
+            width: 100%;
+            padding: 20px;
+            min-height: 120px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease, transform 0.2s ease;
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            border-radius: 12px;
+            box-shadow: 0 5px 15px var(--shadow-light);
         }
 
-        .bubble-container {
+        .card:hover:not(.matched) {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px var(--shadow-medium);
+        }
+
+        .card.active {
+            background-color: var(--secondary-color);
+            color: #fff;
+            box-shadow: 0 5px 20px var(--secondary-color);
+        }
+
+        .card.matched {
+            background-color: var(--correct-color);
+            color: #fff;
+            cursor: not-allowed;
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px var(--correct-color);
+            animation: correctAnim 0.5s ease-out;
+        }
+
+        @keyframes correctAnim {
+            0%, 100% { transform: scale(1.05); }
+            50% { transform: scale(1.1); }
+        }
+
+        .modal {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            overflow: hidden;
-            z-index: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
         }
 
-        .bubble {
-            position: absolute;
-            border-radius: 50%;
-            will-change: transform, background-color;
-            box-shadow: 0 0 20px 10px rgba(100, 116, 139, 0.5);
+        .modal-content {
+            background-color: white;
+            padding: 2.5rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 90%;
+            animation: fadeIn 0.5s ease-out;
         }
 
-        @keyframes bubble-color-morph {
-            0%, 100% { background-color: #a78bfa; }
-            25% { background-color: #60a5fa; }
-            50% { background-color: #34d399; }
-            75% { background-color: #fcd34d; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
         }
 
-        .bubble {
-            animation: bubble-color-morph 20s infinite alternate ease-in-out;
-            animation-delay: calc(var(--delay) * -1s);
-        }
-
-        .modal-overlay {
-            background-color: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-        }
-
-        .btn-game {
-            @apply flex-1 py-3 sm:py-4 rounded-full font-bold text-white shadow-lg transition-all duration-300 transform hover:scale-105;
-        }
-
-        h1, h2 {
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .pop-in {
-            animation: pop-in 0.5s ease-out forwards;
-        }
-
-        /* Disable pointer events for buttons when modal is active */
-        .modal-active button:not(.btn-game, #nav-home, #nav-game, #nav-scoreboard, .start-math-btn) {
-            pointer-events: none;
+        .hidden {
+            display: none;
         }
     </style>
 </head>
-<body class="bg-gray-100 font-sans antialiased">
-    <div class="bubble-container" id="bubble-container"></div>
-    <div id="app-container" class="min-h-screen flex items-center justify-center p-4 sm:p-8 relative z-10">
-        <div class="w-full max-w-2xl main-card rounded-3xl shadow-2xl p-6 sm:p-10 relative overflow-hidden">
-            <nav class="flex justify-center space-x-4 mb-8">
-                <button id="nav-home" class="text-gray-600 font-semibold px-4 py-2 rounded-lg hover:bg-white hover:shadow transition-colors">මුල් පිටුව</button>
-                <button id="nav-game" class="text-gray-600 font-semibold px-4 py-2 rounded-lg hover:bg-white hover:shadow transition-colors">ක්‍රීඩාව</button>
-                <button id="nav-scoreboard" class="text-gray-600 font-semibold px-4 py-2 rounded-lg hover:bg-white hover:shadow transition-colors">ලකුණු පුවරුව</button>
-            </nav>
-            <div id="content" class="fade-in-up"></div>
+<body>
+    <div class="quiz-container">
+        <h1>ගැලපෙන යුගල සොයන්න</h1>
+        <p class="text-center text-gray-500 text-sm md:text-base">ගැලපෙන යුගල සොයාගන්න! එකවර කාඩ්පත් දෙකක් තෝරන්න.</p>
+
+        <div class="score-display-wrapper">
+            <div id="level-display">මට්ටම: 1</div>
+            <div id="score-display">ලකුණු: 0</div>
+            <div id="wrong-attempts-display">වැරදි වූ වාර: 0</div>
+        </div>
+
+        <div id="game-board" class="card-container">
         </div>
     </div>
 
-    <div id="game-modal-container" class="fixed inset-0 hidden items-center justify-center z-50 modal-overlay p-4 sm:p-8">
-        <div id="game-modal-content" class="w-full max-w-xl p-6 sm:p-10 rounded-3xl shadow-2xl relative transform transition-transform duration-500 scale-95 opacity-0" style="background-color: rgba(191, 219, 254, 0.4); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);"></div>
+    <div id="game-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2 id="modal-title" class="text-3xl font-bold mb-4"></h2>
+            <p id="modal-message" class="text-lg text-gray-700 mb-2"></p>
+            <p id="modal-score" class="text-2xl font-bold text-gray-800 mb-4"></p>
+            <button id="modal-button" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-full transition-colors duration-300">
+                ඊළඟ මට්ටම
+            </button>
+        </div>
     </div>
 
     <script>
-        // --- Global Variables ---
-        let currentPage = 'home';
-        let finalScore = 0;
-        let score = 0;
-        let problemsPlayed = 0;
-        const totalProblems = 5;
-        let currentProblem = null;
-        let expressionItems = []; // Items available to be used in the expression
-        let history = []; // Items selected for the current expression
-        let resultMessage = ''; // Message to display after checking (e.g., "Correct!", "Incorrect")
-        let isCorrect = null; // Boolean to track if the last answer was correct
-        let interstitialAdCount = 0; // Interstitial ads ගණන ගණන් කිරීමට අලුත් විචල්‍යයක්
+        const gameBoard = document.getElementById('game-board');
+        const scoreDisplay = document.getElementById('score-display');
+        const wrongAttemptsDisplay = document.getElementById('wrong-attempts-display');
+        const levelDisplay = document.getElementById('level-display');
+        const gameModal = document.getElementById('game-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalMessage = document.getElementById('modal-message');
+        const modalScore = document.getElementById('modal-score');
+        const modalButton = document.getElementById('modal-button');
 
-        // --- Game Data ---
-        const problems = [
-            { target: 10, items: [8, 2, "+", 5, 3] },
-            { target: 12, items: [5, 7, "+", 6, 2, "×"] },
-            { target: 20, items: [4, 5, "×", 10, 2, "+"] },
-            { target: 8, items: [16, 2, "÷", 4, 2, "-"] },
-            { target: 15, items: [18, 3, "-", 10, 5, "÷"] },
-            { target: 6, items: [12, 2, "÷", 3, 3, "+"] },
-            { target: 25, items: [5, 5, "×", 20, 5, "-"] },
-            { target: 9, items: [1, 8, "+", 10, 1, "-"] },
-            { target: 100, items: [10, 10, "×", 5, 2, "×"] },
-            { target: 3, items: [9, 3, "÷", 6, 2, "÷"] },
-            { target: 7, items: [15, 8, "-", 10, 3, "-"] },
-            { target: 18, items: [9, 9, "+", 20, 2, "-"] },
-            { target: 30, items: [6, 5, "×", 25, 5, "+"] },
-            { target: 2, items: [10, 8, "-", 5, 3, "×"] },
-            { target: 7, items: [10, 9, 8, 2, "-", "-", 4, 3, "×"] } // Example with multiple operators/numbers
+        // Game State Variables
+        let firstCard = null;
+        let lockBoard = false;
+        let matchesFound = 0;
+        let totalScore = 0;
+        let currentLevel = 0;
+        let wrongAttempts = 0;
+
+        // 10 levels of game data
+        const levels = [
+            // Level 1: 3 pairs
+            [
+                { id: 1, left: "කොළඹ", right: "ශ්‍රී ලංකාවේ අගනුවර" },
+                { id: 2, left: "පේරාදෙණිය", right: "උද්භිද උද්‍යානය" },
+                { id: 3, left: "සූර්යා", right: "සෞරග්‍රහ මණ්ඩලයේ තාරකාව" }
+            ],
+            // Level 2: 4 pairs
+            [
+                { id: 4, left: "ඇපල්", right: "පළතුරක්" },
+                { id: 5, left: "ජලය", right: "H₂O" },
+                { id: 6, left: "සිංහල", right: "ශ්‍රී ලංකාවේ භාෂාවක්" },
+                { id: 7, left: "අලියා", right: "ගොඩබිම විශාලතම සත්වයා" }
+            ],
+            // Level 3: 5 pairs
+            [
+                { id: 8, left: "චන්ද්‍රයා", right: "පෘථිවියේ චන්ද්‍රිකාව" },
+                { id: 9, left: "ක්‍රිකට්", right: "පිතිකරණය" },
+                { id: 10, left: "තේ", right: "ශ්‍රී ලංකාවේ ප්‍රධාන අපනයනය" },
+                { id: 11, left: "පොත්", right: "කියවීමට" },
+                { id: 12, left: "කන්ද", right: "භූමියේ උස් කොටස" }
+            ],
+            // Level 4: 6 pairs
+            [
+                { id: 13, left: "පැන්සල", right: "ලිවීමට" },
+                { id: 14, left: "කැළණිය", right: "විශ්වවිද්‍යාලයක්" },
+                { id: 15, left: "කොටුව", right: "දුම්රිය ස්ථානය" },
+                { id: 16, left: "ලුණු", right: "NaCl" },
+                { id: 17, left: "කිරි", right: "කැල්සියම්" },
+                { id: 18, left: "මල්", right: "ලස්සන මල්" }
+            ],
+            // Level 5: 7 pairs
+            [
+                { id: 19, left: "මුහුද", right: "විශාල ජල කඳක්" },
+                { id: 20, left: "ගස", right: "ශාක" },
+                { id: 21, left: "කුරුල්ලා", right: "පියාඹයි" },
+                { id: 22, left: "රෝස", right: "මලක්" },
+                { id: 23, left: "රතු", right: "වර්ණයක්" },
+                { id: 24, left: "වාහනය", right: "ගමන් කිරීමට" },
+                { id: 25, left: "පිටි", right: "පාන් සෑදීමට" }
+            ],
+            // Level 6: 8 pairs
+            [
+                { id: 26, left: "පැටියා", right: "බල්ලෙකුගේ පැටියා" },
+                { id: 27, left: "බළලා", right: "මාංශ භක්ෂක සතෙක්" },
+                { id: 28, left: "ගෙවතු", right: "නිරෝගී ශාක" },
+                { id: 29, left: "හිම", right: "ජලයේ ඝන ස්වරූපය" },
+                { id: 30, left: "පෙට්ටිය", right: "යමක් දැමීමට" },
+                { id: 31, left: "අත්පොත", right: "උපදෙස්" },
+                { id: 32, left: "බයිසිකලය", right: "පැඩල" },
+                { id: 33, left: "සඳ", right: "රාත්‍රිය" }
+            ],
+            // Level 7: 9 pairs
+            [
+                { id: 34, left: "නින්ද", right: "විවේකය" },
+                { id: 35, left: "සුදු", right: "හිම වර්ණය" },
+                { id: 36, left: "නිල්", right: "අහස" },
+                { id: 37, left: "කහ", right: "සූර්යයා" },
+                { id: 38, left: "හරිත", right: "ගස්" },
+                { id: 39, left: "කළු", right: "රාත්‍රිය" },
+                { id: 40, left: "අත්", right: "ස්පර්ශ කිරීමට" },
+                { id: 41, left: "කකුල්", right: "ඇවිදීමට" },
+                { id: 42, left: "කණ", right: "ඇසීමට" }
+            ],
+            // Level 8: 10 pairs
+            [
+                { id: 43, left: "ඇස්", right: "දැකීමට" },
+                { id: 44, left: "නාසය", right: "ගඳ දැනීමට" },
+                { id: 45, left: "මුඛය", right: "කෑමට" },
+                { id: 46, left: "හිසකෙස්", right: "හිස මත" },
+                { id: 47, left: "දත්", right: "සපාකෑමට" },
+                { id: 48, left: "හදවත", right: "ලේ පොම්ප කිරීමට" },
+                { id: 49, left: "පෙනහළු", right: "හුස්ම ගැනීමට" },
+                { id: 50, left: "අස්ථි", right: "ශරීරයේ රාමුව" },
+                { id: 51, left: "මස්තිෂ්කය", right: "සිතීමට" },
+                { id: 52, left: "සම", right: "ශරීරය ආවරණය කිරීමට" }
+            ],
+            // Level 9: 11 pairs
+            [
+                { id: 53, left: "මිනිසා", right: "බුද්ධිමත් සත්වයා" },
+                { id: 54, left: "කාන්තාව", right: "ගැහැණු මිනිසා" },
+                { id: 55, left: "ළමයා", right: "කුඩා මිනිසා" },
+                { id: 56, left: "පියා", right: "පිරිමි දෙමාපියන්" },
+                { id: 57, left: "මව", right: "ගැහැණු දෙමාපියන්" },
+                { id: 58, left: "සහෝදරයා", right: "පිරිමි සහෝදරයා" },
+                { id: 59, left: "සහෝදරිය", right: "ගැහැණු සහෝදරිය" },
+                { id: 60, left: "සීයා", right: "මවගේ හෝ පියාගේ පියා" },
+                { id: 61, left: "ආච්චි", right: "මවගේ හෝ පියාගේ මව" },
+                { id: 62, left: "මාමා", right: "අම්මාගේ සහෝදරයා" },
+                { id: 63, left: "නැන්දා", right: "අම්මාගේ සහෝදරිය" }
+            ],
+            // Level 10: 12 pairs
+            [
+                { id: 64, left: "පෘථිවිය", right: "සෞරග්‍රහ මණ්ඩලයේ තුන්වන ග්‍රහලෝකය" },
+                { id: 65, left: "අඟහරු", right: "රතු ග්‍රහලෝකය" },
+                { id: 66, left: "බ්‍රහස්පති", right: "විශාලතම ග්‍රහලෝකය" },
+                { id: 67, left: "සෙනසුරු", right: "වලයාකාර ග්‍රහලෝකය" },
+                { id: 68, left: "යුරේනස්", right: "සීතලම ග්‍රහලෝකය" },
+                { id: 69, left: "නෙප්චූන්", right: "වායු යෝධයා" },
+                { id: 70, left: "සිකුරු", right: "උණුසුම්ම ග්‍රහලෝකය" },
+                { id: 71, left: "බුධ", right: "සූර්යයාට ළඟම" },
+                { id: 72, left: "තරුව", right: "වායූන්ගෙන් සෑදුනු විශාල වස්තුව" },
+                { id: 73, left: "ක්ෂුද්‍ර ග්‍රහයා", right: "ග්‍රහලෝක අතර කුඩා වස්තුවක්" },
+                { id: 74, left: "වායුගෝලය", right: "ග්‍රහලෝකයක් වටා ඇති වායු ස්ථරය" },
+                { id: 75, left: "උල්කාපාතය", right: "අහසින් වැටෙන ගල් කැබැල්ලක්" }
+            ]
         ];
 
-        // --- Ad Functions ---
-        const showAd = (type) => {
-            // Check if the Android JavaScript interface is available
-            if (typeof Android === 'undefined' || Android === null) {
-                console.warn("Android JavaScript Interface not found. Skipping ad display.");
-                return;
-            }
-            console.log(`Attempting to show ${type} ad.`);
-
-            try {
-                switch(type) {
-                    case 'interstitial':
-                        if (typeof Android.showInterstitialAdFromJs === 'function') {
-                            Android.showInterstitialAdFromJs();
-                            console.log("Called Android.showInterstitialAdFromJs()");
-                        } else {
-                             console.warn("Android.showInterstitialAdFromJs() function not available.");
-                        }
-                        break;
-                    case 'rewarded':
-                        if (typeof Android.showRewardedAdFromJs === 'function') {
-                            Android.showRewardedAdFromJs();
-                            console.log("Called Android.showRewardedAdFromJs()");
-                        } else {
-                            console.warn("Android.showRewardedAdFromJs() function not available.");
-                        }
-                        break;
-                }
-            } catch (error) {
-                console.error(`Error calling ad function for ${type}:`, error);
-            }
-        };
-
-        // Rewarded ad එක සාර්ථකව අවසන් වූ පසු Android එකෙන් කැඳවන ශ්‍රිතය
-        function onRewardedAdCompleted() {
-            // ලකුණු දෙගුණ කරමු
-            finalScore = finalScore * 2;
-            console.log("Reward received. New final score: " + finalScore);
-            // Scoreboard එක නැවත render කරමු
-            navigate('scoreboard', finalScore);
-        }
-
-        // --- Navigation and Rendering ---
-
-        // Function to generate random bubbles for background effect
-        const generateBubbles = () => {
-            const container = document.getElementById('bubble-container');
-            const bubbleSizes = [32, 40, 48, 56, 64]; // Tailwind CSS width/height classes
-
-            for (let i = 0; i < 10; i++) {
-                const bubble = document.createElement('div');
-                const size = bubbleSizes[Math.floor(Math.random() * bubbleSizes.length)];
-                const xPos = Math.random() * 100; // Percentage for horizontal position
-                const yPos = Math.random() * 100; // Percentage for vertical position
-                const animDelay = Math.random() * 10; // Random delay for animation
-
-                bubble.className = `bubble w-${size} h-${size}`; // Apply size classes
-                bubble.style.top = `${yPos}vh`; // Position vertically
-                bubble.style.left = `${xPos}vw`; // Position horizontally
-                bubble.style.setProperty('--delay', animDelay); // Set CSS variable for animation delay
-                container.appendChild(bubble);
-            }
-        };
-
-        // Function to navigate between pages and update UI
-        const navigate = (page, finalScoreValue = 0) => {
-            currentPage = page;
-            if (page === 'scoreboard') {
-                finalScore = finalScoreValue; // Store the final score for the scoreboard
-            }
-            renderPage(); // Render the content for the new page
-            updateNavButtons(); // Update the active navigation button
-        };
-
-        // Update the styling of navigation buttons to reflect the active page
-        const updateNavButtons = () => {
-            document.querySelectorAll('nav button').forEach(btn => {
-                btn.classList.remove('bg-white', 'text-purple-600', 'shadow');
-                btn.classList.add('text-gray-600');
-            });
-            const activeBtn = document.getElementById(`nav-${currentPage}`);
-            if (activeBtn) {
-                activeBtn.classList.remove('text-gray-600');
-                activeBtn.classList.add('bg-white', 'text-purple-600', 'shadow');
-            }
-        };
-
-        // Safely evaluate a mathematical expression string
-        const evaluateExpression = (expression) => {
-            try {
-                // Basic sanitization to prevent malicious code execution.
-                // Allow only numbers, operators, parentheses, and dots.
-                const sanitizedExpression = expression.replace(/[^0-9+\-*/().]/g, '');
-                // Replace custom operators for evaluation
-                const evalExpression = sanitizedExpression.replace(/÷/g, '/').replace(/×/g, '*');
-
-                // Use Function constructor for a slightly safer sandbox than eval()
-                const safeEvaluator = new Function(`return (${evalExpression});`);
-                const result = safeEvaluator();
-
-                // Check for division by zero, which results in Infinity
-                if (!isFinite(result)) {
-                    return NaN; // Return NaN for invalid results like division by zero
-                }
-                return result;
-            } catch (e) {
-                console.error("Expression evaluation error:", e);
-                return NaN; // Return NaN if any error occurs during evaluation
-            }
-        };
-
-        // Shuffle an array in place using the Fisher-Yates algorithm
-        const shuffleArray = (array) => {
+        function shuffle(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]]; // Swap elements
+                [array[i], array[j]] = [array[j], array[i]];
             }
             return array;
-        };
+        }
 
-        // --- Game Logic ---
-
-        // Generate a new problem for the game
-        const generateNewGame = () => {
-            if (problemsPlayed >= totalProblems) {
-                handleGameEnd(score); // End the game if all problems are played
+        function loadLevel() {
+            if (currentLevel >= levels.length) {
+                showFinalGameCompleteModal();
                 return;
             }
 
-            // Select a random problem and shuffle its items
-            const shuffledProblems = shuffleArray([...problems]);
-            currentProblem = shuffledProblems[Math.floor(Math.random() * shuffledProblems.length)];
-            expressionItems = shuffleArray([...currentProblem.items]); // Items available to be picked
-            history = []; // Reset the expression history for the new problem
-            resultMessage = ''; // Clear any previous result message
-            isCorrect = null; // Reset the correct/incorrect state
+            const currentPairs = levels[currentLevel];
+            let items = [];
+            currentPairs.forEach(p => {
+                items.push({ id: p.id, text: p.left, type: 'left' });
+                items.push({ id: p.id, text: p.right, type: 'right' });
+            });
 
-            renderGameModal(); // Render the modal with the new problem
-        };
+            const shuffledItems = shuffle(items);
 
-        // Handle the end of the game
-        const handleGameEnd = (finalScoreValue) => {
-            const modalContainer = document.getElementById('game-modal-container');
-            const modalContent = document.getElementById('game-modal-content');
+            gameBoard.innerHTML = '';
+            matchesFound = 0;
+            wrongAttempts = 0;
+            score = 0; // Reset score for the new level
+            scoreDisplay.textContent = 'ලකුණු: 0';
+            wrongAttemptsDisplay.textContent = 'වැරදි වූ වාර: 0';
+            levelDisplay.textContent = `මට්ටම: ${currentLevel + 1}`;
 
-            // Animate modal out
-            document.body.classList.remove('is-modal-active');
-            modalContent.classList.remove('scale-100', 'opacity-100');
-            modalContent.classList.add('scale-95', 'opacity-0');
+            shuffledItems.forEach(item => {
+                const card = document.createElement('div');
+                card.classList.add('card');
+                card.innerHTML = item.text;
+                card.dataset.id = item.id;
+                card.dataset.type = item.type;
+                card.addEventListener('click', handleCardClick);
+                gameBoard.appendChild(card);
+            });
+            resetBoard();
+        }
 
-            setTimeout(() => {
-                modalContainer.classList.add('hidden');
-                modalContainer.classList.remove('flex');
+        function handleCardClick(event) {
+            if (lockBoard) return;
+            const clickedCard = event.currentTarget;
+            if (clickedCard === firstCard || clickedCard.classList.contains('matched')) return;
 
-                // Interstitial ad එකක් පෙන්වීමට
-                if (typeof Android !== 'undefined' && Android !== null && typeof Android.showInterstitialAdFromJs === 'function') {
-                    showAd('interstitial');
-                    interstitialAdCount++; // Ad එකක් පෙන්වූ පසු counter එක වැඩි කරන්න
-                    console.log("Interstitial ads shown: " + interstitialAdCount);
+            clickedCard.classList.add('active');
 
-                    // සෑම Interstitial ads 3කට වරක්ම Rewarded ad එකක් පෙන්වීමට
-                    const adFrequency = 3;
-                    if (interstitialAdCount > 0 && interstitialAdCount % adFrequency === 0) {
-                        console.log("Showing rewarded ad now.");
-                        showAd('rewarded');
-                    }
-                }
-
-                // Scoreboard page එකට යන්න
-                navigate('scoreboard', finalScoreValue);
-            }, 300); // Duration of the modal's exit animation
-        };
-
-        // Handle user clicking on an item to add to the expression
-        const handleItemClick = (item, clickedIndex) => {
-            // Prevent adding if the item is no longer available or already in history
-            if (!expressionItems.some((_, i) => i === clickedIndex) || history.includes(item)) return;
-
-            history.push(item); // Add item to the current expression history
-            expressionItems = expressionItems.filter((_, i) => i !== clickedIndex); // Remove item from available items
-            renderGameModal(); // Re-render the modal to show changes
-        };
-
-        // Handle user clicking the "Undo" button
-        const handleUndo = () => {
-            if (history.length > 0) {
-                const lastItem = history.pop(); // Remove the last item from history
-                // Add it back to the available expressionItems.
-                // Note: This simple push might not restore the exact original order if items were shuffled.
-                // A more robust solution would track original indices.
-                expressionItems.push(lastItem);
-                renderGameModal(); // Re-render the modal
+            if (!firstCard) {
+                firstCard = clickedCard;
+                return;
             }
-        };
 
-        // Handle user clicking the "Check" button
-        const handleCheck = () => {
-            const expression = history.join(''); // Join history items to form the expression string
-            const result = evaluateExpression(expression); // Evaluate the expression
-            const modalContent = document.getElementById('game-modal-content');
+            lockBoard = true;
+            const secondCard = clickedCard;
+            checkMatch(firstCard, secondCard);
+        }
 
-            // Clear previous animations
-            modalContent.style.animation = '';
+        function checkMatch(card1, card2) {
+            const isMatch = card1.dataset.id === card2.dataset.id;
+            const scorePerMatch = 10;
+            const penaltyPerWrong = 2;
 
-            if (isNaN(result)) {
-                isCorrect = false;
-                resultMessage = 'ප්‍රකාශනය වැරදියි.'; // Invalid expression
-                score = Math.max(0, score - 1); // Small penalty for invalid input
-            } else if (result === currentProblem.target) {
-                isCorrect = true;
-                resultMessage = 'නිවැරදියි! 🎉'; // Correct!
-                score += 10; // Award points
-                modalContent.style.animation = 'correct-pop 1s forwards'; // Play correct animation
+            if (isMatch) {
+                disableCards(card1, card2);
+                matchesFound++;
+                score += scorePerMatch;
+                totalScore += scorePerMatch;
+                scoreDisplay.textContent = 'ලකුණු: ' + totalScore;
             } else {
-                isCorrect = false;
-                resultMessage = 'වැරදියි. 😥'; // Incorrect
-                score = Math.max(0, score - 2); // Penalty for incorrect answer
-                modalContent.style.animation = 'incorrect-shake 0.5s forwards'; // Play shake animation
+                unflipCards(card1, card2);
+                wrongAttempts++;
+                totalScore = Math.max(0, totalScore - penaltyPerWrong);
+                wrongAttemptsDisplay.textContent = 'වැරදි වූ වාර: ' + wrongAttempts;
+                scoreDisplay.textContent = 'ලකුණු: ' + totalScore;
             }
 
-            renderGameModal(); // Update modal to show result message and score change
+            if (matchesFound === levels[currentLevel].length) {
+                showNextLevelModal();
+            }
+        }
 
-            // After animation, proceed to next step or end game
+        function disableCards(card1, card2) {
+            card1.classList.add('matched');
+            card2.classList.add('matched');
+            card1.removeEventListener('click', handleCardClick);
+            card2.removeEventListener('click', handleCardClick);
+            card1.classList.remove('active');
+            card2.classList.remove('active');
+            resetBoard();
+        }
+
+        function unflipCards(card1, card2) {
             setTimeout(() => {
-                modalContent.style.animation = ''; // Reset animation property
+                card1.classList.remove('active');
+                card2.classList.remove('active');
+                resetBoard();
+            }, 1000);
+        }
 
-                // Ensure game hasn't ended while animation was playing
-                if (problemsPlayed >= totalProblems) return;
+        function resetBoard() {
+            [firstCard, lockBoard] = [null, false];
+        }
 
-                problemsPlayed++; // Increment the count of problems played
+        function showNextLevelModal() {
+            modalTitle.textContent = 'සුභ පැතුම්!';
+            modalMessage.textContent = 'ඔබ මෙම මට්ටම සාර්ථකව සම්පූර්ණ කළා!';
+            modalScore.textContent = `මුළු ලකුණු: ${totalScore}`;
+            modalButton.textContent = 'ඊළඟ මට්ටම';
+            gameModal.classList.remove('hidden');
 
-                if (problemsPlayed >= totalProblems) {
-                    handleGameEnd(score); // End the game
-                } else {
-                    // Small delay before showing the next problem to allow user to see the result
-                    setTimeout(() => {
-                        generateNewGame(); // Generate the next problem
-                    }, 1000); // 1 second delay
-                }
-            }, 1000); // Match animation duration
-        };
+            modalButton.onclick = () => {
+                currentLevel++;
+                gameModal.classList.add('hidden');
+                loadLevel();
+            };
+        }
 
-        // Render the content of the game modal
-        const renderGameModal = () => {
-            const modalContainer = document.getElementById('game-modal-container');
-            const modalContent = document.getElementById('game-modal-content');
+        function showFinalGameCompleteModal() {
+            modalTitle.textContent = 'සුභ පැතුම්!';
+            modalMessage.textContent = 'ඔබ සියලු මට්ටම් සම්පූර්ණ කර ඇත!';
+            modalScore.textContent = `මුළු ලකුණු: ${totalScore}`;
+            modalButton.textContent = 'නැවත ක්‍රීඩා කරන්න';
+            gameModal.classList.remove('hidden');
 
-            // Create buttons for available expression items
-            const expressionItemButtons = expressionItems.map((item, index) => `
-                <button
-                    class="bg-white text-blue-800 text-xl sm:text-2xl font-bold rounded-xl shadow-md hover:bg-gray-100 transition-colors pop-in w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center"
-                    onclick="handleItemClick(${JSON.stringify(item)}, ${index})"
-                    ${history.length >= 10 ? 'disabled' : ''} >
-                    ${item}
-                </button>
-            `).join('');
+            modalButton.onclick = () => {
+                currentLevel = 0;
+                totalScore = 0;
+                gameModal.classList.add('hidden');
+                loadLevel();
+            };
+        }
 
-            // Create spans for the current expression history
-            const historySpans = history.map((item) => `
-                <span class="bg-white text-purple-600 text-lg sm:text-xl font-bold px-3 py-1 sm:px-4 sm:py-2 rounded-lg shadow-md pop-in">
-                    ${item}
-                </span>
-            `).join('');
-
-            // Determine the class for the result message based on correctness
-            const resultMessageClass = `text-center font-bold text-md sm:text-xl mt-4 ${isCorrect === true ? 'text-green-600' : isCorrect === false ? 'text-red-600' : ''} ${resultMessage ? 'pop-in' : ''}`;
-
-            modalContent.innerHTML = `
-                <button
-                    class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
-                    onclick="handleGameEnd(score)" >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 sm:h-8 sm:w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-                <h2 class="text-2xl sm:text-3xl font-extrabold text-blue-800 mb-2 text-center">ගණිත ප්‍රශ්නය</h2>
-                <p class="text-sm sm:text-lg font-bold text-gray-700 mb-4 text-center">ලකුණු: ${score}</p>
-                <div class="flex flex-col items-center p-4 bg-gray-100 rounded-2xl mb-6 shadow-inner w-full">
-                    <p class="text-lg sm:text-xl font-semibold text-gray-800 text-center">
-                        ඉලක්කය: <span class="text-2xl sm:text-3xl font-extrabold text-purple-600">${currentProblem.target}</span>
-                    </p>
-                </div>
-                <div class="w-full flex flex-wrap justify-center gap-2 sm:gap-4 p-4 bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl mb-6">
-                    ${expressionItemButtons}
-                </div>
-                <div class="w-full h-20 sm:h-24 bg-gray-200 border-2 border-gray-300 rounded-lg flex flex-wrap justify-center items-center gap-2 p-2 mb-6 overflow-auto">
-                    ${historySpans}
-                </div>
-                <div class="flex justify-between w-full gap-4">
-                    <button class="btn-game bg-gray-500 hover:bg-gray-600" onclick="handleUndo()" ${history.length === 0 ? 'disabled' : ''}>
-                        ආපසු ගන්න
-                    </button>
-                    <button class="btn-game bg-green-500 hover:bg-green-600" onclick="handleCheck()">
-                        පරීක්ෂා කරන්න
-                    </button>
-                </div>
-                ${resultMessage ? `<p class="${resultMessageClass}">${resultMessage}</p>` : ''}
-                                ${isCorrect === true ? `
-                <div class="mt-6 text-center">
-                    <p class="text-base sm:text-lg font-bold text-gray-700 mb-2">ඔබේ ලකුණු දෙගුණ කර ගන්න!</p>
-                    <button class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded-full shadow-lg transform hover:scale-105 transition-transform duration-300" onclick="showRewardedAd()">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline-block mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.173l-4.24-4.24a1 1 0 00-1.414 1.414L13.338 12l-4.24 4.24a1 1 0 001.414 1.414l4.24-4.24a1 1 0 000-1.414z" />
-                        </svg>
-                        වීඩියෝවක් බලන්න
-                    </button>
-                </div>` : ''}
-            `;
-            // Show the modal with animation
-            document.body.classList.add('is-modal-active');
-            modalContainer.classList.remove('hidden');
-            modalContainer.classList.add('flex');
-            // Use a small timeout to allow the display property to change before applying transition classes
-            setTimeout(() => {
-                modalContent.classList.remove('scale-95', 'opacity-0');
-                modalContent.classList.add('scale-100', 'opacity-100');
-            }, 10);
-        };
-
-        // --- Page Render Functions ---
-
-        // Render the Home Page content
-        const renderHomePage = () => {
-            return `
-                <div class="text-center p-4">
-                    <h1 class="text-3xl sm:text-4xl font-extrabold text-blue-800 mb-4 animate-[fade-in-up_1s_ease-in-out]">ගණිත ක්‍රීඩාවට සාදරයෙන් පිළිගනිමු</h1>
-                    <p class="text-sm sm:text-lg text-gray-700 mb-8 animate-[fade-in-up_1s_ease-in-out_0.2s_forwards] opacity-0">
-                        ඔබට දුන් අංක සහ ගණිත කර්ම භාවිතයෙන් නිවැරදි ප්‍රකාශනයක් සාදා ඉලක්කගත අගය ලබා ගත හැකිදැයි බලමු.
-                    </p>
-                    <button id="start-game-btn" class="bg-gradient-to-r from-purple-500 to-indigo-600 text-white text-base sm:text-xl font-bold py-3 px-8 rounded-full shadow-lg hover:from-purple-600 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105 animate-[pulse_2s_infinite]">
-                        ක්‍රීඩාව ආරම්භ කරන්න
-                    </button>
-                </div>
-            `;
-        };
-
-        // Render the Game Page content (selection of levels)
-        const renderGamePage = () => {
-            return `
-                <div class="text-center p-4 fade-in-up">
-                    <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-6">ක්‍රීඩා මට්ටම්</h2>
-                    <p class="text-sm sm:text-base text-gray-600 mb-8">ඔබට කැමති මට්ටමක් තෝරා ක්‍රීඩා කළ හැක.</p>
-                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                        ${[1, 2, 3, 4, 5, 6].map(level => `
-                            <button class="start-math-btn bg-blue-500 text-white text-lg sm:text-xl font-bold py-4 rounded-xl shadow-lg hover:bg-blue-600 transform hover:scale-105 transition-transform duration-300">
-                                මට්ටම ${level}
-                            </button>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-        };
-
-        // Render the Scoreboard Page content
-        const renderScoreboardPage = () => {
-            return `
-                <div class="text-center p-4 fade-in-up">
-                    <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-6">ලකුණු පුවරුව</h2>
-                    <p class="text-lg sm:text-xl text-gray-600 mb-4">ඔබගේ අවසන් ලකුණු:</p>
-                    <div class="text-4xl sm:text-6xl font-extrabold text-blue-600 mb-8 animate-[pulse_1s_ease-in-out]">${finalScore}</div>
-                    <button id="play-again-btn" class="bg-purple-500 text-white text-base sm:text-lg font-bold py-3 px-8 rounded-full shadow-lg hover:bg-purple-600 transform hover:scale-105 transition-transform duration-300">
-                        නැවත ක්‍රීඩා කරන්න
-                    </button>
-                </div>
-            `;
-        };
-
-        // Main function to render the current page content
-        const renderPage = () => {
-            const contentDiv = document.getElementById('content');
-            contentDiv.classList.add('opacity-0'); // Start fade-out animation
-
-            setTimeout(() => {
-                switch(currentPage) {
-                    case 'home':
-                        contentDiv.innerHTML = renderHomePage();
-                        // Add event listener for the start game button
-                        document.getElementById('start-game-btn').addEventListener('click', () => navigate('game'));
-                        break;
-                    case 'game':
-                        contentDiv.innerHTML = renderGamePage();
-                        // Add event listeners for each level button
-                        document.querySelectorAll('.start-math-btn').forEach(btn => {
-                            btn.addEventListener('click', () => {
-                                // Reset game state before starting a new game
-                                score = 0;
-                                problemsPlayed = 0;
-                                generateNewGame(); // Start the first problem
-                            });
-                        });
-                        break;
-                    case 'scoreboard':
-                        contentDiv.innerHTML = renderScoreboardPage();
-                        // Add event listener for the play again button
-                        document.getElementById('play-again-btn').addEventListener('click', () => navigate('game'));
-                        break;
-                }
-                // Apply fade-in animation
-                contentDiv.classList.remove('opacity-0');
-                contentDiv.classList.add('fade-in-up');
-            }, 300); // Match the duration of the fade-out animation
-        };
-
-        // --- Initialization ---
-        // Runs when the window has finished loading all resources
-        window.onload = function() {
-            generateBubbles(); // Generate background bubbles
-
-            // Add event listeners for navigation buttons
-            document.getElementById('nav-home').addEventListener('click', () => navigate('home'));
-            document.getElementById('nav-game').addEventListener('click', () => navigate('game'));
-            document.getElementById('nav-scoreboard').addEventListener('click', () => navigate('scoreboard'));
-
-            navigate('home'); // Load the home page initially
-        };
+        window.onload = loadLevel;
     </script>
 </body>
 </html>
