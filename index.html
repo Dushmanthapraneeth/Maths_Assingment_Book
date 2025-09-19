@@ -9,16 +9,16 @@
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
 
         :root {
-            --primary-color: #3949ab;
-            --secondary-color: #42a5f5;
-            --bg-color-1: #e3f2fd;
-            --bg-color-2: #bbdefb;
-            --card-bg: #ffffff;
-            --text-color: #1a237e;
-            --correct-color: #1e88e5;
-            --wrong-color: #ff7043;
-            --shadow-light: rgba(0, 0, 0, 0.1);
-            --shadow-medium: rgba(0, 0, 0, 0.2);
+            --primary-color: #42a5f5; /* Bright blue for accents */
+            --secondary-color: #8bc34a; /* Lime green */
+            --bg-color-1: #212121; /* Dark grey */
+            --bg-color-2: #424242; /* Medium dark grey */
+            --card-bg: #424242; /* Medium dark grey for cards */
+            --text-color: #e0e0e0; /* Light grey text */
+            --correct-color: #4caf50; /* Vibrant green for correct */
+            --wrong-color: #f44336; /* Red for wrong */
+            --shadow-light: rgba(0, 0, 0, 0.3);
+            --shadow-medium: rgba(0, 0, 0, 0.6);
         }
 
         body {
@@ -142,13 +142,14 @@
         }
 
         .modal-content {
-            background-color: white;
+            background-color: var(--card-bg);
             padding: 2.5rem;
             border-radius: 1.5rem;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
             text-align: center;
             max-width: 90%;
             animation: fadeIn 0.5s ease-out;
+            color: var(--text-color);
         }
 
         @keyframes fadeIn {
