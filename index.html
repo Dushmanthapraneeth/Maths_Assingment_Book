@@ -164,15 +164,6 @@
                 return;
             }
 
-            // Example logic for ad frequency (you can adjust this)
-            const adFrequency = 3; // Show an ad every 'adFrequency' problems
-            const shouldShowAd = (problemsPlayed > 0 && problemsPlayed % adFrequency === 0);
-
-            if (!shouldShowAd) {
-                console.log(`Skipping ad (${type}) - Problems played: ${problemsPlayed}, Frequency: ${adFrequency}`);
-                return;
-            }
-
             console.log(`Attempting to show ${type} ad.`);
 
             try {
@@ -318,16 +309,14 @@
                 modalContainer.classList.add('hidden');
                 modalContainer.classList.remove('flex');
 
-                // Show an interstitial ad after every 3 problems
-                const adFrequency = 3; 
-                if (problemsPlayed > 0 && problemsPlayed % adFrequency === 0) {
-                    console.log("Game session ended. Showing interstitial ad.");
-                    // Android යෙදුමේ showInterstitialAdFromJs() ශ්‍රිතය අමතන්න
-                    if (typeof Android !== 'undefined' && Android !== null && typeof Android.showInterstitialAdFromJs === 'function') {
-                        Android.showInterstitialAdFromJs();
-                    } else {
-                        console.warn("Android JavaScript interface not found or function not available.");
-                    }
+                // දැන්, ක්‍රීඩා වාරයක් අවසන් වූ සෑම විටම Interstitial ad එක පෙන්වනු ඇත.
+                // කලින් තිබූ if condition එක ඉවත් කර ඇත.
+                console.log("Game session ended. Showing interstitial ad.");
+                // Android යෙදුමේ showInterstitialAdFromJs() ශ්‍රිතය අමතන්න
+                if (typeof Android !== 'undefined' && Android !== null && typeof Android.showInterstitialAdFromJs === 'function') {
+                    Android.showInterstitialAdFromJs();
+                } else {
+                    console.warn("Android JavaScript interface not found or function not available.");
                 }
 
                 // Navigate to the scoreboard page
