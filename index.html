@@ -15,7 +15,7 @@
             --bg-color-2: #424242; /* Medium dark grey */
             --card-bg: #505050; /* Medium dark grey for cards */
             --text-color: #e0e0e0; /* Light grey text */
-            --correct-color: #00008B; /* Dark bl for correct */
+            --correct-color: #4CAF50; /* Green for correct */
             --wrong-color: #f44336; /* Red for wrong */
             --shadow-light: rgba(0, 0, 0, 0.3);
             --shadow-medium: rgba(0, 0, 0, 0.6);
@@ -436,8 +436,10 @@
             }
 
             if (matchesFound === levels[currentLevel].length) {
-                // සියලුම කාඩ්පත් ගැලපූ විට, තත්පර 1ක් බලා සිට දැන්වීම පෙන්වයි
-                setTimeout(showAdAndEnableButton, 1000);
+                // සියලුම කාඩ්පත් ගැලපූ විට
+                enableNextLevelButton(); // බොත්තම ක්ෂණිකව සක්‍රීය කරයි
+                // දැන්වීම පෙන්වීම තත්පර 1කින් ප්‍රමාද කරයි
+                setTimeout(showAd, 1000); 
             }
         }
 
@@ -463,8 +465,8 @@
             [firstCard, lockBoard] = [null, false];
         }
 
-        // දැන්වීම පෙන්වා බොත්තම සක්‍රීය කරන ප්‍රධාන ශ්‍රිතය
-        function showAdAndEnableButton() {
+        // දැන්වීම පෙන්වන ශ්‍රිතය
+        function showAd() {
             // සෑම 3වන මට්ටමකදී rewarded Ad එකක් පෙන්වයි, අනෙක්වා interstitial
             if ((currentLevel + 1) % 3 === 0) {
                 showRewardedAd();
@@ -472,8 +474,8 @@
                 showInterstitialAd();
             }
         }
-
-        // දැන්වීම අවසන් වූ පසු ඊළඟ මට්ටම බොත්තම සක්‍රීය කරන ශ්‍රිතය
+        
+        // ඊළඟ මට්ටම බොත්තම සක්‍රීය කරන ශ්‍රිතය
         function enableNextLevelButton() {
             nextLevelButton.disabled = false;
         }
@@ -486,7 +488,6 @@
                 Android.showInterstitialAdFromJs();
             } else {
                 console.warn('Android.showInterstitialAdFromJs is not available. Enabling button.');
-                enableNextLevelButton(); 
             }
         }
 
@@ -498,20 +499,17 @@
                 Android.showRewardedAdFromJs();
             } else {
                 console.warn('Android.showRewardedAdFromJs is not available. Enabling button.');
-                enableNextLevelButton(); 
             }
         }
 
         // Interstitial Ad එක අවසන් වූ පසු Android මගින් කැඳවන ශ්‍රිතය
         function onInterstitialAdClosed() {
             console.log("Interstitial Ad එක අවසන් විය.");
-            enableNextLevelButton();
         }
 
         // Rewarded Ad එක සාර්ථකව අවසන් වූ පසු Android මගින් කැඳවන ශ්‍රිතය
         function onRewardedAdCompleted() {
             console.log("Rewarded Ad සාර්ථකව අවසන් විය.");
-            enableNextLevelButton();
         }
 
         function proceedToNextLevel() {
