@@ -15,7 +15,7 @@
             --bg-color-2: #424242; /* Medium dark grey */
             --card-bg: #505050; /* Medium dark grey for cards */
             --text-color: #e0e0e0; /* Light grey text */
-            --correct-color: #00008B; /* Dark blue for correct */
+            --correct-color: #00008B; /* Dark bl for correct */
             --wrong-color: #f44336; /* Red for wrong */
             --shadow-light: rgba(0, 0, 0, 0.3);
             --shadow-medium: rgba(0, 0, 0, 0.6);
@@ -436,7 +436,8 @@
             }
 
             if (matchesFound === levels[currentLevel].length) {
-                showAdAndEnableButton(); // මට්ටම අවසන් වූ විට දැන්වීම පෙන්වා බොත්තම සක්‍රීය කරන්න
+                // සියලුම කාඩ්පත් ගැලපූ විට, තත්පර 1ක් බලා සිට දැන්වීම පෙන්වයි
+                setTimeout(showAdAndEnableButton, 1000);
             }
         }
 
