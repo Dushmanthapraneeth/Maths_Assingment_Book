@@ -172,6 +172,7 @@
         <div class="game-header">
             <span class="score-display">ලකුණු: <span id="score">0</span></span>
             <button id="reset-button" class="reset-button">නැවත පටන් ගන්න</button>
+            <button id="reward-ad-button" class="reset-button">දැන්වීමක් බලා ලකුණු 50ක් ගන්න</button>
         </div>
         <div id="game-grid" class="game-grid"></div>
     </div>
@@ -193,6 +194,7 @@
         const gameGrid = document.getElementById('game-grid');
         const scoreElement = document.getElementById('score');
         const resetButton = document.getElementById('reset-button');
+        const rewardAdButton = document.getElementById('reward-ad-button');
         const messageBox = document.getElementById('messageBox');
         const messageText = document.getElementById('messageText');
         const messageCloseButton = document.getElementById('messageCloseButton');
@@ -280,16 +282,42 @@
             }
         }
         
-        // ජයග්‍රහණ පණිවිඩය පෙන්වීම
+        // ජයග්‍රහණ පණිවිඩය පෙන්වීම සහ දැන්වීමක් පෙන්වීම
         function showCongratulationsMessage() {
             messageText.textContent = `අභියෝගය ජය! ඔබේ ලකුණු: ${score}`;
             messageBox.classList.add('show');
+
+            // JavaScript bridge එක හරහා දැන්වීම පෙන්වීම
+            if (typeof Android !== 'undefined') {
+                Android.showInterstitialAdFromJs();
+            }
         }
+
+        // දැන්වීමක් බැලීමෙන් පසු ලකුණු එකතු කිරීම
+        function onRewardedAdCompleted() {
+            score += 50;
+            scoreElement.textContent = score;
+            showMessage('සුභ පැතුම්! ඔබට අමතර ලකුණු 50ක් ලැබුණා.');
+        }
+
+        // පණිවිඩයක් පෙන්වීම සඳහා
+        function showMessage(text) {
+            messageText.textContent = text;
+            messageBox.classList.add('show');
+        }
+
+        // දැන්වීම් බොත්තම සඳහා listener එක
+        rewardAdButton.addEventListener('click', () => {
+            if (typeof Android !== 'undefined') {
+                Android.showRewardedAdFromJs();
+            } else {
+                showMessage('දැන්වීම් පද්ධතිය ලබාගත නොහැක.');
+            }
+        });
 
         // පණිවිඩය වසා දැමීම
         messageCloseButton.addEventListener('click', () => {
             messageBox.classList.remove('show');
-            startGame(); // අලුත් ක්‍රීඩාවක් ආරම්භ කිරීම
         });
 
         // නැවත පටන් ගැනීමේ බොත්තම සඳහා
