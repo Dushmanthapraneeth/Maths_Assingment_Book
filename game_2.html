@@ -41,7 +41,6 @@
 
         .game-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
             gap: 1rem;
             width: 100%;
         }
@@ -171,8 +170,8 @@
         <h1 class="text-3xl font-bold text-center text-neon-green">කාඩ්පත් ගැලපීමේ ක්‍රීඩාව</h1>
         <div class="game-header">
             <span class="score-display">ලකුණු: <span id="score">0</span></span>
+            <span class="score-display">මට්ටම: <span id="level">1</span></span>
             <button id="reset-button" class="reset-button">නැවත පටන් ගන්න</button>
-            <button id="reward-ad-button" class="reset-button">දැන්වීමක් බලා ලකුණු 50ක් ගන්න</button>
         </div>
         <div id="game-grid" class="game-grid"></div>
     </div>
@@ -184,30 +183,44 @@
 
     <script>
         // ක්‍රීඩාව සඳහා අවශ්‍ය දත්ත
-        const symbols = ['🍎', '🍉', '🍇', '🍋', '🍌', '🥭', '🍓', '🍒'];
+        const allSymbols = ['🍎', '🍉', '🍇', '🍋', '🍌', '🥭', '🍓', '🍒', '🍍', '🥥', '🥝', '🥑', '🍅', '🍆', '🥕', '🌽', '🌶️', '🫑', '🥒', '🥬'];
+        const totalLevels = 10;
         let gameCards = [];
         let flippedCards = [];
         let matchedCards = [];
         let canFlip = true;
         let score = 0;
+        let currentLevel = 1;
 
         const gameGrid = document.getElementById('game-grid');
         const scoreElement = document.getElementById('score');
+        const levelElement = document.getElementById('level');
         const resetButton = document.getElementById('reset-button');
-        const rewardAdButton = document.getElementById('reward-ad-button');
         const messageBox = document.getElementById('messageBox');
         const messageText = document.getElementById('messageText');
         const messageCloseButton = document.getElementById('messageCloseButton');
 
         // ක්‍රීඩාව ආරම්භ කිරීම
-        function startGame() {
-            // කාඩ්පත් අහඹු ලෙස සකස් කිරීම
-            gameCards = [...symbols, ...symbols].sort(() => Math.random() - 0.5);
+        function startGame(level) {
+            currentLevel = level;
+            // මට්ටම 1 සඳහා කාඩ්පත් 6ක් සහ ඉන්පසු සෑම මට්ටමකටම කාඩ්පත් 2 බැගින් වැඩි කිරීම
+            const symbolsForLevel = allSymbols.slice(0, 2 + level); 
+            const cardCount = symbolsForLevel.length * 2;
+            
+            // Grid එකේ columns ගණන සැකසීම
+            const columns = Math.min(Math.ceil(Math.sqrt(cardCount)), 5);
+            gameGrid.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
+
+            gameCards = [...symbolsForLevel, ...symbolsForLevel].sort(() => Math.random() - 0.5);
             gameGrid.innerHTML = '';
             flippedCards = [];
             matchedCards = [];
-            score = 0;
+            
+            if (level === 1) {
+                score = 0;
+            }
             scoreElement.textContent = score;
+            levelElement.textContent = currentLevel;
             canFlip = true;
             
             // සෑම කාඩ්පතක් සඳහාම HTML elements නිර්මාණය කිරීම
@@ -282,51 +295,47 @@
             }
         }
         
-        // ජයග්‍රහණ පණිවිඩය පෙන්වීම සහ දැන්වීමක් පෙන්වීම
+        // ජයග්‍රහණ පණිවිඩය පෙන්වීම
         function showCongratulationsMessage() {
-            messageText.textContent = `අභියෝගය ජය! ඔබේ ලකුණු: ${score}`;
-            messageBox.classList.add('show');
-
-            // JavaScript bridge එක හරහා දැන්වීම පෙන්වීම
-            if (typeof Android !== 'undefined') {
-                Android.showInterstitialAdFromJs();
-            }
-        }
-
-        // දැන්වීමක් බැලීමෙන් පසු ලකුණු එකතු කිරීම
-        function onRewardedAdCompleted() {
-            score += 50;
-            scoreElement.textContent = score;
-            showMessage('සුභ පැතුම්! ඔබට අමතර ලකුණු 50ක් ලැබුණා.');
-        }
-
-        // පණිවිඩයක් පෙන්වීම සඳහා
-        function showMessage(text) {
-            messageText.textContent = text;
-            messageBox.classList.add('show');
-        }
-
-        // දැන්වීම් බොත්තම සඳහා listener එක
-        rewardAdButton.addEventListener('click', () => {
-            if (typeof Android !== 'undefined') {
-                Android.showRewardedAdFromJs();
+            if (currentLevel < totalLevels) {
+                messageText.textContent = `මට්ටම ${currentLevel} සාර්ථකයි! ඊළඟ මට්ටමට යන්න.`;
+                messageCloseButton.textContent = 'ඉදිරියට යන්න';
+                messageCloseButton.onclick = () => {
+                    messageBox.classList.remove('show');
+                    startGame(currentLevel + 1);
+                };
             } else {
-                showMessage('දැන්වීම් පද්ධතිය ලබාගත නොහැක.');
+                messageText.textContent = `ඔබ ක්‍රීඩාව සම්පූර්ණයෙන්ම ජය ගත්තා! ඔබේ අවසාන ලකුණු: ${score}`;
+                messageCloseButton.textContent = 'නැවත පටන් ගන්න';
+                messageCloseButton.onclick = () => {
+                    messageBox.classList.remove('show');
+                    startGame(1);
+                };
             }
-        });
+
+            // JavaScript bridge එක හරහා තත්පරයකට පසුව දැන්වීම පෙන්වීම
+            setTimeout(() => {
+                if (typeof Android !== 'undefined') {
+                    Android.showInterstitialAdFromJs();
+                }
+            }, 1000);
+            
+            messageBox.classList.add('show');
+        }
 
         // පණිවිඩය වසා දැමීම
         messageCloseButton.addEventListener('click', () => {
-            messageBox.classList.remove('show');
+             // මෙම listener එක ඉහත showCongratulationsMessage() එකේදී overwrite කරනවා.
+             // එනිසා මෙහි කිසිවක් කිරීමට අවශ්‍ය නැත.
         });
 
         // නැවත පටන් ගැනීමේ බොත්තම සඳහා
         resetButton.addEventListener('click', () => {
-            startGame();
+            startGame(1);
         });
 
         // ක්‍රීඩාව ආරම්භ කිරීම
-        startGame();
+        startGame(1);
     </script>
 </body>
 </html>
