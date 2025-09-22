@@ -1,541 +1,261 @@
 <!DOCTYPE html>
 <html lang="si">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ගැලපෙන යුගල සොයන්න</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ක්‍රීඩා</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
-
-        :root {
-            --primary-color: #42a5f5; /* Bright blue for accents */
-            --secondary-color: #8bc34a; /* Lime green */
-            --bg-color-1: #212121; /* Dark grey */
-            --bg-color-2: #424242; /* Medium dark grey */
-            --card-bg: #505050; /* Medium dark grey for cards */
-            --text-color: #e0e0e0; /* Light grey text */
-            --correct-color: #4CAF50; /* Green for correct */
-            --wrong-color: #f44336; /* Red for wrong */
-            --shadow-light: rgba(0, 0, 0, 0.3);
-            --shadow-medium: rgba(0, 0, 0, 0.6);
-        }
-
         body {
-            font-family: 'Poppins', sans-serif;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background: linear-gradient(135deg, var(--bg-color-1), var(--bg-color-2));
-            color: var(--text-color);
-            transition: background 0.5s ease;
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
         }
-
-        .quiz-container {
-            background: var(--card-bg);
-            border-radius: 25px;
-            box-shadow: 0 15px 40px var(--shadow-medium);
-            padding: 40px;
-            max-width: 750px;
-            width: 100%;
-            transform: perspective(1000px) rotateY(0deg);
-            transition: transform 0.5s ease;
+        .featured-card {
+            background-image: linear-gradient(to right, #6b46c1, #805ad5);
+            color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            position: relative;
+            overflow: hidden;
+            background-size: cover;
+            background-position: center;
         }
-
-        h1 {
-            text-align: center;
-            color: var(--primary-color);
-            margin-bottom: 25px;
-            font-weight: 700;
-            text-shadow: 1px 1px 2px var(--shadow-light);
-        }
-
-        .score-display-wrapper {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            text-align: center;
-            color: var(--text-color);
-            font-weight: 600;
-            margin-bottom: 25px;
-            padding: 10px;
-            background: var(--bg-color-1);
-            border-radius: 15px;
-            box-shadow: 0 5px 15px var(--shadow-light);
-        }
-
-        #score-display, #wrong-attempts-display {
-            font-size: 1.2em;
-        }
-
-        #level-display {
-            font-size: 1.2em;
-            color: var(--primary-color);
-            font-weight: 700;
-        }
-
-        .card-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 15px;
-            justify-items: center;
-            margin-top: 20px;
-        }
-
-        .card {
-            width: 100%;
-            padding: 20px;
-            min-height: 120px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            font-size: 1.1em;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease, transform 0.2s ease;
-            background-color: var(--card-bg);
-            color: var(--text-color);
-            border-radius: 12px;
-            box-shadow: 0 5px 15px var(--shadow-light);
-        }
-
-        .card:hover:not(.matched) {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 20px var(--shadow-medium);
-        }
-
-        .card.active {
-            background-color: var(--secondary-color);
-            color: #fff;
-            box-shadow: 0 5px 20px var(--secondary-color);
-        }
-
-        .card.matched {
-            background-color: var(--correct-color);
-            color: #fff;
-            cursor: not-allowed;
-            transform: scale(1.05);
-            box-shadow: 0 5px 20px var(--correct-color);
-            animation: correctAnim 0.5s ease-out;
-        }
-
-        @keyframes correctAnim {
-            0%, 100% { transform: scale(1.05); }
-            50% { transform: scale(1.1); }
-        }
-
-        .modal {
-            position: fixed;
+        .featured-card:before {
+            content: '';
+            position: absolute;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: 1rem;
         }
-
-        .modal-content {
-            background-color: var(--card-bg);
-            padding: 2.5rem;
-            border-radius: 1.5rem;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-            text-align: center;
-            max-width: 90%;
-            animation: fadeIn 0.5s ease-out;
-            color: var(--text-color);
+        .featured-content {
+            position: relative;
+            z-index: 10;
         }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        .button-group {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-top: 24px;
-        }
-        
-        .next-level-button {
-            margin-top: 20px;
-            width: 100%;
-            background-color: #10b981; /* Green */
-            color: white;
-            padding: 12px 24px;
-            border-radius: 9999px;
-            font-weight: 700;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            border: none;
+        .game-card {
+            position: relative;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
             cursor: pointer;
         }
-        .next-level-button:hover:not([disabled]) {
-            background-color: #059669;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+        .game-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         }
-        .next-level-button[disabled] {
-            background-color: #555;
-            cursor: not-allowed;
-            opacity: 0.6;
-            transform: none;
-            box-shadow: none;
+        .game-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .game-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 0.75rem;
+            backdrop-filter: blur(5px);
+        }
+        .game-info h3 {
+            font-weight: 600;
+        }
+        .game-info p {
+            font-size: 0.75rem;
+            color: #d1d5db;
+        }
+        .level-new-badge {
+            position: absolute;
+            top: 0.5rem;
+            left: 0.5rem;
+            background-color: #f56565;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .animate-fadeInUp {
+            animation: fadeInUp 0.5s ease-out;
+        }
+        .animate-delay-100 { animation-delay: 0.1s; }
+        .animate-delay-200 { animation-delay: 0.2s; }
+        .animate-delay-300 { animation-delay: 0.3s; }
+        .animate-delay-400 { animation-delay: 0.4s; }
+        .animate-delay-500 { animation-delay: 0.5s; }
+        .animate-delay-600 { animation-delay: 0.6s; }
+        .animate-delay-700 { animation-delay: 0.7s; }
+        .animate-delay-800 { animation-delay: 0.8s; }
+        
+        /* Full-screen iframe modal */
+        #game-modal {
+            transition: opacity 0.3s ease-in-out;
+            opacity: 0;
+            pointer-events: none;
+        }
+        #game-modal.visible {
+            opacity: 1;
+            pointer-events: auto;
         }
     </style>
 </head>
-<body>
-    <div class="quiz-container">
-        <h1>ගැලපෙන යුගල සොයන්න</h1>
-        <p class="text-center text-gray-500 text-sm md:text-base">ගැලපෙන යුගල සොයාගන්න! එකවර කාඩ්පත් දෙකක් තෝරන්න.</p>
+<body class="bg-gray-100 min-h-screen">
 
-        <div class="score-display-wrapper">
-            <div id="level-display">මට්ටම: 1</div>
-            <div id="score-display">ලකුණු: 0</div>
-            <div id="wrong-attempts-display">වැරදි වූ වාර: 0</div>
-        </div>
-
-        <div id="game-board" class="card-container">
-        </div>
-
-        <!-- ඊළඟ මට්ටම බොත්තම මෙහි ස්ථිරව පෙන්වයි -->
-        <button id="next-level-button" class="next-level-button" disabled>
-            ඊළඟ මට්ටම
-        </button>
+    <!-- Full-screen game modal -->
+    <div id="game-modal" class="fixed inset-0 z-50 bg-black bg-opacity-90 flex justify-center items-center p-4">
+        <!-- Close button for the iframe -->
+        <button onclick="closeGame()" class="absolute top-4 right-4 text-red-500 hover:text-red-700 text-3xl font-bold z-50">X</button>
+        <!-- The iframe where the game will load -->
+        <iframe id="game-iframe" class="w-full h-full rounded-lg" frameborder="0"></iframe>
     </div>
 
-    <!-- මෙම Modal එක භාවිතා කරන්නේ ක්‍රීඩාව සම්පූර්ණ වූ විට පමණි -->
-    <div id="game-modal" class="modal hidden">
-        <div class="modal-content">
-            <h2 id="modal-title" class="text-3xl font-bold mb-4"></h2>
-            <p id="modal-message" class="text-lg text-gray-700 mb-2"></p>
-            <p id="modal-score" class="text-2xl font-bold text-gray-800 mb-4"></p>
-            <button id="final-restart-button" class="next-level-button">
-                නැවත ක්‍රීඩා කරන්න
-            </button>
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+
+        <!-- Featured Game Section -->
+        <!-- මෙම කොටස click කලවිට iframe එකක් open කිරීමට, onclick="openGame('featured_game.html')" එකතු කරන්න -->
+        <div class="mb-8 featured-card bg-[url('https://placehold.co/600x400/805ad5/fff?text=Arrows+direction')] animate-fadeInUp">
+            <div class="featured-content flex flex-col sm:flex-row justify-between items-start sm:items-center">
+                <div class="flex-grow">
+                    <h2 class="text-3xl sm:text-4xl font-bold mb-2">ඊතල දිශාව</h2>
+                    <p class="mb-4 text-gray-200">අද දින විශේෂිත ක්‍රීඩාව!</p>
+                    <button class="bg-white text-purple-700 font-bold py-2 px-6 rounded-full shadow-lg hover:bg-gray-100 transition duration-300 transform hover:scale-105" onclick="openGame('arrow_direction.html')">
+                        ක්‍රීඩාව කරන්න
+                    </button>
+                </div>
+                <div class="mt-4 sm:mt-0 sm:ml-8 flex-shrink-0">
+                    <i class="fas fa-arrow-right text-white text-5xl opacity-70"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Free Games Grid -->
+        <h2 class="text-2xl font-bold mb-4 animate-fadeInUp animate-delay-200">නොමිලේ ක්‍රීඩා</h2>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+            
+            <!-- Game Card 1: Candy Sort -->
+            <div class="game-card bg-white shadow-md animate-fadeInUp animate-delay-300" onclick="openGame('game_1.html')">
+                <div class="relative w-full h-40 md:h-52">
+                    <img src="https://placehold.co/600x400/2f855a/fff?text=Candy+Sort" alt="Candy Sort">
+                    <div class="game-info">
+                        <h3 class="text-base sm:text-lg">Candy sort</h3>
+                        <p class="text-xs">LEVEL 9/1500</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Game Card 2: Robotic flows -->
+            <div class="game-card bg-white shadow-md animate-fadeInUp animate-delay-400" onclick="openGame('game_2.html')">
+                <div class="relative w-full h-40 md:h-52">
+                    <img src="https://placehold.co/600x400/8b5cf6/fff?text=Robotic+Flows" alt="Robotic flows">
+                    <div class="game-info">
+                        <h3 class="text-base sm:text-lg">Robotic flows</h3>
+                        <p class="text-xs">LEVEL 8/480</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Game Card 3: Draw one line -->
+            <div class="game-card bg-white shadow-md animate-fadeInUp animate-delay-500" onclick="openGame('game_3.html')">
+                <div class="relative w-full h-40 md:h-52">
+                    <img src="https://placehold.co/600x400/9b2c2c/fff?text=Draw+One+Line" alt="Draw one line">
+                    <div class="game-info">
+                        <h3 class="text-base sm:text-lg">Draw one line</h3>
+                        <p class="text-xs">LEVEL 1/235</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Game Card 4: Blocks puzzle (NEW) -->
+            <div class="game-card bg-white shadow-md animate-fadeInUp animate-delay-600" onclick="openGame('game_4.html')">
+                <div class="relative w-full h-40 md:h-52">
+                    <img src="https://placehold.co/600x400/2c5282/fff?text=Blocks+Puzzle" alt="Blocks puzzle">
+                    <span class="level-new-badge">නව</span>
+                    <div class="game-info">
+                        <h3 class="text-base sm:text-lg">Blocks puzzle</h3>
+                        <p class="text-xs">LEVEL 1/200</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Game Card 5: Words crossword -->
+            <div class="game-card bg-white shadow-md animate-fadeInUp animate-delay-700" onclick="openGame('game_5.html')">
+                <div class="relative w-full h-40 md:h-52">
+                    <img src="https://placehold.co/600x400/4c7c7c/fff?text=Words+Crossword" alt="Words crossword">
+                    <div class="game-info">
+                        <h3 class="text-base sm:text-lg">Words crossword</h3>
+                        <p class="text-xs">LEVEL 2/1000</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Game Card 6: Words search -->
+            <div class="game-card bg-white shadow-md animate-fadeInUp animate-delay-800" onclick="openGame('game_6.html')">
+                <div class="relative w-full h-40 md:h-52">
+                    <img src="https://placehold.co/600x400/32739c/fff?text=Words+Search" alt="Words search">
+                    <div class="game-info">
+                        <h3 class="text-base sm:text-lg">Words search</h3>
+                        <p class="text-xs">LEVEL 1/200</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Game Card 7: Puzzles -->
+            <div class="game-card bg-white shadow-md animate-fadeInUp animate-delay-900" onclick="openGame('game_7.html')">
+                <div class="relative w-full h-40 md:h-52">
+                    <img src="https://placehold.co/600x400/d69e2e/fff?text=Puzzles" alt="Puzzles">
+                    <div class="game-info">
+                        <h3 class="text-base sm:text-lg">Puzzles</h3>
+                        <p class="text-xs">LEVEL 1/30</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Game Card 8: Logic balls -->
+            <div class="game-card bg-white shadow-md animate-fadeInUp animate-delay-1000" onclick="openGame('game_8.html')">
+                <div class="relative w-full h-40 md:h-52">
+                    <img src="https://placehold.co/600x400/2c7a7b/fff?text=Logic+Balls" alt="Logic balls">
+                    <div class="game-info">
+                        <h3 class="text-base sm:text-lg">Logic balls</h3>
+                        <p class="text-xs">LEVEL 1/300</p>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
-
+    
     <script>
-        const gameBoard = document.getElementById('game-board');
-        const scoreDisplay = document.getElementById('score-display');
-        const wrongAttemptsDisplay = document.getElementById('wrong-attempts-display');
-        const levelDisplay = document.getElementById('level-display');
-        const gameModal = document.getElementById('game-modal');
-        const modalTitle = document.getElementById('modal-title');
-        const modalMessage = document.getElementById('modal-message');
-        const modalScore = document.getElementById('modal-score');
-        const nextLevelButton = document.getElementById('next-level-button');
-        const finalRestartButton = document.getElementById('final-restart-button');
-
-        // Game State Variables
-        let firstCard = null;
-        let lockBoard = false;
-        let matchesFound = 0;
-        let totalScore = 0;
-        let currentLevel = 0;
-
-        // 10 levels of game data
-        const levels = [
-            // Level 1: 3 pairs
-            [
-                { id: 1, left: "කොළඹ", right: "ශ්‍රී ලංකාවේ අගනුවර" },
-                { id: 2, left: "පේරාදෙණිය", right: "උද්භිද උද්‍යානය" },
-                { id: 3, left: "සූර්යා", right: "සෞරග්‍රහ මණ්ඩලයේ තාරකාව" }
-            ],
-            // Level 2: 4 pairs
-            [
-                { id: 4, left: "ඇපල්", right: "පළතුරක්" },
-                { id: 5, left: "ජලය", right: "H₂O" },
-                { id: 6, left: "සිංහල", right: "ශ්‍රී ලංකාවේ භාෂාවක්" },
-                { id: 7, left: "අලියා", right: "ගොඩබිම විශාලතම සත්වයා" }
-            ],
-            // Level 3: 5 pairs
-            [
-                { id: 8, left: "චන්ද්‍රයා", right: "පෘථිවියේ චන්ද්‍රිකාව" },
-                { id: 9, left: "ක්‍රිකට්", right: "පිතිකරණය" },
-                { id: 10, left: "තේ", right: "ශ්‍රී ලංකාවේ ප්‍රධාන අපනයනය" },
-                { id: 11, left: "පොත්", right: "කියවීමට" },
-                { id: 12, left: "කන්ද", right: "භූමියේ උස් කොටස" }
-            ],
-            // Level 4: 6 pairs
-            [
-                { id: 13, left: "පැන්සල", right: "ලිවීමට" },
-                { id: 14, left: "කැළණිය", right: "විශ්වවිද්‍යාලයක්" },
-                { id: 15, left: "කොටුව", right: "දුම්රිය ස්ථානය" },
-                { id: 16, left: "ලුණු", right: "NaCl" },
-                { id: 17, left: "කිරි", right: "කැල්සියම්" },
-                { id: 18, left: "මල්", right: "ලස්සන මල්" }
-            ],
-            // Level 5: 7 pairs
-            [
-                { id: 19, left: "මුහුද", right: "විශාල ජල කඳක්" },
-                { id: 20, left: "ගස", right: "ශාක" },
-                { id: 21, left: "කුරුල්ලා", right: "පියාඹයි" },
-                { id: 22, left: "රෝස", right: "මලක්" },
-                { id: 23, left: "රතු", right: "වර්ණයක්" },
-                { id: 24, left: "වාහනය", right: "ගමන් කිරීමට" },
-                { id: 25, left: "පිටි", right: "පාන් සෑදීමට" }
-            ],
-            // Level 6: 8 pairs
-            [
-                { id: 26, left: "පැටියා", right: "බල්ලෙකුගේ පැටියා" },
-                { id: 27, left: "බළලා", right: "මාංශ භක්ෂක සතෙක්" },
-                { id: 28, left: "ගෙවතු", right: "නිරෝගී ශාක" },
-                { id: 29, left: "හිම", right: "ජලයේ ඝන ස්වරූපය" },
-                { id: 30, left: "පෙට්ටිය", right: "යමක් දැමීමට" },
-                { id: 31, left: "අත්පොත", right: "උපදෙස්" },
-                { id: 32, left: "බයිසිකලය", right: "පැඩල" },
-                { id: 33, left: "සඳ", right: "රාත්‍රිය" }
-            ],
-            // Level 7: 9 pairs
-            [
-                { id: 34, left: "නින්ද", right: "විවේකය" },
-                { id: 35, left: "සුදු", right: "හිම වර්ණය" },
-                { id: 36, left: "නිල්", right: "අහස" },
-                { id: 37, left: "කහ", right: "සූර්යයා" },
-                { id: 38, left: "හරිත", right: "ගස්" },
-                { id: 39, left: "කළු", right: "රාත්‍රිය" },
-                { id: 40, left: "අත්", right: "ස්පර්ශ කිරීමට" },
-                { id: 41, left: "කකුල්", right: "ඇවිදීමට" },
-                { id: 42, left: "කණ", right: "ඇසීමට" }
-            ],
-            // Level 8: 10 pairs
-            [
-                { id: 43, left: "ඇස්", right: "දැකීමට" },
-                { id: 44, left: "නාසය", right: "ගඳ දැනීමට" },
-                { id: 45, left: "මුඛය", right: "කෑමට" },
-                { id: 46, left: "හිසකෙස්", right: "හිස මත" },
-                { id: 47, left: "දත්", right: "සපාකෑමට" },
-                { id: 48, left: "හදවත", right: "ලේ පොම්ප කිරීමට" },
-                { id: 49, left: "පෙනහළු", right: "හුස්ම ගැනීමට" },
-                { id: 50, left: "අස්ථි", right: "ශරීරයේ රාමුව" },
-                { id: 51, left: "මස්තිෂ්කය", right: "සිතීමට" },
-                { id: 52, left: "සම", right: "ශරීරය ආවරණය කිරීමට" }
-            ],
-            // Level 9: 11 pairs
-            [
-                { id: 53, left: "මිනිසා", right: "බුද්ධිමත් සත්වයා" },
-                { id: 54, left: "කාන්තාව", right: "ගැහැණු මිනිසා" },
-                { id: 55, left: "ළමයා", right: "කුඩා මිනිසා" },
-                { id: 56, left: "පියා", right: "පිරිමි දෙමාපියන්" },
-                { id: 57, left: "මව", right: "ගැහැණු දෙමාපියන්" },
-                { id: 58, left: "සහෝදරයා", right: "පිරිමි සහෝදරයා" },
-                { id: 59, left: "සහෝදරිය", right: "ගැහැණු සහෝදරිය" },
-                { id: 60, left: "සීයා", right: "මවගේ හෝ පියාගේ පියා" },
-                { id: 61, left: "ආච්චි", right: "මවගේ හෝ පියාගේ මව" },
-                { id: 62, left: "මාමා", right: "අම්මාගේ සහෝදරයා" },
-                { id: 63, left: "නැන්දා", right: "අම්මාගේ සහෝදරිය" }
-            ],
-            // Level 10: 12 pairs
-            [
-                { id: 64, left: "පෘථිවිය", right: "සෞරග්‍රහ මණ්ඩලයේ තුන්වන ග්‍රහලෝකය" },
-                { id: 65, left: "අඟහරු", right: "රතු ග්‍රහලෝකය" },
-                { id: 66, left: "බ්‍රහස්පති", right: "විශාලතම ග්‍රහලෝකය" },
-                { id: 67, left: "සෙනසුරු", right: "වලයාකාර ග්‍රහලෝකය" },
-                { id: 68, left: "යුරේනස්", right: "සීතලම ග්‍රහලෝකය" },
-                { id: 69, left: "නෙප්චූන්", right: "වායු යෝධයා" },
-                { id: 70, left: "සිකුරු", right: "උණුසුම්ම ග්‍රහලෝකය" },
-                { id: 71, left: "බුධ", right: "සූර්යයාට ළඟම" },
-                { id: 72, left: "තරුව", right: "වායූන්ගෙන් සෑදුනු විශාල වස්තුව" },
-                { id: 73, left: "ක්ෂුද්‍ර ග්‍රහයා", right: "ග්‍රහලෝක අතර කුඩා වස්තුවක්" },
-                { id: 74, left: "වායුගෝලය", right: "ග්‍රහලෝකයක් වටා ඇති වායු ස්ථරය" },
-                { id: 75, left: "උල්කාපාතය", right: "අහසින් වැටෙන ගල් කැබැල්ලක්" }
-            ]
-        ];
-
-        function shuffle(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
-            return array;
+        function openGame(gameUrl) {
+            const gameModal = document.getElementById('game-modal');
+            const gameIframe = document.getElementById('game-iframe');
+            gameIframe.src = gameUrl;
+            gameModal.classList.add('visible');
         }
 
-        function loadLevel() {
-            if (currentLevel >= levels.length) {
-                showFinalGameCompleteModal();
-                return;
-            }
-
-            const currentPairs = levels[currentLevel];
-            let items = [];
-            currentPairs.forEach(p => {
-                items.push({ id: p.id, text: p.left, type: 'left' });
-                items.push({ id: p.id, text: p.right, type: 'right' });
-            });
-
-            const shuffledItems = shuffle(items);
-
-            gameBoard.innerHTML = '';
-            matchesFound = 0;
-            wrongAttempts = 0;
-            score = 0; // Reset score for the new level
-            scoreDisplay.textContent = 'ලකුණු: 0';
-            wrongAttemptsDisplay.textContent = 'වැරදි වූ වාර: 0';
-            levelDisplay.textContent = `මට්ටම: ${currentLevel + 1}`;
-            nextLevelButton.disabled = true; // මට්ටම ආරම්භයේදී බොත්තම අක්‍රීය කරන්න
-
-            shuffledItems.forEach(item => {
-                const card = document.createElement('div');
-                card.classList.add('card');
-                card.innerHTML = item.text;
-                card.dataset.id = item.id;
-                card.dataset.type = item.type;
-                card.addEventListener('click', handleCardClick);
-                gameBoard.appendChild(card);
-            });
-            resetBoard();
+        function closeGame() {
+            const gameModal = document.getElementById('game-modal');
+            const gameIframe = document.getElementById('game-iframe');
+            gameIframe.src = ""; // iframe එකේ src හිස් කිරීමෙන් memory නිදහස් වේ.
+            gameModal.classList.remove('visible');
         }
-
-        function handleCardClick(event) {
-            if (lockBoard) return;
-            const clickedCard = event.currentTarget;
-            if (clickedCard === firstCard || clickedCard.classList.contains('matched')) return;
-
-            clickedCard.classList.add('active');
-
-            if (!firstCard) {
-                firstCard = clickedCard;
-                return;
-            }
-
-            lockBoard = true;
-            const secondCard = clickedCard;
-            checkMatch(firstCard, secondCard);
-        }
-
-        function checkMatch(card1, card2) {
-            const isMatch = card1.dataset.id === card2.dataset.id;
-            const scorePerMatch = 10;
-            const penaltyPerWrong = 2;
-
-            if (isMatch) {
-                disableCards(card1, card2);
-                matchesFound++;
-                score += scorePerMatch;
-                totalScore += scorePerMatch;
-                scoreDisplay.textContent = 'ලකුණු: ' + totalScore;
-            } else {
-                unflipCards(card1, card2);
-                wrongAttempts++;
-                totalScore = Math.max(0, totalScore - penaltyPerWrong);
-                wrongAttemptsDisplay.textContent = 'වැරදි වූ වාර: ' + wrongAttempts;
-                scoreDisplay.textContent = 'ලකුණු: ' + totalScore;
-            }
-
-            if (matchesFound === levels[currentLevel].length) {
-                // සියලුම කාඩ්පත් ගැලපූ විට
-                enableNextLevelButton(); // බොත්තම ක්ෂණිකව සක්‍රීය කරයි
-                // දැන්වීම පෙන්වීම තත්පර 1කින් ප්‍රමාද කරයි
-                setTimeout(showAd, 1000); 
-            }
-        }
-
-        function disableCards(card1, card2) {
-            card1.classList.add('matched');
-            card2.classList.add('matched');
-            card1.removeEventListener('click', handleCardClick);
-            card2.removeEventListener('click', handleCardClick);
-            card1.classList.remove('active');
-            card2.classList.remove('active');
-            resetBoard();
-        }
-
-        function unflipCards(card1, card2) {
-            setTimeout(() => {
-                card1.classList.remove('active');
-                card2.classList.remove('active');
-                resetBoard();
-            }, 1000);
-        }
-
-        function resetBoard() {
-            [firstCard, lockBoard] = [null, false];
-        }
-
-        // දැන්වීම පෙන්වන ශ්‍රිතය
-        function showAd() {
-            // සෑම 3වන මට්ටමකදී rewarded Ad එකක් පෙන්වයි, අනෙක්වා interstitial
-            if ((currentLevel + 1) % 3 === 0) {
-                showRewardedAd();
-            } else {
-                showInterstitialAd();
-            }
-        }
-        
-        // ඊළඟ මට්ටම බොත්තම සක්‍රීය කරන ශ්‍රිතය
-        function enableNextLevelButton() {
-            nextLevelButton.disabled = false;
-        }
-
-        // Interstitial Ad එක පෙන්වීමට Android වෙත කැඳවයි
-        function showInterstitialAd() {
-            console.log("Interstitial Ad එක පෙන්වීමට උත්සාහ කරයි.");
-            // Android object එක තිබේදැයි පරීක්ෂා කර, නැතිනම් කෙලින්ම බොත්තම සක්‍රීය කරයි
-            if (typeof Android !== 'undefined' && Android.showInterstitialAdFromJs) {
-                Android.showInterstitialAdFromJs();
-            } else {
-                console.warn('Android.showInterstitialAdFromJs is not available. Enabling button.');
-            }
-        }
-
-        // Rewarded Ad එක පෙන්වීමට Android වෙත කැඳවයි
-        function showRewardedAd() {
-            console.log("Rewarded Ad එක පෙන්වීමට උත්සාහ කරයි.");
-            // Android object එක තිබේදැයි පරීක්ෂා කර, නැතිනම් කෙලින්ම බොත්තම සක්‍රීය කරයි
-            if (typeof Android !== 'undefined' && Android.showRewardedAdFromJs) {
-                Android.showRewardedAdFromJs();
-            } else {
-                console.warn('Android.showRewardedAdFromJs is not available. Enabling button.');
-            }
-        }
-
-        // Interstitial Ad එක අවසන් වූ පසු Android මගින් කැඳවන ශ්‍රිතය
-        function onInterstitialAdClosed() {
-            console.log("Interstitial Ad එක අවසන් විය.");
-        }
-
-        // Rewarded Ad එක සාර්ථකව අවසන් වූ පසු Android මගින් කැඳවන ශ්‍රිතය
-        function onRewardedAdCompleted() {
-            console.log("Rewarded Ad සාර්ථකව අවසන් විය.");
-        }
-
-        function proceedToNextLevel() {
-            nextLevelButton.disabled = true; // ඊළඟ මට්ටමට යන විට නැවත බොත්තම අක්‍රීය කරන්න
-            currentLevel++;
-            loadLevel();
-        }
-
-        function showFinalGameCompleteModal() {
-            modalTitle.textContent = 'සුභ පැතුම්!';
-            modalMessage.textContent = 'ඔබ සියලු මට්ටම් සම්පූර්ණ කර ඇත!';
-            modalScore.textContent = `මුළු ලකුණු: ${totalScore}`;
-            gameModal.classList.remove('hidden');
-        }
-
-        // Event Listeners
-        nextLevelButton.addEventListener('click', proceedToNextLevel);
-
-        finalRestartButton.onclick = () => {
-            currentLevel = 0;
-            totalScore = 0;
-            gameModal.classList.add('hidden');
-            loadLevel();
-        };
-
-        window.onload = loadLevel;
     </script>
 </body>
 </html>
