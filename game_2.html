@@ -3,179 +3,302 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>අංක පෙළගස්වමු! (Reorder Numbers Game)</title>
+    <title>කාඩ්පත් ගැලපීම</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: 'Inter', sans-serif;
+            background-color: #121212;
+            color: #E0E0E0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .game-container {
+            background-color: #1E1E1E;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            max-width: 900px;
+            width: 100%;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            gap: 1.5rem;
             align-items: center;
-            height: 100vh;
-            background-color: #f0f0f0;
-            margin: 0;
-            color: #333;
         }
-        h1 {
-            color: #4CAF50;
-            margin-bottom: 20px;
+
+        .game-header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
         }
-        #game-board {
+
+        .game-grid {
             display: grid;
-            grid-template-columns: repeat(4, 100px);
-            gap: 10px;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            width: 100%;
         }
-        .tile {
-            width: 100px;
-            height: 100px;
-            background-color: #79a5e2;
-            color: #fff;
-            font-size: 2.5em;
+
+        .card {
+            background-color: #333;
+            aspect-ratio: 1 / 1.4;
             display: flex;
             justify-content: center;
             align-items: center;
+            border-radius: 0.75rem;
             cursor: pointer;
-            border-radius: 8px;
-            transition: transform 0.2s, background-color 0.2s;
-            user-select: none;
+            transform-style: preserve-3d;
+            transition: transform 0.5s, background-color 0.3s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            position: relative;
         }
-        .tile:hover {
-            transform: scale(1.05);
-            background-color: #5d8cce;
+
+        .card-inner {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.5s;
         }
-        .tile.empty {
-            background-color: #ccc;
-            cursor: default;
+
+        .card.flipped .card-inner {
+            transform: rotateY(180deg);
         }
-        #message {
-            margin-top: 20px;
-            font-size: 1.5em;
-            font-weight: bold;
-            color: #e53935;
-            min-height: 1.5em; /* Message box height to avoid layout shift */
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 0.75rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.5rem;
         }
-        #reset-button {
-            margin-top: 20px;
-            padding: 10px 20px;
-            font-size: 1.2em;
-            background-color: #4CAF50;
+
+        .card-front {
+            background-color: #6a1b9a;
             color: #fff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.2s;
         }
-        #reset-button:hover {
-            background-color: #45a049;
+
+        .card-back {
+            background-color: #4a148c;
+            transform: rotateY(180deg);
+        }
+
+        .card.matched {
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.7);
+            border: 2px solid #00ff00;
+        }
+
+        .card.matched .card-back {
+            background-color: #008000;
+        }
+
+        .card.matched .card-front {
+            background-color: #339933;
+        }
+
+        .card.matched.flipped {
+            animation: match-pulse 1s infinite alternate;
+        }
+
+        @keyframes match-pulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.05); }
+        }
+
+        #messageBox {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 2rem;
+            border-radius: 1rem;
+            text-align: center;
+            font-size: 1.5rem;
+            color: #fff;
+            z-index: 100;
+            display: none;
+        }
+
+        #messageBox.show {
+            display: block;
+        }
+
+        .text-neon-green {
+            color: #00ff80;
+        }
+
+        .text-neon-purple {
+            color: #b366ff;
+        }
+        
+        .reset-button {
+            background-color: #6a1b9a;
+            color: #fff;
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .reset-button:hover {
+            background-color: #550a7c;
+            transform: scale(1.05);
+        }
+
+        .score-display {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #E0E0E0;
         }
     </style>
 </head>
-<body>
+<body class="bg-gray-900 text-white">
 
-    <h1>අංක පෙළගස්වමු!</h1>
-    <p>අංක 1 සිට 15 දක්වා පිළිවෙලට පෙළගස්වන්න. හිස් කොටුව භාවිතා කර අංක තල්ලු කරන්න.</p>
-    
-    <div id="game-board"></div>
-    <div id="message"></div>
-    <button id="reset-button">අලුතින් පටන් ගන්න</button>
+    <div class="game-container">
+        <h1 class="text-3xl font-bold text-center text-neon-green">කාඩ්පත් ගැලපීමේ ක්‍රීඩාව</h1>
+        <div class="game-header">
+            <span class="score-display">ලකුණු: <span id="score">0</span></span>
+            <button id="reset-button" class="reset-button">නැවත පටන් ගන්න</button>
+        </div>
+        <div id="game-grid" class="game-grid"></div>
+    </div>
+
+    <div id="messageBox" class="rounded-lg shadow-lg">
+        <span id="messageText"></span>
+        <button id="messageCloseButton" class="mt-4 px-4 py-2 bg-purple-700 text-white rounded-lg">හරි</button>
+    </div>
 
     <script>
-        const gameBoard = document.getElementById('game-board');
-        const messageDisplay = document.getElementById('message');
+        // ක්‍රීඩාව සඳහා අවශ්‍ය දත්ත
+        const symbols = ['🍎', '🍉', '🍇', '🍋', '🍌', '🥭', '🍓', '🍒'];
+        let gameCards = [];
+        let flippedCards = [];
+        let matchedCards = [];
+        let canFlip = true;
+        let score = 0;
+
+        const gameGrid = document.getElementById('game-grid');
+        const scoreElement = document.getElementById('score');
         const resetButton = document.getElementById('reset-button');
-        let tiles = [];
-        let emptyTileIndex = 15;
+        const messageBox = document.getElementById('messageBox');
+        const messageText = document.getElementById('messageText');
+        const messageCloseButton = document.getElementById('messageCloseButton');
 
-        // Create the tiles and shuffle them
-        function createAndShuffleTiles() {
-            tiles = [];
-            for (let i = 1; i <= 15; i++) {
-                tiles.push(i);
-            }
-            tiles.push(null); // The empty tile
+        // ක්‍රීඩාව ආරම්භ කිරීම
+        function startGame() {
+            // කාඩ්පත් අහඹු ලෙස සකස් කිරීම
+            gameCards = [...symbols, ...symbols].sort(() => Math.random() - 0.5);
+            gameGrid.innerHTML = '';
+            flippedCards = [];
+            matchedCards = [];
+            score = 0;
+            scoreElement.textContent = score;
+            canFlip = true;
+            
+            // සෑම කාඩ්පතක් සඳහාම HTML elements නිර්මාණය කිරීම
+            gameCards.forEach((symbol, index) => {
+                const cardElement = document.createElement('div');
+                cardElement.classList.add('card', 'rounded-lg');
+                cardElement.dataset.symbol = symbol;
+                cardElement.dataset.index = index;
 
-            // Fisher-Yates shuffle algorithm to randomize the array
-            for (let i = tiles.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [tiles[i], tiles[j]] = [tiles[j], tiles[i]];
-            }
+                const cardInner = document.createElement('div');
+                cardInner.classList.add('card-inner');
 
-            // Find the empty tile index after shuffle
-            emptyTileIndex = tiles.indexOf(null);
-            renderBoard();
-        }
+                const cardFront = document.createElement('div');
+                cardFront.classList.add('card-face', 'card-front');
+                cardFront.textContent = '?';
 
-        // Render the board on the screen
-        function renderBoard() {
-            gameBoard.innerHTML = '';
-            tiles.forEach((value, index) => {
-                const tile = document.createElement('div');
-                tile.classList.add('tile');
-                if (value === null) {
-                    tile.classList.add('empty');
-                    emptyTileIndex = index; // Keep track of the empty tile's position
-                } else {
-                    tile.textContent = value;
-                    tile.addEventListener('click', () => moveTile(index));
-                }
-                gameBoard.appendChild(tile);
+                const cardBack = document.createElement('div');
+                cardBack.classList.add('card-face', 'card-back');
+                cardBack.textContent = symbol;
+
+                cardInner.appendChild(cardFront);
+                cardInner.appendChild(cardBack);
+                cardElement.appendChild(cardInner);
+
+                cardElement.addEventListener('click', () => handleCardClick(cardElement));
+                gameGrid.appendChild(cardElement);
             });
         }
 
-        // Logic for moving a tile
-        function moveTile(tileIndex) {
-            const row = Math.floor(tileIndex / 4);
-            const col = tileIndex % 4;
-            const emptyRow = Math.floor(emptyTileIndex / 4);
-            const emptyCol = emptyTileIndex % 4;
-
-            // Check if the clicked tile is adjacent to the empty tile (horizontally or vertically)
-            if (
-                (Math.abs(row - emptyRow) === 1 && col === emptyCol) ||
-                (Math.abs(col - emptyCol) === 1 && row === emptyRow)
-            ) {
-                // Swap the tiles
-                [tiles[tileIndex], tiles[emptyTileIndex]] = [tiles[emptyTileIndex], tiles[tileIndex]];
-                renderBoard();
-                checkWin();
+        // කාඩ්පතක් click කල විට සිදුවන දේ
+        function handleCardClick(cardElement) {
+            if (!canFlip || flippedCards.length >= 2 || cardElement.classList.contains('flipped') || cardElement.classList.contains('matched')) {
+                return;
             }
-        }
 
-        // Check if the game is won
-        function checkWin() {
-            let isWin = true;
-            for (let i = 0; i < 15; i++) {
-                // Check if tiles are in the correct sequential order
-                if (tiles[i] !== i + 1) {
-                    isWin = false;
-                    break;
+            // කාඩ්පත පෙරළීම
+            cardElement.classList.add('flipped');
+            flippedCards.push(cardElement);
+
+            if (flippedCards.length === 2) {
+                canFlip = false;
+                const [card1, card2] = flippedCards;
+                
+                // කාඩ්පත් දෙක සමානදැයි පරීක්ෂා කිරීම
+                if (card1.dataset.symbol === card2.dataset.symbol) {
+                    // ගැලපෙනවා නම්
+                    card1.classList.add('matched');
+                    card2.classList.add('matched');
+                    matchedCards.push(card1, card2);
+                    score += 10;
+                    scoreElement.textContent = score;
+                    
+                    // ක්‍රීඩාව අවසන්දැයි පරීක්ෂා කිරීම
+                    if (matchedCards.length === gameCards.length) {
+                        showCongratulationsMessage();
+                    }
+                    flippedCards = [];
+                    canFlip = true;
+                } else {
+                    // ගැලපෙන්නේ නැතිනම්
+                    setTimeout(() => {
+                        card1.classList.remove('flipped');
+                        card2.classList.remove('flipped');
+                        flippedCards = [];
+                        canFlip = true;
+                        if (score > 0) {
+                            score -= 2;
+                        }
+                        scoreElement.textContent = score;
+                    }, 1000);
                 }
             }
-
-            if (isWin) {
-                messageDisplay.textContent = 'ඔබ දිනුවා! සුභ පැතුම්!';
-                messageDisplay.style.color = '#4CAF50';
-            } else {
-                messageDisplay.textContent = '';
-            }
+        }
+        
+        // ජයග්‍රහණ පණිවිඩය පෙන්වීම
+        function showCongratulationsMessage() {
+            messageText.textContent = `අභියෝගය ජය! ඔබේ ලකුණු: ${score}`;
+            messageBox.classList.add('show');
         }
 
-        // Event listener for the reset button
-        resetButton.addEventListener('click', () => {
-            messageDisplay.textContent = '';
-            messageDisplay.style.color = '#e53935';
-            createAndShuffleTiles();
+        // පණිවිඩය වසා දැමීම
+        messageCloseButton.addEventListener('click', () => {
+            messageBox.classList.remove('show');
+            startGame(); // අලුත් ක්‍රීඩාවක් ආරම්භ කිරීම
         });
 
-        // Start the game for the first time on window load
-        window.onload = function() {
-            createAndShuffleTiles();
-        };
-    </script>
+        // නැවත පටන් ගැනීමේ බොත්තම සඳහා
+        resetButton.addEventListener('click', () => {
+            startGame();
+        });
 
+        // ක්‍රීඩාව ආරම්භ කිරීම
+        startGame();
+    </script>
 </body>
 </html>
